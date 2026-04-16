@@ -7,6 +7,7 @@ struct ExerciseContainerView: View {
     @State private var engine = ExerciseEngine()
     @State private var isEditorFocused = false
     @State private var isEditorHovered = false
+    @State private var showHint = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -61,44 +62,49 @@ struct ExerciseContainerView: View {
                 }
             }
 
-            // Completion stats + reset
-            HStack(spacing: 12) {
+            // Stats + actions
+            HStack(spacing: 8) {
                 if case .completed(let time, let keystrokes) = engine.state {
                     Text("\(String(format: "%.1f", time))s · \(keystrokes) keystrokes")
                         .font(.system(size: 12, design: .monospaced))
                         .foregroundStyle(.tertiary)
                 }
                 Spacer()
+                if !exercise.hints.isEmpty {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            showHint.toggle()
+                        }
+                    } label: {
+                        Image(systemName: "questionmark.circle")
+                            .font(.system(size: 13))
+                    }
+                    .buttonStyle(.borderless)
+                    .foregroundStyle(showHint ? .secondary : .tertiary)
+                    .help("Show hint")
+                }
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
+                        showHint = false
                         engine.reset()
                     }
                 } label: {
-                    Text("Reset")
+                    Image(systemName: "arrow.counterclockwise")
                         .font(.system(size: 12))
                 }
                 .buttonStyle(.borderless)
                 .foregroundStyle(.tertiary)
+                .help("Reset exercise")
             }
             .padding(.top, 8)
 
-            // Hints
-            if !exercise.hints.isEmpty {
-                DisclosureGroup {
-                    VStack(alignment: .leading, spacing: 4) {
-                        ForEach(exercise.hints, id: \.self) { hint in
-                            Text(hint)
-                                .font(Typography.bodySecondary)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
+            // Hint — shown inline below the stats when requested
+            if !exercise.hints.isEmpty, showHint {
+                Text(exercise.hints.first ?? "")
+                    .font(Typography.bodySecondary)
+                    .foregroundStyle(.secondary)
                     .padding(.top, 4)
-                } label: {
-                    Label("Hint", systemImage: "lightbulb")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.tertiary)
-                }
-                .padding(.top, 8)
+                    .transition(.opacity)
             }
         }
         .onAppear {
