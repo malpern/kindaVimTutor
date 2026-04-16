@@ -3,13 +3,48 @@ import SwiftUI
 struct ContentStepView: View {
     let blocks: [ContentBlock]
 
+    @State private var headingDone = false
+    @State private var visibleBlockCount = 0
+
+    // Separate heading from body blocks
+    private var headingText: String? {
+        if case .heading(let text) = blocks.first { return text }
+        return nil
+    }
+
+    private var bodyBlocks: [ContentBlock] {
+        if headingText != nil { return Array(blocks.dropFirst()) }
+        return blocks
+    }
+
     var body: some View {
         VStack {
             Spacer()
 
             VStack(alignment: .leading, spacing: 20) {
-                ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
-                    contentBlockView(block)
+                // Heading types in
+                if let heading = headingText {
+                    TypewriterText(
+                        heading,
+                        font: .system(size: 28, weight: .bold),
+                        foregroundStyle: .primary
+                    ) {
+                        headingDone = true
+                        revealBodyBlocks()
+                    }
+                    .tracking(-0.6)
+                } else {
+                    // No heading — start revealing blocks immediately
+                    EmptyView()
+                        .onAppear { revealBodyBlocks() }
+                }
+
+                // Body blocks fade in sequentially
+                ForEach(Array(bodyBlocks.enumerated()), id: \.offset) { index, block in
+                    if index < visibleBlockCount {
+                        contentBlockView(block)
+                            .transition(.opacity.combined(with: .offset(y: 6)))
+                    }
                 }
             }
             .frame(maxWidth: 520)
@@ -18,6 +53,18 @@ struct ContentStepView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 56)
+        .onDisappear {
+            headingDone = false
+            visibleBlockCount = 0
+        }
+    }
+
+    private func revealBodyBlocks() {
+        for i in 0..<bodyBlocks.count {
+            withAnimation(.easeOut(duration: 0.35).delay(Double(i) * 0.12)) {
+                visibleBlockCount = i + 1
+            }
+        }
     }
 
     @ViewBuilder
