@@ -11,6 +11,11 @@ let package = Package(
             name: "KindaVimTutor",
             path: "Sources/KindaVimTutor",
             exclude: ["Resources/.gitkeep"]
+        ),
+        .testTarget(
+            name: "KindaVimTutorTests",
+            dependencies: ["KindaVimTutor"],
+            path: "Tests/KindaVimTutorTests"
         )
     ]
 )
