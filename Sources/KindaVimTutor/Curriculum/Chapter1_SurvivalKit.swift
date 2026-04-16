@@ -13,15 +13,17 @@ extension Curriculum {
             lesson1_3,
             lesson1_4,
             lesson1_5,
+            lesson1_6,
+            lesson1_7,
         ]
     )
 
-    // MARK: - Lesson 1: Moving Around
+    // MARK: - Lesson 1.1: Moving the Cursor
 
     private static let lesson1_1 = Lesson(
         id: "ch1.l1",
         number: 1,
-        title: "Moving Around",
+        title: "Moving the Cursor",
         subtitle: "Navigate with h, j, k, l",
         explanation: [
             .heading("Your Hands Stay on Home Row"),
@@ -107,18 +109,55 @@ extension Curriculum {
         motionsIntroduced: ["h", "j", "k", "l"]
     )
 
-    // MARK: - Lesson 2: Normal and Insert Mode
+    // MARK: - Lesson 1.2: Deleting Characters
 
     private static let lesson1_2 = Lesson(
         id: "ch1.l2",
         number: 2,
-        title: "Normal and Insert Mode",
-        subtitle: "The two modes you'll use most",
+        title: "Deleting Characters",
+        subtitle: "Fix mistakes with x",
+        explanation: [
+            .heading("Delete What's Under the Cursor"),
+            .text("In Normal mode, press x to delete the character under the cursor. This is how you fix typos without entering Insert mode."),
+            .spacer,
+            .keyCommand(keys: ["x"], description: "Delete character under cursor"),
+            .spacer,
+            .tip("Move to the bad character with h/l, then press x to remove it. Like using a single-character eraser."),
+        ],
+        exercises: [
+            Exercise(
+                id: "ch1.l2.e1",
+                instruction: "Fix the sentence by deleting the extra characters with x",
+                initialText: "The ccow jumped",
+                initialCursorPosition: 4,
+                expectedText: "The cow jumped",
+                expectedCursorPosition: nil,
+                hints: ["Move to the extra 'c' and press x"],
+                difficulty: .learn,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: "The cow jumpedd", initialCursorPosition: 14, expectedText: "The cow jumped", expectedCursorPosition: nil),
+                    .init(initialText: "Thee quick fox", initialCursorPosition: 3, expectedText: "The quick fox", expectedCursorPosition: nil),
+                    .init(initialText: "Hello wworld", initialCursorPosition: 6, expectedText: "Hello world", expectedCursorPosition: nil),
+                    .init(initialText: "Good mmorning", initialCursorPosition: 5, expectedText: "Good morning", expectedCursorPosition: nil),
+                ]
+            ),
+        ],
+        motionsIntroduced: ["x"]
+    )
+
+    // MARK: - Lesson 1.3: Inserting Text
+
+    private static let lesson1_3 = Lesson(
+        id: "ch1.l3",
+        number: 3,
+        title: "Inserting Text",
+        subtitle: "Enter Insert mode with i",
         explanation: [
             .heading("Two Ways of Being"),
             .text("Vim has modes. In Normal mode, keys are commands — h moves left, not types \"h\". In Insert mode, keys type text like you'd expect."),
             .spacer,
-            .keyCommand(keys: ["i"], description: "Enter Insert mode (before cursor)"),
+            .keyCommand(keys: ["i"], description: "Enter Insert mode before the cursor"),
             .keyCommand(keys: ["Esc"], description: "Return to Normal mode"),
             .spacer,
             .text("You'll spend most of your time in Normal mode, dipping into Insert mode only to type new text, then pressing Esc to come back."),
@@ -126,8 +165,8 @@ extension Curriculum {
         ],
         exercises: [
             Exercise(
-                id: "ch1.l2.e1",
-                instruction: "Press i to enter Insert mode, type \"Hello\", then press Esc to return to Normal mode",
+                id: "ch1.l3.e1",
+                instruction: "Press i to enter Insert mode, type \"Hello\", then press Esc",
                 initialText: "",
                 initialCursorPosition: 0,
                 expectedText: "Hello",
@@ -136,24 +175,65 @@ extension Curriculum {
                 difficulty: .learn
             ),
             Exercise(
-                id: "ch1.l2.e2",
-                instruction: "Move to the blank and type the missing word. The sentence should read \"The quick brown fox\"",
-                initialText: "The quick  fox",
-                initialCursorPosition: 0,
-                expectedText: "The quick brown fox",
+                id: "ch1.l3.e2",
+                instruction: "Insert the missing word. The line should read \"There is some text missing\"",
+                initialText: "There is text missing",
+                initialCursorPosition: 8,
+                expectedText: "There is some text missing",
                 expectedCursorPosition: nil,
-                hints: ["Use l to move to position 10, press i, type \"brown\", press Esc"],
+                hints: ["Move to position 9, press i, type \"some \", press Esc"],
                 difficulty: .practice
             ),
         ],
         motionsIntroduced: ["i", "Esc"]
     )
 
-    // MARK: - Lesson 3: Undoing Mistakes
+    // MARK: - Lesson 1.4: Appending Text
 
-    private static let lesson1_3 = Lesson(
-        id: "ch1.l3",
-        number: 3,
+    private static let lesson1_4 = Lesson(
+        id: "ch1.l4",
+        number: 4,
+        title: "Appending Text",
+        subtitle: "Add text at the end with A",
+        explanation: [
+            .heading("Append to the End of a Line"),
+            .text("Sometimes you need to add text at the end of a line. Instead of moving all the way to the end with l, you can use A to jump there and enter Insert mode in one step."),
+            .spacer,
+            .keyCommand(keys: ["A"], description: "Append text at end of line"),
+            .keyCommand(keys: ["a"], description: "Append text after the cursor"),
+            .spacer,
+            .tip("A (uppercase) goes to the end of the line. a (lowercase) inserts right after the cursor position."),
+        ],
+        exercises: [
+            Exercise(
+                id: "ch1.l4.e1",
+                instruction: "Complete the line using A. It should read \"This line is complete.\"",
+                initialText: "This line is",
+                initialCursorPosition: 0,
+                expectedText: "This line is complete.",
+                expectedCursorPosition: nil,
+                hints: ["Press A to jump to end and enter Insert mode, type \" complete.\", press Esc"],
+                difficulty: .learn
+            ),
+            Exercise(
+                id: "ch1.l4.e2",
+                instruction: "Complete the line. It should read \"Vim is powerful.\"",
+                initialText: "Vim is",
+                initialCursorPosition: 0,
+                expectedText: "Vim is powerful.",
+                expectedCursorPosition: nil,
+                hints: ["Press A, type \" powerful.\", press Esc"],
+                difficulty: .practice
+            ),
+        ],
+        motionsIntroduced: ["A", "a"]
+    )
+
+    // MARK: - Lesson 1.5: Undoing Mistakes
+
+    private static let lesson1_5 = Lesson(
+        id: "ch1.l5",
+        number: 5,
         title: "Undoing Mistakes",
         subtitle: "Everyone makes them",
         explanation: [
@@ -167,7 +247,7 @@ extension Curriculum {
         ],
         exercises: [
             Exercise(
-                id: "ch1.l3.e1",
+                id: "ch1.l5.e1",
                 instruction: "The word \"world\" was deleted by mistake. Press u to undo and restore it.",
                 initialText: "Hello ",
                 initialCursorPosition: 5,
@@ -180,11 +260,11 @@ extension Curriculum {
         motionsIntroduced: ["u", "Ctrl+r"]
     )
 
-    // MARK: - Lesson 4: Word Hopping
+    // MARK: - Lesson 1.6: Word Hopping
 
-    private static let lesson1_4 = Lesson(
-        id: "ch1.l4",
-        number: 4,
+    private static let lesson1_6 = Lesson(
+        id: "ch1.l6",
+        number: 6,
         title: "Word Hopping",
         subtitle: "Move faster with w, b, e",
         explanation: [
@@ -200,18 +280,25 @@ extension Curriculum {
         ],
         exercises: [
             Exercise(
-                id: "ch1.l4.e1",
+                id: "ch1.l6.e1",
                 instruction: "Jump from the beginning to the word \"fox\" using w",
                 initialText: "The quick brown fox jumps",
                 initialCursorPosition: 0,
                 expectedText: "The quick brown fox jumps",
                 expectedCursorPosition: 16,
                 hints: ["Press w three times: The → quick → brown → fox"],
-                difficulty: .learn
+                difficulty: .learn,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: "One two three four five", initialCursorPosition: 0, expectedText: "One two three four five", expectedCursorPosition: 14),
+                    .init(initialText: "She sells sea shells", initialCursorPosition: 0, expectedText: "She sells sea shells", expectedCursorPosition: 14),
+                    .init(initialText: "Move to this word here", initialCursorPosition: 0, expectedText: "Move to this word here", expectedCursorPosition: 13),
+                    .init(initialText: "Find the target now", initialCursorPosition: 0, expectedText: "Find the target now", expectedCursorPosition: 9),
+                ]
             ),
             Exercise(
-                id: "ch1.l4.e2",
-                instruction: "Jump backward from \"jumps\" to \"quick\" using b",
+                id: "ch1.l6.e2",
+                instruction: "Jump backward from the end to \"quick\" using b",
                 initialText: "The quick brown fox jumps",
                 initialCursorPosition: 20,
                 expectedText: "The quick brown fox jumps",
@@ -220,7 +307,7 @@ extension Curriculum {
                 difficulty: .learn
             ),
             Exercise(
-                id: "ch1.l4.e3",
+                id: "ch1.l6.e3",
                 instruction: "Move to the end of \"brown\" using e",
                 initialText: "The quick brown fox",
                 initialCursorPosition: 10,
@@ -233,11 +320,11 @@ extension Curriculum {
         motionsIntroduced: ["w", "b", "e"]
     )
 
-    // MARK: - Lesson 5: Line Jumps
+    // MARK: - Lesson 1.7: Line Jumps
 
-    private static let lesson1_5 = Lesson(
-        id: "ch1.l5",
-        number: 5,
+    private static let lesson1_7 = Lesson(
+        id: "ch1.l7",
+        number: 7,
         title: "Line Jumps",
         subtitle: "Get to the start and end fast",
         explanation: [
@@ -252,17 +339,24 @@ extension Curriculum {
         ],
         exercises: [
             Exercise(
-                id: "ch1.l5.e1",
+                id: "ch1.l7.e1",
                 instruction: "Jump to the end of the line using $",
                 initialText: "Jump to the very end of this line",
                 initialCursorPosition: 0,
                 expectedText: "Jump to the very end of this line",
                 expectedCursorPosition: 32,
                 hints: ["Press $ to jump to the last character"],
-                difficulty: .learn
+                difficulty: .learn,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: "A shorter line", initialCursorPosition: 0, expectedText: "A shorter line", expectedCursorPosition: 13),
+                    .init(initialText: "This one is a bit longer than before", initialCursorPosition: 0, expectedText: "This one is a bit longer than before", expectedCursorPosition: 35),
+                    .init(initialText: "Go to the end", initialCursorPosition: 0, expectedText: "Go to the end", expectedCursorPosition: 12),
+                    .init(initialText: "Practice makes perfect", initialCursorPosition: 0, expectedText: "Practice makes perfect", expectedCursorPosition: 21),
+                ]
             ),
             Exercise(
-                id: "ch1.l5.e2",
+                id: "ch1.l7.e2",
                 instruction: "Jump to the beginning of the line using 0",
                 initialText: "Get back to the start",
                 initialCursorPosition: 16,
@@ -272,7 +366,7 @@ extension Curriculum {
                 difficulty: .learn
             ),
             Exercise(
-                id: "ch1.l5.e3",
+                id: "ch1.l7.e3",
                 instruction: "Jump to the first non-space character using ^",
                 initialText: "    indented text here",
                 initialCursorPosition: 18,
