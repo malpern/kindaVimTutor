@@ -5,6 +5,8 @@ struct ExerciseContainerView: View {
     let exerciseNumber: Int
     let progressStore: ProgressStore
     @State private var engine = ExerciseEngine()
+    @State private var isEditorFocused = false
+    @State private var isEditorHovered = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -30,7 +32,7 @@ struct ExerciseContainerView: View {
 
             Spacer().frame(height: 12)
 
-            // Editor
+            // Editor with interactive states
             ExerciseEditorView(
                 initialText: exercise.initialText,
                 initialCursorPosition: exercise.initialCursorPosition,
@@ -39,13 +41,27 @@ struct ExerciseContainerView: View {
                 },
                 onSelectionChange: { text, cursor in
                     engine.selectionDidChange(currentText: text, cursorPosition: cursor)
+                },
+                onFocusChange: { focused in
+                    withAnimation(.easeInOut(duration: 0.15)) {
+                        isEditorFocused = focused
+                    }
                 }
             )
             .frame(minHeight: editorHeight, maxHeight: editorHeight)
-            .background(AppColors.editorBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(AppColors.editorBackground, in: editorShape)
+            .clipShape(editorShape)
+            .overlay {
+                editorShape
+                    .strokeBorder(editorBorderColor, lineWidth: editorBorderWidth)
+            }
+            .onHover { hovering in
+                withAnimation(.easeInOut(duration: 0.12)) {
+                    isEditorHovered = hovering
+                }
+            }
 
-            // Completion stats + reset — only shown when relevant
+            // Completion stats + reset
             HStack(spacing: 12) {
                 if case .completed(let time, let keystrokes) = engine.state {
                     Text("\(String(format: "%.1f", time))s · \(keystrokes) keystrokes")
@@ -110,8 +126,35 @@ struct ExerciseContainerView: View {
         }
     }
 
+    // MARK: - Editor styling
+
+    private var editorShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: 8, style: .continuous)
+    }
+
     private var editorHeight: CGFloat {
         let lineCount = max(exercise.initialText.components(separatedBy: "\n").count, 1)
         return CGFloat(lineCount) * 20 + 32
+    }
+
+    private var editorBorderColor: Color {
+        if engine.isCompleted {
+            return .green.opacity(0.5)
+        }
+        if isEditorFocused {
+            return Color.accentColor.opacity(0.6)
+        }
+        if isEditorHovered {
+            return .primary.opacity(0.2)
+        }
+        // Resting state — subtle but visible border
+        return .primary.opacity(0.1)
+    }
+
+    private var editorBorderWidth: CGFloat {
+        if isEditorFocused || engine.isCompleted {
+            return 2
+        }
+        return 1
     }
 }

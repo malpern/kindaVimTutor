@@ -6,6 +6,7 @@ struct ExerciseEditorView: NSViewRepresentable {
     let initialCursorPosition: Int
     var onTextChange: (String, Int) -> Void
     var onSelectionChange: (String, Int) -> Void
+    var onFocusChange: ((Bool) -> Void)?
 
     func makeNSView(context: Context) -> NSScrollView {
         let scrollView = NSTextView.scrollableTextView()
@@ -25,10 +26,10 @@ struct ExerciseEditorView: NSViewRepresentable {
         textView.isAutomaticLinkDetectionEnabled = false
         textView.isGrammarCheckingEnabled = false
 
-        // Typography — standard system text, not terminal-style
+        // Typography — standard system text
         textView.font = Typography.editorFont
         textView.textColor = .labelColor
-        textView.insertionPointColor = .labelColor
+        textView.insertionPointColor = .controlAccentColor
         textView.backgroundColor = NSColor(AppColors.editorBackground)
 
         // Generous interior spacing
@@ -49,6 +50,7 @@ struct ExerciseEditorView: NSViewRepresentable {
         // Delegate
         textView.delegate = context.coordinator
         context.coordinator.textView = textView
+        context.coordinator.onFocusChange = onFocusChange
 
         scrollView.hasVerticalScroller = false
         scrollView.hasHorizontalScroller = false
@@ -60,6 +62,7 @@ struct ExerciseEditorView: NSViewRepresentable {
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         guard let textView = scrollView.documentView as? NSTextView else { return }
+        context.coordinator.onFocusChange = onFocusChange
         if context.coordinator.currentInitialText != initialText {
             context.coordinator.currentInitialText = initialText
             context.coordinator.isResetting = true
@@ -74,12 +77,15 @@ struct ExerciseEditorView: NSViewRepresentable {
         Coordinator(onTextChange: onTextChange, onSelectionChange: onSelectionChange, initialText: initialText)
     }
 
+    @MainActor
     final class Coordinator: NSObject, NSTextViewDelegate {
         var onTextChange: (String, Int) -> Void
         var onSelectionChange: (String, Int) -> Void
+        var onFocusChange: ((Bool) -> Void)?
         var currentInitialText: String
         var isResetting = false
         weak var textView: NSTextView?
+        private var lastFocusState: Bool?
 
         init(onTextChange: @escaping (String, Int) -> Void,
              onSelectionChange: @escaping (String, Int) -> Void,
@@ -99,9 +105,32 @@ struct ExerciseEditorView: NSViewRepresentable {
             guard !isResetting, let textView = notification.object as? NSTextView else { return }
             let cursorPosition = textView.selectedRange().location
             onSelectionChange(textView.string, cursorPosition)
+            checkFocusState()
         }
 
-        @MainActor func resetToInitial() {
+        nonisolated func textDidBeginEditing(_ notification: Notification) {
+            MainActor.assumeIsolated {
+                onFocusChange?(true)
+                lastFocusState = true
+            }
+        }
+
+        nonisolated func textDidEndEditing(_ notification: Notification) {
+            MainActor.assumeIsolated {
+                onFocusChange?(false)
+                lastFocusState = false
+            }
+        }
+
+        private func checkFocusState() {
+            let isFocused = textView?.window?.firstResponder === textView
+            if isFocused != lastFocusState {
+                lastFocusState = isFocused
+                onFocusChange?(isFocused)
+            }
+        }
+
+        func resetToInitial() {
             guard let textView else { return }
             isResetting = true
             textView.string = currentInitialText
