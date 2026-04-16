@@ -25,7 +25,8 @@ struct TitleStepView: View {
             TypewriterText(
                 lesson.title,
                 font: .system(size: 44, weight: .bold),
-                foregroundStyle: .primary
+                foregroundStyle: .primary,
+                alignment: .center
             ) {
                 titleDone = true
                 withAnimation(.easeOut(duration: 0.4)) {

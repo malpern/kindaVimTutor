@@ -4,6 +4,7 @@ struct TypewriterText: View {
     let text: String
     let font: Font
     var foregroundStyle: AnyShapeStyle
+    var alignment: TextAlignment
     var onComplete: (() -> Void)?
 
     @State private var revealedCount: Int = 0
@@ -15,11 +16,21 @@ struct TypewriterText: View {
     init(_ text: String,
          font: Font = .body,
          foregroundStyle: some ShapeStyle = .primary,
+         alignment: TextAlignment = .leading,
          onComplete: (() -> Void)? = nil) {
         self.text = text
         self.font = font
         self.foregroundStyle = AnyShapeStyle(foregroundStyle)
+        self.alignment = alignment
         self.onComplete = onComplete
+    }
+
+    private var frameAlignment: Alignment {
+        switch alignment {
+        case .center: .center
+        case .trailing: .trailing
+        default: .leading
+        }
     }
 
     var body: some View {
@@ -27,6 +38,7 @@ struct TypewriterText: View {
             Text(revealedText)
                 .font(font)
                 .foregroundStyle(foregroundStyle)
+                .multilineTextAlignment(alignment)
 
             // Green blinking cursor
             if !isComplete {
@@ -36,7 +48,7 @@ struct TypewriterText: View {
                     .opacity(cursorVisible ? 1 : 0)
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, alignment: frameAlignment)
         .contentShape(Rectangle())
         .onTapGesture {
             skipToEnd()
