@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class AppState {
     var selectedLessonId: String?
+    let modeMonitor = ModeMonitor()
 
     let chapters: [Chapter] = Curriculum.chapters
 

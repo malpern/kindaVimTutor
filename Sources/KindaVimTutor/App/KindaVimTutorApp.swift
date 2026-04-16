@@ -19,7 +19,18 @@ struct KindaVimTutorApp: App {
                     WelcomeView()
                 }
             }
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    ModeIndicatorView(
+                        mode: appState.modeMonitor.currentMode,
+                        isKindaVimRunning: appState.modeMonitor.isKindaVimRunning
+                    )
+                }
+            }
             .frame(minWidth: 900, minHeight: 600)
+            .onAppear {
+                appState.modeMonitor.startMonitoring()
+            }
         }
     }
 }
