@@ -18,25 +18,25 @@ extension Curriculum {
         id: "ch5.l1",
         number: 1,
         title: "Visual Character Mode",
-        subtitle: "Select text character by character with v",
+        subtitle: "Select text with v",
         explanation: [
             .heading("See What You're About to Change"),
-            .text("Press v to enter Visual mode. As you move the cursor, text is highlighted. Then apply any operator (d, y, c) to act on the selection."),
+            .text("Press v to start selecting. Move to extend the selection. Then press an operator key to act on it."),
             .spacer,
-            .keyCommand(keys: ["v"], description: "Enter Visual character mode"),
+            .keyCommand(keys: ["v"], description: "Start visual selection"),
             .spacer,
-            .text("Visual mode flips the workflow: instead of operator-then-motion, you select first, then operate. This is useful when you're not sure exactly how much text to affect."),
-            .tip("Press Esc to cancel Visual mode without doing anything."),
+            .text("Visual mode flips the workflow: select first, then operate. Useful when you're not sure exactly how far to go."),
+            .tip("Press Esc to cancel without doing anything."),
         ],
         exercises: [
             Exercise(
                 id: "ch5.l1.e1",
-                instruction: "Select \"REMOVE THIS\" with v and motions, then delete with d",
+                instruction: "Select the UPPERCASE text with v + motion, then delete with d",
                 initialText: "Keep REMOVE THIS end.",
                 initialCursorPosition: 5,
-                expectedText: "Keep end.",
+                expectedText: "Keep  end.",
                 expectedCursorPosition: nil,
-                hints: ["Press v, then use l or w to select 'REMOVE THIS ', then press d"],
+                hints: ["Press v, then w or e to select the words, then d to delete"],
                 difficulty: .learn
             ),
         ],
@@ -51,29 +51,29 @@ extension Curriculum {
         title: "Visual Line Mode",
         subtitle: "Select whole lines with V",
         explanation: [
-            .heading("Select Entire Lines at Once"),
-            .text("Press V (uppercase) to select entire lines. Move up or down to extend the selection, then operate."),
+            .heading("Select Entire Lines"),
+            .text("V (uppercase) selects whole lines. Move up/down to extend, then operate."),
             .spacer,
-            .keyCommand(keys: ["V"], description: "Enter Visual line mode"),
+            .keyCommand(keys: ["V"], description: "Start visual line selection"),
             .spacer,
-            .text("This is perfect for deleting, moving, or copying multiple lines. Select them with V and j/k, then d to delete or y to copy."),
+            .text("Perfect for deleting or moving blocks of lines."),
         ],
         exercises: [
             Exercise(
                 id: "ch5.l2.e1",
-                instruction: "Select the two middle lines with V and j, then delete with d",
-                initialText: "Keep this\nRemove this\nRemove this too\nKeep this also",
-                initialCursorPosition: 10,
-                expectedText: "Keep this\nKeep this also",
+                instruction: "Select the two marked lines with V + j, then delete with d",
+                initialText: "Keep\n--- DELETE ---\n--- DELETE ---\nKeep",
+                initialCursorPosition: 5,
+                expectedText: "Keep\nKeep",
                 expectedCursorPosition: nil,
-                hints: ["On 'Remove this', press V, then j to extend to next line, then d"],
+                hints: ["On first DELETE line, press V, then j, then d"],
                 difficulty: .learn
             ),
         ],
         motionsIntroduced: ["V"]
     )
 
-    // MARK: - Lesson 5.3: Visual Mode with Operators
+    // MARK: - Lesson 5.3: Visual + Operators
 
     private static let lesson5_3 = Lesson(
         id: "ch5.l3",
@@ -82,26 +82,23 @@ extension Curriculum {
         subtitle: "Select then delete, yank, or change",
         explanation: [
             .heading("Any Operator Works on a Selection"),
-            .text("In Visual mode, any operator key acts on the selected text:"),
+            .text("In Visual mode, any operator acts on the highlighted text:"),
             .spacer,
             .keyCommand(keys: ["d"], description: "Delete selection"),
             .keyCommand(keys: ["y"], description: "Yank (copy) selection"),
-            .keyCommand(keys: ["c"], description: "Change selection (delete + insert)"),
-            .keyCommand(keys: [">"], description: "Indent selection"),
-            .keyCommand(keys: ["<"], description: "Outdent selection"),
-            .keyCommand(keys: ["~"], description: "Toggle case of selection"),
-            .spacer,
-            .tip("Visual mode is great when you want to be precise about what you're affecting."),
+            .keyCommand(keys: ["c"], description: "Change (replace) selection"),
+            .keyCommand(keys: ["~"], description: "Toggle case"),
+            .keyCommand(keys: [">"], description: "Indent"),
         ],
         exercises: [
             Exercise(
                 id: "ch5.l3.e1",
-                instruction: "Select 'hello' with v and motions, then toggle its case to 'HELLO' with ~",
-                initialText: "Say hello to the world.",
-                initialCursorPosition: 4,
-                expectedText: "Say HELLO to the world.",
+                instruction: "Select 'lower' with ve, then toggle its case to 'LOWER' with ~",
+                initialText: "Make lower UPPER.",
+                initialCursorPosition: 5,
+                expectedText: "Make LOWER UPPER.",
                 expectedCursorPosition: nil,
-                hints: ["Press v, then e to select 'hello', then ~ to toggle case"],
+                hints: ["Press v, then e to select 'lower', then ~ to toggle case"],
                 difficulty: .practice
             ),
         ],
