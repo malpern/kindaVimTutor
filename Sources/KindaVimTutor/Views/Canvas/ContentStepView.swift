@@ -43,7 +43,7 @@ struct ContentStepView: View {
                 ForEach(Array(bodyBlocks.enumerated()), id: \.offset) { index, block in
                     if index < visibleBlockCount {
                         contentBlockView(block)
-                            .transition(.opacity.combined(with: .offset(y: 6)))
+                            .transition(.opacity.combined(with: .offset(y: 4)))
                     }
                 }
             }
@@ -61,7 +61,7 @@ struct ContentStepView: View {
 
     private func revealBodyBlocks() {
         for i in 0..<bodyBlocks.count {
-            withAnimation(.easeOut(duration: 0.35).delay(Double(i) * 0.12)) {
+            withAnimation(.spring(duration: 0.4, bounce: 0.0).delay(Double(i) * 0.08)) {
                 visibleBlockCount = i + 1
             }
         }

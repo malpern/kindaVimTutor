@@ -12,12 +12,13 @@ struct TitleStepView: View {
         VStack(spacing: 16) {
             Spacer()
 
-            // Chapter label — fades in first
+            // Chapter label — fades in first, no movement
             Text(chapterTitle.uppercased())
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.tint)
                 .tracking(2)
                 .opacity(showChapter ? 1 : 0)
+                .offset(y: showChapter ? 0 : 4)
 
             // Title — types in
             TypewriterText(
@@ -26,7 +27,7 @@ struct TitleStepView: View {
                 foregroundStyle: .primary,
                 alignment: .center
             ) {
-                withAnimation(.easeOut(duration: 0.4)) {
+                withAnimation(.spring(duration: 0.5, bounce: 0.0)) {
                     showSubtitle = true
                 }
             }
@@ -42,7 +43,7 @@ struct TitleStepView: View {
                     foregroundStyle: .secondary,
                     alignment: .center
                 ) {
-                    withAnimation(.easeOut(duration: 0.35)) {
+                    withAnimation(.easeOut(duration: 0.4).delay(0.15)) {
                         showHint = true
                     }
                 }
@@ -70,7 +71,7 @@ struct TitleStepView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            withAnimation(.easeOut(duration: 0.3)) {
+            withAnimation(.spring(duration: 0.5, bounce: 0.0).delay(0.05)) {
                 showChapter = true
             }
         }

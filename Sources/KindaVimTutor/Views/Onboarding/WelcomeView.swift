@@ -3,7 +3,9 @@ import SwiftUI
 struct WelcomeView: View {
     var onStartLearning: (() -> Void)?
 
-    @State private var animateIn = false
+    @State private var showTitle = false
+    @State private var showSubtitle = false
+    @State private var showHint = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,22 +15,21 @@ struct WelcomeView: View {
                 Text("kindaVim Tutor")
                     .font(.system(size: 44, weight: .bold))
                     .tracking(-1.2)
-                    .opacity(animateIn ? 1 : 0)
-                    .offset(y: animateIn ? 0 : 12)
+                    .opacity(showTitle ? 1 : 0)
+                    .offset(y: showTitle ? 0 : 8)
 
                 Text("Learn Vim motions for macOS,\none exercise at a time.")
                     .font(.system(size: 20, weight: .regular))
                     .foregroundStyle(.secondary)
                     .tracking(-0.3)
                     .multilineTextAlignment(.center)
-                    .opacity(animateIn ? 1 : 0)
-                    .offset(y: animateIn ? 0 : 12)
-
+                    .opacity(showSubtitle ? 1 : 0)
+                    .offset(y: showSubtitle ? 0 : 6)
             }
 
             Spacer()
 
-            // Navigation hint + kindaVim status
+            // Navigation hint + kindaVim status — no movement, just fade
             VStack(spacing: 16) {
                 HStack(spacing: 10) {
                     KeyCapView(label: "L", size: .regular)
@@ -43,7 +44,7 @@ struct WelcomeView: View {
                 kindaVimStatus
             }
             .padding(.bottom, 40)
-            .opacity(animateIn ? 1 : 0)
+            .opacity(showHint ? 1 : 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
@@ -58,8 +59,15 @@ struct WelcomeView: View {
             return .ignored
         }
         .onAppear {
-            withAnimation(.easeOut(duration: 0.5).delay(0.05)) {
-                animateIn = true
+            // Staggered entrance: title first, subtitle follows, hint last
+            withAnimation(.spring(duration: 0.6, bounce: 0.0).delay(0.1)) {
+                showTitle = true
+            }
+            withAnimation(.spring(duration: 0.5, bounce: 0.0).delay(0.35)) {
+                showSubtitle = true
+            }
+            withAnimation(.easeOut(duration: 0.4).delay(0.7)) {
+                showHint = true
             }
         }
     }
