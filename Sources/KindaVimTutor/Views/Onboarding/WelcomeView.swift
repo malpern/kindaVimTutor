@@ -17,6 +17,7 @@ struct WelcomeView: View {
                     .tracking(-1.2)
                     .opacity(showTitle ? 1 : 0)
                     .offset(y: showTitle ? 0 : 8)
+                    .animation(.spring(duration: 0.6, bounce: 0.0), value: showTitle)
 
                 Text("Learn Vim motions for macOS,\none exercise at a time.")
                     .font(.system(size: 20, weight: .regular))
@@ -25,11 +26,11 @@ struct WelcomeView: View {
                     .multilineTextAlignment(.center)
                     .opacity(showSubtitle ? 1 : 0)
                     .offset(y: showSubtitle ? 0 : 6)
+                    .animation(.spring(duration: 0.5, bounce: 0.0), value: showSubtitle)
             }
 
             Spacer()
 
-            // Navigation hint + kindaVim status — no movement, just fade
             VStack(spacing: 16) {
                 HStack(spacing: 10) {
                     KeyCapView(label: "L", size: .regular)
@@ -45,6 +46,7 @@ struct WelcomeView: View {
             }
             .padding(.bottom, 40)
             .opacity(showHint ? 1 : 0)
+            .animation(.easeOut(duration: 0.4), value: showHint)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
@@ -58,17 +60,13 @@ struct WelcomeView: View {
             }
             return .ignored
         }
-        .onAppear {
-            // Staggered entrance: title first, subtitle follows, hint last
-            withAnimation(.spring(duration: 0.6, bounce: 0.0).delay(0.1)) {
-                showTitle = true
-            }
-            withAnimation(.spring(duration: 0.5, bounce: 0.0).delay(0.35)) {
-                showSubtitle = true
-            }
-            withAnimation(.easeOut(duration: 0.4).delay(0.7)) {
-                showHint = true
-            }
+        .task {
+            try? await Task.sleep(for: .milliseconds(100))
+            showTitle = true
+            try? await Task.sleep(for: .milliseconds(250))
+            showSubtitle = true
+            try? await Task.sleep(for: .milliseconds(400))
+            showHint = true
         }
     }
 
