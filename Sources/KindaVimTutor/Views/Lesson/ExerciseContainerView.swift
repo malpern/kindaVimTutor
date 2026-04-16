@@ -71,8 +71,9 @@ struct ExerciseContainerView: View {
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(editorBorderColor, lineWidth: engine.isCompleted ? 2 : 1)
+                    .strokeBorder(engine.isCompleted ? .green : .clear, lineWidth: 2)
             }
+            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
 
             // Hints
             if !exercise.hints.isEmpty {
@@ -125,10 +126,6 @@ struct ExerciseContainerView: View {
     private var editorHeight: CGFloat {
         let lineCount = max(exercise.initialText.components(separatedBy: "\n").count, 1)
         return CGFloat(lineCount) * 22 + 28
-    }
-
-    private var editorBorderColor: Color {
-        engine.isCompleted ? .green : .primary.opacity(0.12)
     }
 
     private var difficultyBadge: some View {

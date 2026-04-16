@@ -16,9 +16,15 @@ struct KindaVimTutorApp: App {
             } detail: {
                 if let lesson = appState.selectedLesson,
                    let chapter = appState.selectedChapter {
-                    LessonView(lesson: lesson, chapterTitle: chapter.title, progressStore: appState.progressStore)
+                    LessonView(
+                        lesson: lesson,
+                        chapterTitle: chapter.title,
+                        progressStore: appState.progressStore,
+                        nextLesson: appState.nextLesson,
+                        onNextLesson: { appState.goToNextLesson() }
+                    )
                 } else {
-                    WelcomeView()
+                    WelcomeView(onStartLearning: { appState.goToFirstLesson() })
                 }
             }
             .toolbar {
@@ -47,6 +53,21 @@ struct KindaVimTutorApp: App {
             .frame(minWidth: 900, minHeight: 600)
             .onAppear {
                 appState.modeMonitor.startMonitoring()
+            }
+        }
+        .commands {
+            CommandGroup(after: .toolbar) {
+                Button("Next Lesson") {
+                    appState.goToNextLesson()
+                }
+                .keyboardShortcut("]", modifiers: .command)
+
+                Divider()
+
+                Button("Show Progress") {
+                    showStats.toggle()
+                }
+                .keyboardShortcut("p", modifiers: [.command, .shift])
             }
         }
     }

@@ -27,12 +27,12 @@ struct ExerciseEditorView: NSViewRepresentable {
 
         // Typography
         textView.font = Typography.editorFont
-        textView.textColor = .labelColor
-        textView.insertionPointColor = .labelColor
-        textView.backgroundColor = .clear
+        textView.textColor = NSColor.white.withAlphaComponent(0.9)
+        textView.insertionPointColor = .white
+        textView.backgroundColor = NSColor(white: 0.12, alpha: 1.0)
 
         // Layout
-        textView.textContainerInset = NSSize(width: 8, height: 8)
+        textView.textContainerInset = NSSize(width: 12, height: 10)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.textContainer?.widthTracksTextView = true
