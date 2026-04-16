@@ -13,6 +13,7 @@ final class ExerciseEngine {
     private(set) var keystrokeCount: Int = 0
     private(set) var elapsedTime: TimeInterval = 0
     private(set) var currentHintIndex: Int = -1
+    private(set) var attemptCount: Int = 0
 
     var exercise: Exercise?
     private var startTime: Date?
@@ -24,7 +25,29 @@ final class ExerciseEngine {
     }
 
     func start(_ exercise: Exercise) {
+        let isNewExercise = self.exercise?.id != exercise.id
         self.exercise = exercise
+        state = .active
+        keystrokeCount = 0
+        elapsedTime = 0
+        currentHintIndex = -1
+        startTime = Date()
+        if isNewExercise {
+            attemptCount = 1
+        }
+
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, let startTime = self.startTime else { return }
+                self.elapsedTime = Date().timeIntervalSince(startTime)
+            }
+        }
+    }
+
+    func reset() {
+        guard exercise != nil else { return }
+        attemptCount += 1
         state = .active
         keystrokeCount = 0
         elapsedTime = 0
@@ -38,11 +61,6 @@ final class ExerciseEngine {
                 self.elapsedTime = Date().timeIntervalSince(startTime)
             }
         }
-    }
-
-    func reset() {
-        guard let exercise else { return }
-        start(exercise)
     }
 
     func showNextHint() {

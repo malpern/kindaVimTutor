@@ -9,6 +9,10 @@ struct ExerciseContainerView: View {
     @State private var isEditorHovered = false
     @State private var showHint = false
 
+    private var bestResult: ExerciseResult? {
+        progressStore.bestResult(for: exercise.id)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Label
@@ -33,7 +37,7 @@ struct ExerciseContainerView: View {
 
             Spacer().frame(height: 12)
 
-            // Editor with interactive states
+            // Editor
             ExerciseEditorView(
                 initialText: exercise.initialText,
                 initialCursorPosition: exercise.initialCursorPosition,
@@ -62,14 +66,71 @@ struct ExerciseContainerView: View {
                 }
             }
 
-            // Stats + actions
-            HStack(spacing: 8) {
-                if case .completed(let time, let keystrokes) = engine.state {
-                    Text("\(String(format: "%.1f", time))s · \(keystrokes) keystrokes")
-                        .font(.system(size: 12, design: .monospaced))
-                        .foregroundStyle(.tertiary)
-                }
-                Spacer()
+            // Metrics bar
+            metricsBar
+                .padding(.top, 10)
+
+            // Hint
+            if !exercise.hints.isEmpty, showHint {
+                Text(exercise.hints.first ?? "")
+                    .font(Typography.bodySecondary)
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 6)
+                    .transition(.opacity)
+            }
+        }
+        .onAppear {
+            engine.start(exercise)
+        }
+        .onDisappear {
+            engine.stop()
+        }
+        .onChange(of: exercise) {
+            engine.start(exercise)
+        }
+        .animation(.easeInOut(duration: 0.2), value: engine.isCompleted)
+        .onChange(of: engine.isCompleted) {
+            if case .completed(let time, let keystrokes) = engine.state {
+                let result = ExerciseResult(
+                    exerciseId: exercise.id,
+                    completedAt: Date(),
+                    timeSeconds: time,
+                    keystrokeCount: keystrokes,
+                    attempts: engine.attemptCount,
+                    hintsUsed: max(0, engine.currentHintIndex + 1)
+                )
+                progressStore.recordCompletion(result)
+            }
+        }
+    }
+
+    // MARK: - Metrics bar
+
+    private var metricsBar: some View {
+        HStack(spacing: 0) {
+            // Metrics
+            HStack(spacing: 16) {
+                metric(
+                    label: "Time",
+                    current: String(format: "%.1fs", engine.isCompleted ? completedTime : engine.elapsedTime),
+                    best: bestResult.map { String(format: "%.1fs", $0.timeSeconds) }
+                )
+                metric(
+                    label: "Keystrokes",
+                    current: "\(engine.isCompleted ? completedKeystrokes : engine.keystrokeCount)",
+                    best: bestResult.map { "\($0.keystrokeCount)" }
+                )
+                metric(
+                    label: "Attempt",
+                    current: "\(engine.attemptCount)",
+                    best: nil
+                )
+            }
+
+            Spacer()
+
+            // Actions
+            HStack(spacing: 6) {
                 if !exercise.hints.isEmpty {
                     Button {
                         withAnimation(.easeInOut(duration: 0.15)) {
@@ -96,43 +157,40 @@ struct ExerciseContainerView: View {
                 .foregroundStyle(.tertiary)
                 .help("Reset exercise")
             }
-            .padding(.top, 8)
+        }
+    }
 
-            // Hint — shown inline below the stats when requested
-            if !exercise.hints.isEmpty, showHint {
-                Text(exercise.hints.first ?? "")
-                    .font(Typography.bodySecondary)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
-                    .transition(.opacity)
-            }
-        }
-        .onAppear {
-            engine.start(exercise)
-        }
-        .onDisappear {
-            engine.stop()
-        }
-        .onChange(of: exercise) {
-            engine.start(exercise)
-        }
-        .animation(.easeInOut(duration: 0.2), value: engine.isCompleted)
-        .onChange(of: engine.isCompleted) {
-            if case .completed(let time, let keystrokes) = engine.state {
-                let result = ExerciseResult(
-                    exerciseId: exercise.id,
-                    completedAt: Date(),
-                    timeSeconds: time,
-                    keystrokeCount: keystrokes,
-                    attempts: 1,
-                    hintsUsed: max(0, engine.currentHintIndex + 1)
-                )
-                progressStore.recordCompletion(result)
+    private func metric(label: String, current: String, best: String?) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(label)
+                .font(.system(size: 10, weight: .medium))
+                .foregroundStyle(.quaternary)
+                .textCase(.uppercase)
+                .tracking(0.3)
+            HStack(alignment: .firstTextBaseline, spacing: 4) {
+                Text(current)
+                    .font(.system(size: 13, weight: .medium, design: .monospaced))
+                    .foregroundStyle(engine.isCompleted ? .secondary : .tertiary)
+                if let best {
+                    Text("best \(best)")
+                        .font(.system(size: 10, design: .monospaced))
+                        .foregroundStyle(.quaternary)
+                }
             }
         }
     }
 
-    // MARK: - Editor styling
+    // MARK: - Helpers
+
+    private var completedTime: Double {
+        if case .completed(let time, _) = engine.state { return time }
+        return 0
+    }
+
+    private var completedKeystrokes: Int {
+        if case .completed(_, let ks) = engine.state { return ks }
+        return 0
+    }
 
     private var editorShape: RoundedRectangle {
         RoundedRectangle(cornerRadius: 8, style: .continuous)
@@ -153,7 +211,6 @@ struct ExerciseContainerView: View {
         if isEditorHovered {
             return .primary.opacity(0.2)
         }
-        // Resting state — subtle but visible border
         return .primary.opacity(0.1)
     }
 

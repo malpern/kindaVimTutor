@@ -41,6 +41,10 @@ final class ProgressStore {
         progress.completedExercises[exerciseId] != nil
     }
 
+    func bestResult(for exerciseId: String) -> ExerciseResult? {
+        progress.completedExercises[exerciseId]
+    }
+
     func isLessonCompleted(_ lesson: Lesson) -> Bool {
         lesson.exercises.allSatisfy { isExerciseCompleted($0.id) }
     }
