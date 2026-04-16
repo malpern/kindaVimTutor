@@ -52,6 +52,8 @@ struct WelcomeView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
         .focusable()
+        .accessibilityIdentifier("WelcomeScreen")
+        .accessibilityLabel("welcome lesson=none")
         .onKeyPress { keyPress in
             if keyPress.characters.first == "l" || keyPress.characters.first == " " {
                 onStartLearning?()

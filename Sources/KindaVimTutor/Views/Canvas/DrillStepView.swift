@@ -95,6 +95,8 @@ struct DrillStepView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 56)
+        .accessibilityIdentifier("DrillStep")
+        .accessibilityLabel("drill exercise=\(exercise.id) rep=\(engine.completedReps)/\(engine.drillCount) state=\(drillStateLabel)")
         .onAppear {
             engine.start(exercise)
         }
@@ -122,6 +124,13 @@ struct DrillStepView: View {
                 }
             }
         }
+    }
+
+    private var drillStateLabel: String {
+        if engine.isDrillComplete { return "complete" }
+        if engine.isRepCompleted { return "repDone" }
+        if engine.isActive { return "active" }
+        return "idle"
     }
 
     private func updateInspector() {

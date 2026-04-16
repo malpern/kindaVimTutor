@@ -169,11 +169,12 @@ final class ExerciseEngine {
 
         // Update rep record
         let repTimestamp = drillStartTime.map { Date().timeIntervalSince($0) } ?? 0
-        if var lastRep = currentSession?.reps.last {
+        if let session = currentSession, let lastIndex = session.reps.indices.last {
+            var lastRep = session.reps[lastIndex]
             lastRep.endTimestamp = repTimestamp
             lastRep.keystrokeCount = keystrokeCount
             lastRep.completed = true
-            currentSession?.reps[currentSession!.reps.count - 1] = lastRep
+            currentSession?.reps[lastIndex] = lastRep
         }
 
         recordEvent(.repCompleted, text: finalText, cursorPosition: finalCursor)

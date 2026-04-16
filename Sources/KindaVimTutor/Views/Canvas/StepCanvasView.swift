@@ -49,12 +49,22 @@ struct StepCanvasView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
         .focusable()
+        .accessibilityIdentifier("StepCanvas")
+        .accessibilityLabel(accessibilityStatus)
         .onAppear {
             controller.loadLesson(lesson, chapterTitle: chapterTitle)
+            AppCommandChannel.shared.registerController(controller)
         }
         .onChange(of: lesson) {
             controller.loadLesson(lesson, chapterTitle: chapterTitle)
             isEditorFocused = false
+            AppCommandChannel.shared.registerController(controller)
+        }
+        .onChange(of: controller.currentStepIndex) {
+            AppCommandChannel.shared.notifyStateChanged()
+        }
+        .onDisappear {
+            AppCommandChannel.shared.registerController(nil)
         }
         .onKeyPress { keyPress in
             handleKeyPress(keyPress)
@@ -104,6 +114,23 @@ struct StepCanvasView: View {
             return false
         }
         return !controller.isFirstStep
+    }
+
+    private var accessibilityStatus: String {
+        let step = controller.currentStep
+        let stepKind: String
+        let stepId: String
+        switch step {
+        case .title(let lesson, _):
+            stepKind = "title"; stepId = lesson.id
+        case .content(let id, _):
+            stepKind = "content"; stepId = id
+        case .drill(let exercise, _):
+            stepKind = "drill"; stepId = exercise.id
+        case .none:
+            stepKind = "none"; stepId = ""
+        }
+        return "step=\(stepKind) id=\(stepId) index=\(controller.currentStepIndex + 1)/\(controller.stepCount) lesson=\(lesson.id) focused=\(isEditorFocused ? "1" : "0")"
     }
 
     private var stepTransition: AnyTransition {

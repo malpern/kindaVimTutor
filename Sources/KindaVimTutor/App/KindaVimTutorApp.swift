@@ -67,6 +67,9 @@ struct KindaVimTutorApp: App {
             .frame(minWidth: 900, minHeight: 600)
             .onAppear {
                 appState.modeMonitor.startMonitoring()
+                if ProcessInfo.processInfo.environment["KINDAVIMTUTOR_ENABLE_CHANNEL"] == "1" {
+                    AppCommandChannel.shared.start(appState: appState)
+                }
             }
         }
         .commands {
