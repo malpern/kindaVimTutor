@@ -57,6 +57,11 @@ struct ExerciseEditorView: NSViewRepresentable {
         scrollView.drawsBackground = false
         scrollView.borderType = .noBorder
 
+        // Auto-focus the editor after a brief delay (lets the view settle)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            textView.window?.makeFirstResponder(textView)
+        }
+
         return scrollView
     }
 

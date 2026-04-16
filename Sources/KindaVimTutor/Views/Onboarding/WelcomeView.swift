@@ -34,29 +34,31 @@ struct WelcomeView: View {
                 .padding(.top, 8)
                 .opacity(animateIn ? 1 : 0)
                 .offset(y: animateIn ? 0 : 12)
-
-                if let onStartLearning {
-                    Button(action: onStartLearning) {
-                        Text("Start Learning")
-                            .fontWeight(.medium)
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    .padding(.top, 12)
-                    .opacity(animateIn ? 1 : 0)
-                    .offset(y: animateIn ? 0 : 10)
-                }
             }
 
             Spacer()
 
-            // kindaVim status
-            kindaVimStatus
-                .padding(.bottom, 40)
-                .opacity(animateIn ? 1 : 0)
+            // Navigation hint + kindaVim status
+            VStack(spacing: 12) {
+                Text("Press l to begin")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.quaternary)
+
+                kindaVimStatus
+            }
+            .padding(.bottom, 40)
+            .opacity(animateIn ? 1 : 0)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
+        .focusable()
+        .onKeyPress { keyPress in
+            if keyPress.characters.first == "l" || keyPress.characters.first == " " {
+                onStartLearning?()
+                return .handled
+            }
+            return .ignored
+        }
         .onAppear {
             withAnimation(.easeOut(duration: 0.5).delay(0.05)) {
                 animateIn = true
