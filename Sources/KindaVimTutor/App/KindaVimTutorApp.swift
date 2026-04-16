@@ -5,6 +5,13 @@ struct KindaVimTutorApp: App {
     @State private var appState = AppState()
     @State private var showStats = false
 
+    init() {
+        AppLogger.shared.info("app", "launch", fields: [
+            "pid": String(ProcessInfo.processInfo.processIdentifier),
+            "logDir": AppLogger.shared.logDirectoryURL.path
+        ])
+    }
+
     var body: some Scene {
         Window("kindaVim Tutor", id: "main") {
             NavigationSplitView {

@@ -33,6 +33,7 @@ final class AppState {
 
     func goToNextLesson() {
         if let next = nextLesson {
+            AppLogger.shared.info("lesson", "advance", fields: ["to": next.id])
             withAnimation(.easeInOut(duration: 0.25)) {
                 selectedLessonId = next.id
             }
@@ -41,6 +42,7 @@ final class AppState {
 
     func goToFirstLesson() {
         if let first = allLessons.first {
+            AppLogger.shared.info("lesson", "start", fields: ["id": first.id])
             selectedLessonId = first.id
         }
     }

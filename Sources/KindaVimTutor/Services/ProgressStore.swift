@@ -21,7 +21,14 @@ final class ProgressStore {
         }
     }
 
+    var progressFileURL: URL { fileURL }
+
     func recordCompletion(_ result: ExerciseResult) {
+        AppLogger.shared.info("progress", "record", fields: [
+            "exercise": result.exerciseId,
+            "keystrokes": String(result.keystrokeCount),
+            "time": String(format: "%.3f", result.timeSeconds)
+        ])
         // Keep the best result (fewest keystrokes, then fastest time)
         if let existing = progress.completedExercises[result.exerciseId] {
             if result.keystrokeCount < existing.keystrokeCount
@@ -90,7 +97,7 @@ final class ProgressStore {
             let filename = "\(session.exerciseId)_\(session.id.uuidString.prefix(8)).json"
             try data.write(to: sessionsDir.appendingPathComponent(filename), options: .atomic)
         } catch {
-            print("Failed to save drill session: \(error)")
+            AppLogger.shared.error("progress", "saveDrillSession failed", fields: ["error": String(describing: error)])
         }
     }
 
@@ -101,7 +108,7 @@ final class ProgressStore {
             let data = try JSONEncoder().encode(progress)
             try data.write(to: fileURL, options: .atomic)
         } catch {
-            print("Failed to save progress: \(error)")
+            AppLogger.shared.error("progress", "save failed", fields: ["error": String(describing: error)])
         }
     }
 }

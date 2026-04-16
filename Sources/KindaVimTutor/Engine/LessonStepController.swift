@@ -29,6 +29,11 @@ final class LessonStepController {
         steps = LessonStep.steps(from: lesson, chapterTitle: chapterTitle)
         currentStepIndex = 0
         navigationDirection = .forward
+        AppLogger.shared.info("step", "loadLesson", fields: [
+            "lesson": lesson.id,
+            "chapter": chapterTitle,
+            "stepCount": String(steps.count)
+        ])
     }
 
     func nextStep() {
@@ -37,6 +42,7 @@ final class LessonStepController {
         withAnimation(.easeInOut(duration: 0.3)) {
             currentStepIndex += 1
         }
+        logCurrentStep("next")
     }
 
     func previousStep() {
@@ -45,6 +51,7 @@ final class LessonStepController {
         withAnimation(.easeInOut(duration: 0.3)) {
             currentStepIndex -= 1
         }
+        logCurrentStep("previous")
     }
 
     func goToStep(_ index: Int) {
@@ -53,5 +60,15 @@ final class LessonStepController {
         withAnimation(.easeInOut(duration: 0.3)) {
             currentStepIndex = index
         }
+        logCurrentStep("goTo")
+    }
+
+    private func logCurrentStep(_ reason: String) {
+        AppLogger.shared.info("step", "change", fields: [
+            "reason": reason,
+            "index": String(currentStepIndex),
+            "total": String(steps.count),
+            "id": currentStep?.id ?? ""
+        ])
     }
 }

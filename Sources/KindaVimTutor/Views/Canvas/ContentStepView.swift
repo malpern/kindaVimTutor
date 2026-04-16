@@ -47,7 +47,7 @@ struct ContentStepView: View {
                     }
                 }
             }
-            .frame(maxWidth: 520)
+            .frame(maxWidth: 640, alignment: .leading)
 
             Spacer()
         }
@@ -74,49 +74,64 @@ struct ContentStepView: View {
             Text(text)
                 .font(.system(size: 28, weight: .bold))
                 .tracking(-0.6)
+                .fixedSize(horizontal: false, vertical: true)
 
         case .text(let text):
             Text(text)
                 .font(.system(size: 16, weight: .regular))
                 .lineSpacing(6)
                 .foregroundStyle(.primary.opacity(0.85))
+                .fixedSize(horizontal: false, vertical: true)
 
         case .tip(let text):
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "lightbulb")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 14))
+                    .frame(width: 18, alignment: .topLeading)
+                    .padding(.top, 2)
                 Text(text)
                     .font(.system(size: 15))
                     .foregroundStyle(.secondary)
                     .lineSpacing(4)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .important(let text):
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 14))
+                    .frame(width: 18, alignment: .topLeading)
+                    .padding(.top, 2)
                 Text(text)
                     .font(.system(size: 15))
                     .foregroundStyle(.secondary)
                     .lineSpacing(4)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .keyCommand(let keys, let description):
-            HStack(spacing: 16) {
+            HStack(alignment: .top, spacing: 16) {
                 Text(keys.joined(separator: " "))
                     .font(.system(size: 18, weight: .medium, design: .monospaced))
-                    .frame(minWidth: 50, alignment: .leading)
+                    .frame(minWidth: 56, alignment: .leading)
                 Text(description)
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
 
@@ -147,6 +162,7 @@ struct ContentStepView: View {
                 .font(.system(size: 14, design: .monospaced))
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }

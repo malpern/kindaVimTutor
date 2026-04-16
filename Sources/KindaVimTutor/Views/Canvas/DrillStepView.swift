@@ -82,7 +82,7 @@ struct DrillStepView: View {
                     }
                 }
             }
-            .frame(maxWidth: 520)
+            .frame(maxWidth: 640, alignment: .leading)
 
             Spacer()
 

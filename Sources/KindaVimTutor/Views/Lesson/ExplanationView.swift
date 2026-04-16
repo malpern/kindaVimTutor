@@ -18,49 +18,64 @@ struct ExplanationView: View {
             Text(text)
                 .font(Typography.body)
                 .lineSpacing(4)
+                .fixedSize(horizontal: false, vertical: true)
 
         case .heading(let text):
             Text(text)
                 .font(Typography.sectionHeading)
                 .tracking(Typography.titleTracking)
                 .padding(.top, 16)
+                .fixedSize(horizontal: false, vertical: true)
 
         case .tip(let text):
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "lightbulb")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 13))
+                    .frame(width: 18, alignment: .topLeading)
+                    .padding(.top, 2)
                 Text(text)
                     .font(Typography.bodySecondary)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .important(let text):
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
+            HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "exclamationmark.triangle")
                     .foregroundStyle(.secondary)
                     .font(.system(size: 13))
+                    .frame(width: 18, alignment: .topLeading)
+                    .padding(.top, 2)
                 Text(text)
                     .font(Typography.bodySecondary)
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .keyCommand(let keys, let description):
-            HStack(spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
                 Text(keys.joined(separator: " "))
                     .font(.system(size: 15, weight: .medium, design: .monospaced))
-                    .frame(minWidth: 50, alignment: .leading)
+                    .frame(minWidth: 56, alignment: .leading)
                 Text(description)
                     .font(Typography.body)
                     .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 3)
 
@@ -91,6 +106,7 @@ struct ExplanationView: View {
                 .font(Typography.code)
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }

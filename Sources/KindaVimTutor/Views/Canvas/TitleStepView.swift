@@ -5,9 +5,7 @@ struct TitleStepView: View {
     let chapterTitle: String
 
     @State private var showChapter = false
-    @State private var titleDone = false
     @State private var showSubtitle = false
-    @State private var showMotions = false
     @State private var showHint = false
 
     var body: some View {
@@ -28,41 +26,28 @@ struct TitleStepView: View {
                 foregroundStyle: .primary,
                 alignment: .center
             ) {
-                titleDone = true
                 withAnimation(.easeOut(duration: 0.4)) {
                     showSubtitle = true
-                }
-                withAnimation(.easeOut(duration: 0.4).delay(0.2)) {
-                    showMotions = true
-                }
-                withAnimation(.easeOut(duration: 0.4).delay(0.5)) {
-                    showHint = true
                 }
             }
             .tracking(-1.2)
             .multilineTextAlignment(.center)
             .frame(maxWidth: 600)
 
-            // Subtitle — fades in after title
+            // Subtitle — types in after title
             if showSubtitle {
-                Text(lesson.subtitle)
-                    .font(.system(size: 20, weight: .regular))
-                    .foregroundStyle(.secondary)
-                    .tracking(-0.3)
-                    .multilineTextAlignment(.center)
-                    .transition(.opacity)
-            }
-
-            // Motions — fade in after subtitle
-            if showMotions, !lesson.motionsIntroduced.isEmpty {
-                HStack(spacing: 12) {
-                    ForEach(lesson.motionsIntroduced, id: \.self) { motion in
-                        Text(motion)
-                            .font(.system(size: 22, weight: .medium, design: .monospaced))
-                            .foregroundStyle(.secondary)
+                TypewriterText(
+                    lesson.subtitle,
+                    font: .system(size: 20, weight: .regular),
+                    foregroundStyle: .secondary,
+                    alignment: .center
+                ) {
+                    withAnimation(.easeOut(duration: 0.35)) {
+                        showHint = true
                     }
                 }
-                .padding(.top, 12)
+                .tracking(-0.3)
+                .multilineTextAlignment(.center)
                 .transition(.opacity)
             }
 
@@ -70,11 +55,17 @@ struct TitleStepView: View {
 
             // Navigation hint
             if showHint {
-                Text("Press l to continue")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.quaternary)
-                    .padding(.bottom, 40)
-                    .transition(.opacity)
+                HStack(spacing: 10) {
+                    KeyCapView(label: "L", size: .regular)
+                        .scaleEffect(0.92)
+                        .shadow(color: .white.opacity(0.06), radius: 10, y: 1)
+                    Text("press to begin")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.secondary.opacity(0.82))
+                }
+                .opacity(0.92)
+                .padding(.bottom, 40)
+                .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -85,9 +76,7 @@ struct TitleStepView: View {
         }
         .onDisappear {
             showChapter = false
-            titleDone = false
             showSubtitle = false
-            showMotions = false
             showHint = false
         }
     }

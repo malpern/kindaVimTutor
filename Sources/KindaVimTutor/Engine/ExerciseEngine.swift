@@ -53,6 +53,11 @@ final class ExerciseEngine {
         // Start a new recording session
         currentSession = DrillSession(exerciseId: exercise.id, drillCount: exercise.drillCount)
 
+        AppLogger.shared.info("drill", "start", fields: [
+            "exercise": exercise.id,
+            "reps": String(exercise.drillCount)
+        ])
+
         startRep(exercise.variation(for: 0))
     }
 
@@ -174,10 +179,23 @@ final class ExerciseEngine {
         recordEvent(.repCompleted, text: finalText, cursorPosition: finalCursor)
         completedReps += 1
 
+        AppLogger.shared.info("drill", "repCompleted", fields: [
+            "exercise": exercise?.id ?? "",
+            "rep": String(completedReps),
+            "of": String(drillCount),
+            "keystrokes": String(keystrokeCount),
+            "time": String(format: "%.3f", repTime)
+        ])
+
         if completedReps >= drillCount {
             state = .drillCompleted
             recordEvent(.drillCompleted, text: finalText, cursorPosition: finalCursor)
             currentSession?.completedAt = Date()
+            AppLogger.shared.info("drill", "completed", fields: [
+                "exercise": exercise?.id ?? "",
+                "totalKeystrokes": String(totalKeystrokes),
+                "totalTime": String(format: "%.3f", totalTime)
+            ])
         } else {
             state = .repCompleted
             guard let exercise else { return }

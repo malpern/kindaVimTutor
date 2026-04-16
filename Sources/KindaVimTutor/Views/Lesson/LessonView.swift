@@ -48,7 +48,7 @@ struct LessonView: View {
             }
             .padding(.horizontal, 56)
             .padding(.top, 48)
-            .frame(maxWidth: 640, alignment: .leading)
+            .frame(maxWidth: 700, alignment: .leading)
             .frame(maxWidth: .infinity)
         }
         .scrollContentBackground(.hidden)

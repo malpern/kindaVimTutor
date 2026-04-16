@@ -7,11 +7,20 @@ struct TypewriterText: View {
     var alignment: TextAlignment
     var onComplete: (() -> Void)?
 
-    @State private var revealedCount: Int = 0
+    @State private var displayedText = ""
+    @State private var actions: [TypingAction] = []
+    @State private var actionIndex = 0
     @State private var isComplete = false
     @State private var cursorVisible = true
     @State private var timer: Timer?
     @State private var cursorTimer: Timer?
+    @State private var didFireCompletion = false
+
+    private enum TypingAction {
+        case type(Character)
+        case backspace
+        case pause(TimeInterval)
+    }
 
     init(_ text: String,
          font: Font = .body,
@@ -35,7 +44,7 @@ struct TypewriterText: View {
 
     var body: some View {
         HStack(alignment: .lastTextBaseline, spacing: 0) {
-            Text(revealedText)
+            Text(displayedText)
                 .font(font)
                 .foregroundStyle(foregroundStyle)
                 .multilineTextAlignment(alignment)
@@ -63,59 +72,192 @@ struct TypewriterText: View {
         }
     }
 
-    private var revealedText: String {
-        if isComplete { return text }
-        let index = text.index(text.startIndex, offsetBy: min(revealedCount, text.count))
-        return String(text[..<index])
-    }
-
     private func startTyping() {
-        revealedCount = 0
+        displayedText = ""
+        actions = buildTypingActions(for: text)
+        actionIndex = 0
         isComplete = false
+        didFireCompletion = false
         scheduleNextCharacter()
     }
 
     private func scheduleNextCharacter() {
-        guard revealedCount < text.count else {
-            isComplete = true
-            onComplete?()
+        guard actionIndex < actions.count else {
+            finishTyping()
             return
         }
 
-        let delay = typingDelay(for: revealedCount)
+        let nextAction = actions[actionIndex]
+        let delay = typingDelay(for: nextAction)
         timer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { _ in
             Task { @MainActor in
-                revealedCount += 1
+                apply(nextAction)
+                actionIndex += 1
                 scheduleNextCharacter()
             }
         }
     }
 
-    private func typingDelay(for index: Int) -> TimeInterval {
-        guard index < text.count else { return 0.03 }
+    private func apply(_ action: TypingAction) {
+        switch action {
+        case .type(let char):
+            displayedText.append(char)
 
-        let char = text[text.index(text.startIndex, offsetBy: index)]
+        case .backspace:
+            if !displayedText.isEmpty {
+                displayedText.removeLast()
+            }
 
-        // Base speed: fast enough to not annoy
-        var delay: TimeInterval = Double.random(in: 0.02...0.045)
+        case .pause:
+            break
+        }
+    }
 
-        // Punctuation pauses
-        if ".!?".contains(char) {
-            delay = Double.random(in: 0.12...0.2)
-        } else if ",;:".contains(char) {
-            delay = Double.random(in: 0.06...0.12)
-        } else if char == " " {
-            delay = Double.random(in: 0.03...0.06)
-        } else if char == "\n" {
-            delay = Double.random(in: 0.08...0.15)
+    private func finishTyping() {
+        displayedText = text
+        isComplete = true
+        guard !didFireCompletion else { return }
+        didFireCompletion = true
+        onComplete?()
+    }
+
+    private func typingDelay(for action: TypingAction) -> TimeInterval {
+        switch action {
+        case .pause(let duration):
+            return duration
+
+        case .backspace:
+            return Double.random(in: 0.035...0.07)
+
+        case .type(let char):
+            var delay: TimeInterval = Double.random(in: 0.04...0.09)
+
+            if ".!?".contains(char) {
+                delay = Double.random(in: 0.22...0.38)
+            } else if ",;:".contains(char) {
+                delay = Double.random(in: 0.12...0.22)
+            } else if char == " " {
+                delay = Double.random(in: 0.06...0.12)
+            } else if char == "\n" {
+                delay = Double.random(in: 0.14...0.24)
+            } else if char.isUppercase {
+                delay += Double.random(in: 0.02...0.05)
+            }
+
+            return delay
+        }
+    }
+
+    private func buildTypingActions(for text: String) -> [TypingAction] {
+        let characters = Array(text)
+        var builtActions: [TypingAction] = []
+
+        for (index, char) in characters.enumerated() {
+            builtActions.append(contentsOf: typoActionsIfNeeded(for: char, at: index, in: characters))
+            builtActions.append(.type(char))
         }
 
-        // Occasional stutter (3% chance) — brief pause mid-word
-        if Double.random(in: 0...1) < 0.03 {
-            delay += Double.random(in: 0.1...0.25)
+        return builtActions
+    }
+
+    private func typoActionsIfNeeded(
+        for char: Character,
+        at index: Int,
+        in characters: [Character]
+    ) -> [TypingAction] {
+        guard char.isLetter else { return [] }
+        guard Double.random(in: 0...1) < 0.075 else { return [] }
+
+        let previousCharacter = index > 0 ? characters[index - 1] : nil
+        let nextCharacter = index + 1 < characters.count ? characters[index + 1] : nil
+        let typoStyle = Int.random(in: 0...2)
+
+        switch typoStyle {
+        case 0:
+            return [
+                .type(neighboringTypo(for: char)),
+                .pause(Double.random(in: 0.08...0.18)),
+                .backspace,
+                .pause(Double.random(in: 0.04...0.09)),
+            ]
+
+        case 1:
+            return [
+                .type(char),
+                .pause(Double.random(in: 0.03...0.08)),
+                .type(char),
+                .pause(Double.random(in: 0.08...0.18)),
+                .backspace,
+                .pause(Double.random(in: 0.04...0.09)),
+            ]
+
+        default:
+            let wrongSequence = shortMistypedFragment(
+                intended: char,
+                previous: previousCharacter,
+                next: nextCharacter
+            )
+
+            var typoActions = wrongSequence.map(TypingAction.type)
+            typoActions.append(.pause(Double.random(in: 0.1...0.2)))
+            typoActions.append(contentsOf: Array(repeating: .backspace, count: wrongSequence.count))
+            typoActions.append(.pause(Double.random(in: 0.05...0.1)))
+            return typoActions
+        }
+    }
+
+    private func neighboringTypo(for char: Character) -> Character {
+        let lowercase = Character(String(char).lowercased())
+        let neighborMap: [Character: [Character]] = [
+            "a": ["s", "q", "z"],
+            "b": ["v", "n", "g"],
+            "c": ["x", "v", "d"],
+            "d": ["s", "f", "e"],
+            "e": ["w", "r", "d"],
+            "f": ["d", "g", "r"],
+            "g": ["f", "h", "t"],
+            "h": ["g", "j", "y"],
+            "i": ["u", "o", "k"],
+            "j": ["h", "k", "u"],
+            "k": ["j", "l", "i"],
+            "l": ["k", "o", "p"],
+            "m": ["n", "j", "k"],
+            "n": ["b", "m", "h"],
+            "o": ["i", "p", "l"],
+            "p": ["o", "l"],
+            "q": ["w", "a"],
+            "r": ["e", "t", "f"],
+            "s": ["a", "d", "w"],
+            "t": ["r", "y", "g"],
+            "u": ["y", "i", "j"],
+            "v": ["c", "b", "f"],
+            "w": ["q", "e", "s"],
+            "x": ["z", "c", "s"],
+            "y": ["t", "u", "h"],
+            "z": ["x", "a"]
+        ]
+
+        let replacement = neighborMap[lowercase]?.randomElement() ?? lowercase
+        let string = char.isUppercase ? String(replacement).uppercased() : String(replacement)
+        return Character(string)
+    }
+
+    private func shortMistypedFragment(
+        intended char: Character,
+        previous: Character?,
+        next: Character?
+    ) -> [Character] {
+        let first = neighboringTypo(for: char)
+
+        if let next, next.isLetter, Double.random(in: 0...1) < 0.45 {
+            return [first, neighboringTypo(for: next)]
         }
 
-        return delay
+        if let previous, previous.isLetter, Double.random(in: 0...1) < 0.35 {
+            return [previous, first]
+        }
+
+        return [first]
     }
 
     private func startCursorBlink() {
@@ -128,8 +270,6 @@ struct TypewriterText: View {
 
     private func skipToEnd() {
         timer?.invalidate()
-        revealedCount = text.count
-        isComplete = true
-        onComplete?()
+        finishTyping()
     }
 }
