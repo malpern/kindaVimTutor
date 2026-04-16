@@ -168,96 +168,22 @@ struct TypewriterText: View {
         guard char.isLetter else { return [] }
         guard Double.random(in: 0...1) < 0.075 else { return [] }
 
-        let previousCharacter = index > 0 ? characters[index - 1] : nil
-        let nextCharacter = index + 1 < characters.count ? characters[index + 1] : nil
-        let typoStyle = Int.random(in: 0...2)
+        // Hesitation only — no misspelled characters, just human pauses
+        let hesitationStyle = Int.random(in: 0...2)
 
-        switch typoStyle {
+        switch hesitationStyle {
         case 0:
-            return [
-                .type(neighboringTypo(for: char)),
-                .pause(Double.random(in: 0.08...0.18)),
-                .backspace,
-                .pause(Double.random(in: 0.04...0.09)),
-            ]
+            // Brief thinking pause
+            return [.pause(Double.random(in: 0.15...0.35))]
 
         case 1:
-            return [
-                .type(char),
-                .pause(Double.random(in: 0.03...0.08)),
-                .type(char),
-                .pause(Double.random(in: 0.08...0.18)),
-                .backspace,
-                .pause(Double.random(in: 0.04...0.09)),
-            ]
+            // Longer pause, like reconsidering phrasing
+            return [.pause(Double.random(in: 0.3...0.6))]
 
         default:
-            let wrongSequence = shortMistypedFragment(
-                intended: char,
-                previous: previousCharacter,
-                next: nextCharacter
-            )
-
-            var typoActions = wrongSequence.map(TypingAction.type)
-            typoActions.append(.pause(Double.random(in: 0.1...0.2)))
-            typoActions.append(contentsOf: Array(repeating: .backspace, count: wrongSequence.count))
-            typoActions.append(.pause(Double.random(in: 0.05...0.1)))
-            return typoActions
+            // Stutter — pause, then slightly faster typing resumes
+            return [.pause(Double.random(in: 0.1...0.2))]
         }
-    }
-
-    private func neighboringTypo(for char: Character) -> Character {
-        let lowercase = Character(String(char).lowercased())
-        let neighborMap: [Character: [Character]] = [
-            "a": ["s", "q", "z"],
-            "b": ["v", "n", "g"],
-            "c": ["x", "v", "d"],
-            "d": ["s", "f", "e"],
-            "e": ["w", "r", "d"],
-            "f": ["d", "g", "r"],
-            "g": ["f", "h", "t"],
-            "h": ["g", "j", "y"],
-            "i": ["u", "o", "k"],
-            "j": ["h", "k", "u"],
-            "k": ["j", "l", "i"],
-            "l": ["k", "o", "p"],
-            "m": ["n", "j", "k"],
-            "n": ["b", "m", "h"],
-            "o": ["i", "p", "l"],
-            "p": ["o", "l"],
-            "q": ["w", "a"],
-            "r": ["e", "t", "f"],
-            "s": ["a", "d", "w"],
-            "t": ["r", "y", "g"],
-            "u": ["y", "i", "j"],
-            "v": ["c", "b", "f"],
-            "w": ["q", "e", "s"],
-            "x": ["z", "c", "s"],
-            "y": ["t", "u", "h"],
-            "z": ["x", "a"]
-        ]
-
-        let replacement = neighborMap[lowercase]?.randomElement() ?? lowercase
-        let string = char.isUppercase ? String(replacement).uppercased() : String(replacement)
-        return Character(string)
-    }
-
-    private func shortMistypedFragment(
-        intended char: Character,
-        previous: Character?,
-        next: Character?
-    ) -> [Character] {
-        let first = neighboringTypo(for: char)
-
-        if let next, next.isLetter, Double.random(in: 0...1) < 0.45 {
-            return [first, neighboringTypo(for: next)]
-        }
-
-        if let previous, previous.isLetter, Double.random(in: 0...1) < 0.35 {
-            return [previous, first]
-        }
-
-        return [first]
     }
 
     private func startCursorBlink() {
