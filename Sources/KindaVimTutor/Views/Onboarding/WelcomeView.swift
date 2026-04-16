@@ -72,7 +72,7 @@ struct WelcomeView: View {
 
             if isRunning {
                 Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
+                    .foregroundStyle(.quaternary)
                 Text("kindaVim is running")
                     .font(.system(size: 13))
                     .foregroundStyle(.quaternary)
