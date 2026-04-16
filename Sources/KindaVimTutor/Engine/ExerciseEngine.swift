@@ -6,8 +6,8 @@ final class ExerciseEngine {
     enum State: Equatable {
         case idle
         case active
-        case repCompleted   // brief pause before next rep
-        case drillCompleted // all reps done
+        case repCompleted
+        case drillCompleted
     }
 
     private(set) var state: State = .idle
@@ -26,7 +26,11 @@ final class ExerciseEngine {
     // Current variation
     private(set) var currentVariation: Exercise.Variation?
 
+    // Session recording
+    private(set) var currentSession: DrillSession?
+
     private var startTime: Date?
+    private var drillStartTime: Date?
     private var timer: Timer?
 
     var isDrillComplete: Bool { state == .drillCompleted }
@@ -44,6 +48,11 @@ final class ExerciseEngine {
         completedReps = 0
         totalTime = 0
         totalKeystrokes = 0
+        drillStartTime = Date()
+
+        // Start a new recording session
+        currentSession = DrillSession(exerciseId: exercise.id, drillCount: exercise.drillCount)
+
         startRep(exercise.variation(for: 0))
     }
 
@@ -54,21 +63,23 @@ final class ExerciseEngine {
 
     func resetRep() {
         guard let exercise else { return }
+        recordEvent(.repReset, text: currentVariation?.initialText ?? "", cursorPosition: 0)
         startRep(exercise.variation(for: completedReps))
     }
 
     func textDidChange(currentText: String, cursorPosition: Int) {
         guard state == .active else { return }
         keystrokeCount += 1
+        recordEvent(.textChanged, text: currentText, cursorPosition: cursorPosition)
         validate(currentText: currentText, cursorPosition: cursorPosition)
     }
 
     func selectionDidChange(currentText: String, cursorPosition: Int) {
         guard state == .active, let variation = currentVariation else { return }
-        // For cursor-only exercises, count selection changes
         if variation.initialText == variation.expectedText {
             keystrokeCount += 1
         }
+        recordEvent(.cursorMoved, text: currentText, cursorPosition: cursorPosition)
         validate(currentText: currentText, cursorPosition: cursorPosition)
     }
 
@@ -80,6 +91,21 @@ final class ExerciseEngine {
         currentVariation = nil
     }
 
+    // MARK: - Recording
+
+    private func recordEvent(_ type: DrillSession.Event.EventType, text: String, cursorPosition: Int) {
+        guard let drillStartTime else { return }
+        let timestamp = Date().timeIntervalSince(drillStartTime)
+        let event = DrillSession.Event(
+            timestamp: timestamp,
+            type: type,
+            text: text,
+            cursorPosition: cursorPosition,
+            repIndex: completedReps
+        )
+        currentSession?.events.append(event)
+    }
+
     // MARK: - Private
 
     private func startRep(_ variation: Exercise.Variation) {
@@ -88,6 +114,20 @@ final class ExerciseEngine {
         keystrokeCount = 0
         elapsedTime = 0
         startTime = Date()
+
+        let repTimestamp = drillStartTime.map { Date().timeIntervalSince($0) } ?? 0
+
+        // Record rep start
+        currentSession?.reps.append(DrillSession.RepRecord(
+            repIndex: completedReps,
+            variationText: variation.initialText,
+            expectedText: variation.expectedText,
+            expectedCursorPosition: variation.expectedCursorPosition,
+            startTimestamp: repTimestamp,
+            keystrokeCount: 0,
+            completed: false
+        ))
+        recordEvent(.repStarted, text: variation.initialText, cursorPosition: variation.initialCursorPosition)
 
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
@@ -110,24 +150,36 @@ final class ExerciseEngine {
         }
 
         if textMatches && cursorMatches {
-            completeRep()
+            completeRep(finalText: currentText, finalCursor: cursorPosition)
         }
     }
 
-    private func completeRep() {
+    private func completeRep(finalText: String, finalCursor: Int) {
         timer?.invalidate()
         timer = nil
 
         let repTime = startTime.map { Date().timeIntervalSince($0) } ?? 0
         totalTime += repTime
         totalKeystrokes += keystrokeCount
+
+        // Update rep record
+        let repTimestamp = drillStartTime.map { Date().timeIntervalSince($0) } ?? 0
+        if var lastRep = currentSession?.reps.last {
+            lastRep.endTimestamp = repTimestamp
+            lastRep.keystrokeCount = keystrokeCount
+            lastRep.completed = true
+            currentSession?.reps[currentSession!.reps.count - 1] = lastRep
+        }
+
+        recordEvent(.repCompleted, text: finalText, cursorPosition: finalCursor)
         completedReps += 1
 
         if completedReps >= drillCount {
             state = .drillCompleted
+            recordEvent(.drillCompleted, text: finalText, cursorPosition: finalCursor)
+            currentSession?.completedAt = Date()
         } else {
             state = .repCompleted
-            // Auto-advance to next rep after brief pause
             guard let exercise else { return }
             let nextVariation = exercise.variation(for: completedReps)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in

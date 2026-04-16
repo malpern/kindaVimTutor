@@ -79,6 +79,21 @@ final class ProgressStore {
         Curriculum.chapters.flatMap(\.lessons).count
     }
 
+    func saveDrillSession(_ session: DrillSession) {
+        let sessionsDir = fileURL.deletingLastPathComponent().appendingPathComponent("sessions", isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: sessionsDir, withIntermediateDirectories: true)
+            let encoder = JSONEncoder()
+            encoder.dateEncodingStrategy = .iso8601
+            encoder.outputFormatting = .prettyPrinted
+            let data = try encoder.encode(session)
+            let filename = "\(session.exerciseId)_\(session.id.uuidString.prefix(8)).json"
+            try data.write(to: sessionsDir.appendingPathComponent(filename), options: .atomic)
+        } catch {
+            print("Failed to save drill session: \(error)")
+        }
+    }
+
     private func save() {
         do {
             let dir = fileURL.deletingLastPathComponent()

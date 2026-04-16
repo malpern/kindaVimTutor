@@ -112,6 +112,10 @@ struct ExerciseContainerView: View {
                     hintsUsed: 0
                 )
                 progressStore.recordCompletion(result)
+                // Save the full session recording for future LLM analysis
+                if let session = engine.currentSession {
+                    progressStore.saveDrillSession(session)
+                }
             }
         }
     }
