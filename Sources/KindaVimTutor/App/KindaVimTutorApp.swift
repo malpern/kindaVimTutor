@@ -20,6 +20,7 @@ struct KindaVimTutorApp: App {
                         lesson: lesson,
                         chapterTitle: chapter.title,
                         progressStore: appState.progressStore,
+                        inspectorState: appState.inspectorState,
                         nextLesson: appState.nextLesson,
                         onNextLesson: { appState.goToNextLesson() }
                     )
@@ -29,6 +30,12 @@ struct KindaVimTutorApp: App {
                     WelcomeView(onStartLearning: { appState.goToFirstLesson() })
                     .transition(.opacity.animation(.easeInOut(duration: 0.2)))
                 }
+            }
+            .inspector(isPresented: .init(
+                get: { appState.inspectorState.isVisible },
+                set: { if !$0 { appState.inspectorState.hide() } }
+            )) {
+                ExerciseInspectorView(state: appState.inspectorState)
             }
             .toolbar {
                 ToolbarItem(placement: .automatic) {

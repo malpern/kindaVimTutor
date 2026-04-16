@@ -10,7 +10,17 @@ enum Typography {
     static let code = Font.system(size: 14, weight: .regular, design: .monospaced)
     static let caption = Font.system(size: 12, weight: .regular)
 
-    @MainActor static let editorFont = NSFont.monospacedSystemFont(ofSize: 14, weight: .regular)
+    // Editor font — try iA Writer Mono, Menlo, then fall back to system mono
+    @MainActor static let editorFont: NSFont = {
+        // Try distinctive monospaced fonts in order of preference
+        let candidates = ["iA Writer Mono S", "Menlo", "SF Mono"]
+        for name in candidates {
+            if let font = NSFont(name: name, size: 15) {
+                return font
+            }
+        }
+        return NSFont.monospacedSystemFont(ofSize: 15, weight: .regular)
+    }()
 
     static let headingTracking: CGFloat = -0.5
     static let titleTracking: CGFloat = -0.3

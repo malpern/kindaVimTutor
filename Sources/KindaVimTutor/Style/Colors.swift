@@ -1,9 +1,9 @@
 import SwiftUI
 
 enum AppColors {
-    // Editor — a quiet recessed field, not a terminal
-    static let editorBackground = Color(light: .init(white: 0.965),
-                                        dark: .init(white: 0.15))
+    // Editor — clearly distinct from body text, recessed code field
+    static let editorBackground = Color(light: .init(white: 0.94),
+                                        dark: .init(white: 0.13))
 
     // Content callouts — background tint only, no borders
     static let tipBackground = Color(light: .init(red: 0.95, green: 0.96, blue: 1.0),

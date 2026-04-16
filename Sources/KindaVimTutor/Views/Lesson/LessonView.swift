@@ -4,6 +4,7 @@ struct LessonView: View {
     let lesson: Lesson
     let chapterTitle: String
     let progressStore: ProgressStore
+    let inspectorState: ExerciseInspectorState
     var nextLesson: Lesson?
     var onNextLesson: (() -> Void)?
 
@@ -34,7 +35,8 @@ struct LessonView: View {
                         ExerciseContainerView(
                             exercise: exercise,
                             exerciseNumber: index + 1,
-                            progressStore: progressStore
+                            progressStore: progressStore,
+                            inspectorState: inspectorState
                         )
                     }
                 }

@@ -6,6 +6,7 @@ final class AppState {
     var selectedLessonId: String?
     let modeMonitor = ModeMonitor()
     let progressStore = ProgressStore()
+    let inspectorState = ExerciseInspectorState()
 
     let chapters: [Chapter] = Curriculum.chapters
 
