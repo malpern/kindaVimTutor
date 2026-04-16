@@ -7,17 +7,16 @@ struct ExerciseContainerView: View {
     @State private var engine = ExerciseEngine()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Exercise header
-            HStack {
-                Label("Exercise \(exerciseNumber)", systemImage: "pencil.and.outline")
+        VStack(alignment: .leading, spacing: 14) {
+            // Header
+            HStack(alignment: .firstTextBaseline) {
+                Text("Exercise \(exerciseNumber)")
                     .font(.headline)
                 Spacer()
                 if engine.isCompleted {
-                    Label("Done", systemImage: "checkmark.circle.fill")
-                        .font(.callout)
-                        .fontWeight(.medium)
+                    Image(systemName: "checkmark.circle.fill")
                         .foregroundStyle(.green)
+                        .imageScale(.large)
                         .transition(.scale.combined(with: .opacity))
                 }
                 difficultyBadge
@@ -26,9 +25,9 @@ struct ExerciseContainerView: View {
             // Instruction
             Text(exercise.instruction)
                 .font(Typography.body)
-                .foregroundStyle(.primary)
+                .lineSpacing(2)
 
-            // Live editor
+            // Editor
             VStack(spacing: 0) {
                 ExerciseEditorView(
                     initialText: exercise.initialText,
@@ -43,7 +42,7 @@ struct ExerciseContainerView: View {
                 .frame(minHeight: editorHeight, maxHeight: editorHeight)
 
                 // Status bar
-                HStack(spacing: 16) {
+                HStack(spacing: 14) {
                     if case .completed(let time, let keystrokes) = engine.state {
                         Label(String(format: "%.1fs", time), systemImage: "clock")
                         Label("\(keystrokes) actions", systemImage: "keyboard")
@@ -63,43 +62,41 @@ struct ExerciseContainerView: View {
                     .foregroundStyle(.secondary)
                 }
                 .font(.caption)
+                .monospacedDigit()
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(.quaternary.opacity(0.3))
+                .padding(.vertical, 8)
+                .background(.primary.opacity(0.03))
             }
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .strokeBorder(editorBorderColor, lineWidth: 2)
-            )
-            .overlay(alignment: .leading) {
-                RoundedRectangle(cornerRadius: 2, style: .continuous)
-                    .fill(editorBorderColor)
-                    .frame(width: 3)
-                    .padding(.vertical, 1)
+            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(editorBorderColor, lineWidth: engine.isCompleted ? 2 : 1)
             }
 
             // Hints
             if !exercise.hints.isEmpty {
                 DisclosureGroup {
-                    VStack(alignment: .leading, spacing: 4) {
+                    VStack(alignment: .leading, spacing: 6) {
                         ForEach(exercise.hints, id: \.self) { hint in
                             Text(hint)
-                                .font(.callout)
+                                .font(Typography.bodySecondary)
                                 .foregroundStyle(.secondary)
                         }
                     }
+                    .padding(.top, 4)
                 } label: {
-                    Text("Hint")
-                        .font(.callout)
+                    Label("Hint", systemImage: "lightbulb")
+                        .font(Typography.bodySecondary)
                         .foregroundStyle(.secondary)
                 }
             }
         }
-        .padding(16)
-        .background(.background, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .shadow(color: .primary.opacity(0.06), radius: 8, x: 0, y: 2)
+        .padding(20)
+        .background {
+            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                .fill(.primary.opacity(0.03))
+        }
         .onAppear {
             engine.start(exercise)
         }
@@ -127,25 +124,24 @@ struct ExerciseContainerView: View {
 
     private var editorHeight: CGFloat {
         let lineCount = max(exercise.initialText.components(separatedBy: "\n").count, 1)
-        return CGFloat(lineCount) * 20 + 24
+        return CGFloat(lineCount) * 22 + 28
     }
 
     private var editorBorderColor: Color {
-        if engine.isCompleted {
-            return .green
-        }
-        return AppColors.exerciseBorder.opacity(0.3)
+        engine.isCompleted ? .green : .primary.opacity(0.12)
     }
 
     private var difficultyBadge: some View {
         Text(exercise.difficulty.rawValue.capitalized)
-            .font(.caption)
-            .fontWeight(.medium)
+            .font(.caption2)
+            .fontWeight(.semibold)
+            .textCase(.uppercase)
+            .tracking(0.5)
             .padding(.horizontal, 8)
-            .padding(.vertical, 3)
+            .padding(.vertical, 4)
             .background {
                 Capsule()
-                    .fill(difficultyColor.opacity(0.15))
+                    .fill(difficultyColor.opacity(0.12))
             }
             .foregroundStyle(difficultyColor)
     }

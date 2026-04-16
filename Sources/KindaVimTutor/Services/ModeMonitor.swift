@@ -66,9 +66,9 @@ final class ModeMonitor {
     func checkKindaVimRunning() {
         // Try common bundle identifiers for kindaVim
         let bundleIds = [
+            "mo.com.sleeplessmind.kindaVim",
             "app.kindavim.kindaVim",
             "com.godbout.kindaVim",
-            "kindaVim",
         ]
         isKindaVimRunning = bundleIds.contains { id in
             !NSRunningApplication.runningApplications(withBundleIdentifier: id).isEmpty

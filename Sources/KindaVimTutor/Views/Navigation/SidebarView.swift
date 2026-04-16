@@ -24,6 +24,7 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
+        .frame(minWidth: 220)
         .navigationTitle("kindaVim Tutor")
     }
 }

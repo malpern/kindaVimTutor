@@ -6,31 +6,45 @@ struct LessonView: View {
     let progressStore: ProgressStore
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+        ScrollView(.vertical, showsIndicators: true) {
+            VStack(alignment: .leading, spacing: 28) {
                 LessonHeaderView(lesson: lesson, chapterTitle: chapterTitle)
-
-                Divider()
 
                 ExplanationView(blocks: lesson.explanation)
 
                 if !lesson.exercises.isEmpty {
-                    Divider()
-                        .padding(.vertical, 4)
+                    exercisesSection
+                }
 
-                    Text("Exercises")
-                        .font(.title2)
-                        .fontWeight(.bold)
+                Spacer(minLength: 40)
+            }
+            .padding(.horizontal, 40)
+            .padding(.top, 32)
+            .padding(.bottom, 24)
+            .frame(maxWidth: 700, alignment: .leading)
+            .frame(maxWidth: .infinity)
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color(nsColor: .windowBackgroundColor))
+    }
 
-                    ForEach(Array(lesson.exercises.enumerated()), id: \.element.id) { index, exercise in
-                        ExerciseContainerView(exercise: exercise, exerciseNumber: index + 1, progressStore: progressStore)
-                    }
+    private var exercisesSection: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(spacing: 8) {
+                Text("Exercises")
+                    .font(Typography.sectionHeading)
+                Spacer()
+                if progressStore.isLessonCompleted(lesson) {
+                    Label("All complete", systemImage: "checkmark.circle.fill")
+                        .font(.callout)
+                        .foregroundStyle(.green)
                 }
             }
-            .padding(32)
-            .frame(maxWidth: 720, alignment: .leading)
+            .padding(.top, 8)
+
+            ForEach(Array(lesson.exercises.enumerated()), id: \.element.id) { index, exercise in
+                ExerciseContainerView(exercise: exercise, exerciseNumber: index + 1, progressStore: progressStore)
+            }
         }
-        .frame(maxWidth: .infinity)
-        .background(.background)
     }
 }

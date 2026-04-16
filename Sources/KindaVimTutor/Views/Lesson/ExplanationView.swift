@@ -4,7 +4,7 @@ struct ExplanationView: View {
     let blocks: [ContentBlock]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 16) {
             ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
                 contentBlockView(block)
             }
@@ -18,89 +18,95 @@ struct ExplanationView: View {
             Text(text)
                 .font(Typography.body)
                 .foregroundStyle(.primary)
+                .lineSpacing(3)
 
         case .heading(let text):
             Text(text)
-                .font(Typography.heading)
-                .padding(.top, 4)
+                .font(Typography.sectionHeading)
+                .padding(.top, 8)
 
         case .tip(let text):
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .top, spacing: 10) {
                 Image(systemName: "lightbulb.fill")
                     .foregroundStyle(.yellow)
-                    .font(.body)
+                    .font(.callout)
                 Text(text)
-                    .font(Typography.body)
+                    .font(Typography.bodySecondary)
+                    .lineSpacing(2)
             }
-            .padding(12)
+            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .important(let text):
-            HStack(alignment: .top, spacing: 8) {
+            HStack(alignment: .top, spacing: 10) {
                 Image(systemName: "exclamationmark.triangle.fill")
                     .foregroundStyle(.orange)
-                    .font(.body)
+                    .font(.callout)
                 Text(text)
-                    .font(Typography.body)
+                    .font(Typography.bodySecondary)
+                    .lineSpacing(2)
             }
-            .padding(12)
+            .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .keyCommand(let keys, let description):
-            HStack(spacing: 12) {
+            HStack(spacing: 14) {
                 HStack(spacing: 4) {
                     ForEach(keys, id: \.self) { key in
-                        KeyCapView(label: key)
+                        KeyCapView(label: key, size: .large)
                     }
                 }
-                .frame(minWidth: 60)
+                .frame(minWidth: 70, alignment: .leading)
                 Text(description)
                     .font(Typography.body)
                     .foregroundStyle(.secondary)
             }
-            .padding(.leading, 4)
+            .padding(.vertical, 2)
 
         case .codeExample(let before, let after, let motion):
-            VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 4) {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 6) {
                     Text("Using")
-                        .font(.caption)
+                        .font(Typography.caption)
                         .foregroundStyle(.secondary)
                     KeyCapView(label: motion)
                 }
-                HStack(spacing: 16) {
-                    VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 20) {
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("Before")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(Typography.caption)
+                            .foregroundStyle(.tertiary)
+                            .textCase(.uppercase)
                         Text(before)
                             .font(Typography.code)
-                            .padding(8)
+                            .padding(10)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                     Image(systemName: "arrow.right")
-                        .foregroundStyle(.tertiary)
-                    VStack(alignment: .leading, spacing: 4) {
+                        .foregroundStyle(.quaternary)
+                        .font(.title3)
+                    VStack(alignment: .leading, spacing: 6) {
                         Text("After")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                            .font(Typography.caption)
+                            .foregroundStyle(.tertiary)
+                            .textCase(.uppercase)
                         Text(after)
                             .font(Typography.code)
-                            .padding(8)
+                            .padding(10)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                            .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
                     }
                 }
             }
-            .padding(12)
-            .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .padding(14)
+            .background(AppColors.codeBackground.opacity(0.5), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .spacer:
             Spacer()
-                .frame(height: 4)
+                .frame(height: 6)
         }
     }
 }

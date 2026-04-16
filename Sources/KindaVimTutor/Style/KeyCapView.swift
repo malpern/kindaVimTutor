@@ -2,19 +2,45 @@ import SwiftUI
 
 struct KeyCapView: View {
     let label: String
+    var size: KeyCapSize = .regular
+
+    enum KeyCapSize {
+        case regular, large
+
+        var font: Font {
+            switch self {
+            case .regular: Typography.keyCap
+            case .large: Typography.keyCapLarge
+            }
+        }
+
+        var horizontalPadding: CGFloat {
+            switch self {
+            case .regular: 8
+            case .large: 10
+            }
+        }
+
+        var verticalPadding: CGFloat {
+            switch self {
+            case .regular: 4
+            case .large: 6
+            }
+        }
+    }
 
     var body: some View {
         Text(label)
-            .font(.system(.body, design: .monospaced, weight: .medium))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
+            .font(size.font)
+            .foregroundStyle(.primary)
+            .padding(.horizontal, size.horizontalPadding)
+            .padding(.vertical, size.verticalPadding)
             .background {
                 RoundedRectangle(cornerRadius: 6, style: .continuous)
-                    .fill(.background)
-                    .shadow(color: .primary.opacity(0.15), radius: 0, x: 0, y: 1)
+                    .fill(.primary.opacity(0.06))
                     .overlay {
                         RoundedRectangle(cornerRadius: 6, style: .continuous)
-                            .strokeBorder(.primary.opacity(0.2), lineWidth: 1)
+                            .strokeBorder(.primary.opacity(0.15), lineWidth: 1)
                     }
             }
     }

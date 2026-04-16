@@ -5,33 +5,29 @@ struct LessonHeaderView: View {
     let chapterTitle: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(chapterTitle.uppercased())
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .tracking(1)
+                .font(Typography.chapterLabel)
+                .foregroundStyle(.tint)
+                .tracking(1.5)
 
             Text(lesson.title)
-                .font(.largeTitle)
-                .fontWeight(.bold)
+                .font(Typography.lessonTitle)
 
             Text(lesson.subtitle)
-                .font(.title3)
+                .font(Typography.lessonSubtitle)
                 .foregroundStyle(.secondary)
 
             if !lesson.motionsIntroduced.isEmpty {
-                HStack(spacing: 6) {
-                    Text("Motions:")
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
+                HStack(spacing: 8) {
                     ForEach(lesson.motionsIntroduced, id: \.self) { motion in
-                        KeyCapView(label: motion)
+                        KeyCapView(label: motion, size: .large)
                     }
                 }
-                .padding(.top, 4)
+                .padding(.top, 8)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.bottom, 8)
+        .padding(.bottom, 12)
     }
 }
