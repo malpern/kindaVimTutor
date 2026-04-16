@@ -39,10 +39,16 @@ struct WelcomeView: View {
             Spacer()
 
             // Navigation hint + kindaVim status
-            VStack(spacing: 12) {
-                Text("Press l to begin")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.quaternary)
+            VStack(spacing: 16) {
+                HStack(spacing: 10) {
+                    KeyCapView(label: "L", size: .regular)
+                        .scaleEffect(0.92)
+                        .shadow(color: .white.opacity(0.06), radius: 10, y: 1)
+                    Text("press to begin")
+                        .font(.system(size: 12, weight: .regular))
+                        .foregroundStyle(.secondary.opacity(0.82))
+                }
+                .opacity(0.92)
 
                 kindaVimStatus
             }
