@@ -64,29 +64,18 @@ struct StepCanvasView: View {
     // MARK: - Key handling
 
     private func handleKeyPress(_ keyPress: KeyPress) -> KeyPress.Result {
-        let hasCmd = keyPress.modifiers.contains(.command)
+        let char = keyPress.characters.first
 
-        switch keyPress.key {
-        case .rightArrow where hasCmd:
-            if !controller.isLastStep {
-                controller.nextStep()
-            } else {
-                onNextLesson?()
-            }
-            return .handled
-
-        case .leftArrow where hasCmd:
-            controller.previousStep()
-            return .handled
-
-        case .rightArrow, .space:
+        // Vim navigation: l = forward, h = back, Space = forward
+        switch char {
+        case "l", " ":
             if canNavigateForward {
                 controller.nextStep()
                 return .handled
             }
             return .ignored
 
-        case .leftArrow:
+        case "h":
             if canNavigateBackward {
                 controller.previousStep()
                 return .handled
@@ -98,7 +87,7 @@ struct StepCanvasView: View {
         }
     }
 
-    /// Can navigate forward with unmodified arrow/space?
+    /// Can navigate forward? Not when editor is focused (keys go to kindaVim)
     private var canNavigateForward: Bool {
         if controller.isOnDrillStep && isEditorFocused {
             if case .drill(let exercise, _) = controller.currentStep {
@@ -109,7 +98,7 @@ struct StepCanvasView: View {
         return !controller.isLastStep
     }
 
-    /// Can navigate backward with unmodified arrow?
+    /// Can navigate backward? Not when editor is focused
     private var canNavigateBackward: Bool {
         if controller.isOnDrillStep && isEditorFocused {
             return false

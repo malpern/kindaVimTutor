@@ -47,7 +47,7 @@ struct TitleStepView: View {
 
             Spacer()
 
-            Text("Press → to continue")
+            Text("Press l to continue")
                 .font(.system(size: 13))
                 .foregroundStyle(.quaternary)
                 .padding(.bottom, 40)
