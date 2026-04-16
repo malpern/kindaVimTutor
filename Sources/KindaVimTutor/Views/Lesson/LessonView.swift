@@ -3,6 +3,7 @@ import SwiftUI
 struct LessonView: View {
     let lesson: Lesson
     let chapterTitle: String
+    let progressStore: ProgressStore
 
     var body: some View {
         ScrollView {
@@ -22,7 +23,7 @@ struct LessonView: View {
                         .fontWeight(.bold)
 
                     ForEach(Array(lesson.exercises.enumerated()), id: \.element.id) { index, exercise in
-                        ExerciseContainerView(exercise: exercise, exerciseNumber: index + 1)
+                        ExerciseContainerView(exercise: exercise, exerciseNumber: index + 1, progressStore: progressStore)
                     }
                 }
             }

@@ -3,6 +3,7 @@ import SwiftUI
 struct ExerciseContainerView: View {
     let exercise: Exercise
     let exerciseNumber: Int
+    let progressStore: ProgressStore
     @State private var engine = ExerciseEngine()
 
     var body: some View {
@@ -109,6 +110,19 @@ struct ExerciseContainerView: View {
             engine.start(exercise)
         }
         .animation(.spring(duration: 0.3), value: engine.isCompleted)
+        .onChange(of: engine.isCompleted) {
+            if case .completed(let time, let keystrokes) = engine.state {
+                let result = ExerciseResult(
+                    exerciseId: exercise.id,
+                    completedAt: Date(),
+                    timeSeconds: time,
+                    keystrokeCount: keystrokes,
+                    attempts: 1,
+                    hintsUsed: max(0, engine.currentHintIndex + 1)
+                )
+                progressStore.recordCompletion(result)
+            }
+        }
     }
 
     private var editorHeight: CGFloat {

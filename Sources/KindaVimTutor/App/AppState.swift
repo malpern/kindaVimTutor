@@ -5,6 +5,7 @@ import SwiftUI
 final class AppState {
     var selectedLessonId: String?
     let modeMonitor = ModeMonitor()
+    let progressStore = ProgressStore()
 
     let chapters: [Chapter] = Curriculum.chapters
 
