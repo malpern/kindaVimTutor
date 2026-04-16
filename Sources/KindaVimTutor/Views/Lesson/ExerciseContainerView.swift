@@ -11,16 +11,20 @@ struct ExerciseContainerView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Label
-            HStack {
-                if engine.isCompleted {
+            // Label with drill progress
+            HStack(spacing: 6) {
+                if engine.isDrillComplete {
                     Text("Exercise \(exerciseNumber) ") + Text(Image(systemName: "checkmark"))
                 } else {
                     Text("Exercise \(exerciseNumber)")
                 }
+                if engine.completedReps > 0, !engine.isDrillComplete {
+                    Text("— \(engine.completedReps)/\(engine.drillCount)")
+                        .foregroundStyle(.quaternary)
+                }
             }
             .font(.system(size: 12, weight: .semibold))
-            .foregroundStyle(engine.isCompleted ? .secondary : .tertiary)
+            .foregroundStyle(engine.isDrillComplete ? .secondary : .tertiary)
             .textCase(.uppercase)
             .tracking(0.8)
 
@@ -33,46 +37,49 @@ struct ExerciseContainerView: View {
 
             Spacer().frame(height: 12)
 
-            // Editor
-            ExerciseEditorView(
-                initialText: exercise.initialText,
-                initialCursorPosition: exercise.initialCursorPosition,
-                onTextChange: { text, cursor in
-                    engine.textDidChange(currentText: text, cursorPosition: cursor)
-                },
-                onSelectionChange: { text, cursor in
-                    engine.selectionDidChange(currentText: text, cursorPosition: cursor)
-                },
-                onFocusChange: { focused in
-                    withAnimation(.easeInOut(duration: 0.15)) {
-                        isEditorFocused = focused
-                    }
-                    if focused {
-                        inspectorState.show(
-                            exerciseNumber: exerciseNumber,
-                            exerciseId: exercise.id,
-                            hints: exercise.hints
-                        )
-                        inspectorState.onReset = { [self] in
-                            engine.reset()
+            // Editor — bound to current variation
+            if let variation = engine.currentVariation {
+                ExerciseEditorView(
+                    initialText: variation.initialText,
+                    initialCursorPosition: variation.initialCursorPosition,
+                    onTextChange: { text, cursor in
+                        engine.textDidChange(currentText: text, cursorPosition: cursor)
+                    },
+                    onSelectionChange: { text, cursor in
+                        engine.selectionDidChange(currentText: text, cursorPosition: cursor)
+                    },
+                    onFocusChange: { focused in
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            isEditorFocused = focused
                         }
-                        updateInspector()
-                    } else {
-                        inspectorState.hide()
+                        if focused {
+                            inspectorState.show(
+                                exerciseNumber: exerciseNumber,
+                                exerciseId: exercise.id,
+                                hints: exercise.hints
+                            )
+                            inspectorState.onResetRep = { engine.resetRep() }
+                            inspectorState.onResetDrill = { engine.resetDrill() }
+                            updateInspector()
+                        } else {
+                            inspectorState.hide()
+                        }
+                    }
+                )
+                .id(variation.initialText + "\(variation.initialCursorPosition)")
+                .frame(minHeight: editorHeight(for: variation), maxHeight: editorHeight(for: variation))
+                .background(AppColors.editorBackground, in: editorShape)
+                .clipShape(editorShape)
+                .overlay {
+                    editorShape
+                        .strokeBorder(editorBorderColor, lineWidth: editorBorderWidth)
+                }
+                .onHover { hovering in
+                    withAnimation(.easeInOut(duration: 0.12)) {
+                        isEditorHovered = hovering
                     }
                 }
-            )
-            .frame(minHeight: editorHeight, maxHeight: editorHeight)
-            .background(AppColors.editorBackground, in: editorShape)
-            .clipShape(editorShape)
-            .overlay {
-                editorShape
-                    .strokeBorder(editorBorderColor, lineWidth: editorBorderWidth)
-            }
-            .onHover { hovering in
-                withAnimation(.easeInOut(duration: 0.12)) {
-                    isEditorHovered = hovering
-                }
+                .animation(.easeInOut(duration: 0.15), value: variation.initialText)
             }
         }
         .onAppear {
@@ -90,16 +97,18 @@ struct ExerciseContainerView: View {
         .onChange(of: engine.keystrokeCount) {
             if isEditorFocused { updateInspector() }
         }
-        .animation(.easeInOut(duration: 0.2), value: engine.isCompleted)
-        .onChange(of: engine.isCompleted) {
+        .onChange(of: engine.completedReps) {
             if isEditorFocused { updateInspector() }
-            if case .completed(let time, let keystrokes) = engine.state {
+        }
+        .onChange(of: engine.isDrillComplete) {
+            if isEditorFocused { updateInspector() }
+            if engine.isDrillComplete {
                 let result = ExerciseResult(
                     exerciseId: exercise.id,
                     completedAt: Date(),
-                    timeSeconds: time,
-                    keystrokeCount: keystrokes,
-                    attempts: engine.attemptCount,
+                    timeSeconds: engine.totalTime,
+                    keystrokeCount: engine.totalKeystrokes,
+                    attempts: engine.drillCount,
                     hintsUsed: 0
                 )
                 progressStore.recordCompletion(result)
@@ -120,14 +129,17 @@ struct ExerciseContainerView: View {
         RoundedRectangle(cornerRadius: 8, style: .continuous)
     }
 
-    private var editorHeight: CGFloat {
-        let lineCount = max(exercise.initialText.components(separatedBy: "\n").count, 1)
+    private func editorHeight(for variation: Exercise.Variation) -> CGFloat {
+        let lineCount = max(variation.initialText.components(separatedBy: "\n").count, 1)
         return CGFloat(lineCount) * 20 + 32
     }
 
     private var editorBorderColor: Color {
-        if engine.isCompleted {
+        if engine.isDrillComplete {
             return .green.opacity(0.5)
+        }
+        if engine.isRepCompleted {
+            return .green.opacity(0.3)
         }
         if isEditorFocused {
             return Color.accentColor.opacity(0.6)
@@ -139,7 +151,7 @@ struct ExerciseContainerView: View {
     }
 
     private var editorBorderWidth: CGFloat {
-        if isEditorFocused || engine.isCompleted {
+        if isEditorFocused || engine.isDrillComplete || engine.isRepCompleted {
             return 2
         }
         return 1

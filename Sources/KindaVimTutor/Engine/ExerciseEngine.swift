@@ -6,80 +6,67 @@ final class ExerciseEngine {
     enum State: Equatable {
         case idle
         case active
-        case completed(timeSeconds: Double, keystrokeCount: Int)
+        case repCompleted   // brief pause before next rep
+        case drillCompleted // all reps done
     }
 
     private(set) var state: State = .idle
+    private(set) var exercise: Exercise?
+
+    // Current rep
     private(set) var keystrokeCount: Int = 0
     private(set) var elapsedTime: TimeInterval = 0
-    private(set) var currentHintIndex: Int = -1
-    private(set) var attemptCount: Int = 0
 
-    var exercise: Exercise?
+    // Drill progress
+    private(set) var completedReps: Int = 0
+    private(set) var drillCount: Int = 5
+    private(set) var totalTime: TimeInterval = 0
+    private(set) var totalKeystrokes: Int = 0
+
+    // Current variation
+    private(set) var currentVariation: Exercise.Variation?
+
     private var startTime: Date?
     private var timer: Timer?
 
-    var isCompleted: Bool {
-        if case .completed = state { return true }
-        return false
+    var isDrillComplete: Bool { state == .drillCompleted }
+    var isRepCompleted: Bool { state == .repCompleted }
+    var isActive: Bool { state == .active }
+
+    var drillProgress: Double {
+        guard drillCount > 0 else { return 0 }
+        return Double(completedReps) / Double(drillCount)
     }
 
     func start(_ exercise: Exercise) {
-        let isNewExercise = self.exercise?.id != exercise.id
         self.exercise = exercise
-        state = .active
-        keystrokeCount = 0
-        elapsedTime = 0
-        currentHintIndex = -1
-        startTime = Date()
-        if isNewExercise {
-            attemptCount = 1
-        }
-
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                guard let self, let startTime = self.startTime else { return }
-                self.elapsedTime = Date().timeIntervalSince(startTime)
-            }
-        }
+        self.drillCount = exercise.drillCount
+        completedReps = 0
+        totalTime = 0
+        totalKeystrokes = 0
+        startRep(exercise.variation(for: 0))
     }
 
-    func reset() {
-        guard exercise != nil else { return }
-        attemptCount += 1
-        state = .active
-        keystrokeCount = 0
-        elapsedTime = 0
-        currentHintIndex = -1
-        startTime = Date()
-
-        timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            Task { @MainActor in
-                guard let self, let startTime = self.startTime else { return }
-                self.elapsedTime = Date().timeIntervalSince(startTime)
-            }
-        }
-    }
-
-    func showNextHint() {
+    func resetDrill() {
         guard let exercise else { return }
-        if currentHintIndex < exercise.hints.count - 1 {
-            currentHintIndex += 1
-        }
+        start(exercise)
+    }
+
+    func resetRep() {
+        guard let exercise else { return }
+        startRep(exercise.variation(for: completedReps))
     }
 
     func textDidChange(currentText: String, cursorPosition: Int) {
-        guard case .active = state else { return }
+        guard state == .active else { return }
         keystrokeCount += 1
         validate(currentText: currentText, cursorPosition: cursorPosition)
     }
 
     func selectionDidChange(currentText: String, cursorPosition: Int) {
-        guard case .active = state, let exercise else { return }
-        // For cursor-only exercises (text doesn't change), count selection changes
-        if exercise.initialText == exercise.expectedText {
+        guard state == .active, let variation = currentVariation else { return }
+        // For cursor-only exercises, count selection changes
+        if variation.initialText == variation.expectedText {
             keystrokeCount += 1
         }
         validate(currentText: currentText, cursorPosition: cursorPosition)
@@ -90,24 +77,63 @@ final class ExerciseEngine {
         timer = nil
         state = .idle
         exercise = nil
+        currentVariation = nil
+    }
+
+    // MARK: - Private
+
+    private func startRep(_ variation: Exercise.Variation) {
+        currentVariation = variation
+        state = .active
+        keystrokeCount = 0
+        elapsedTime = 0
+        startTime = Date()
+
+        timer?.invalidate()
+        timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, let startTime = self.startTime, self.state == .active else { return }
+                self.elapsedTime = Date().timeIntervalSince(startTime)
+            }
+        }
     }
 
     private func validate(currentText: String, cursorPosition: Int) {
-        guard let exercise else { return }
+        guard let variation = currentVariation else { return }
 
-        let textMatches = currentText == exercise.expectedText
+        let textMatches = currentText == variation.expectedText
         let cursorMatches: Bool
-        if let expectedCursor = exercise.expectedCursorPosition {
+        if let expectedCursor = variation.expectedCursorPosition {
             cursorMatches = cursorPosition == expectedCursor
         } else {
             cursorMatches = true
         }
 
         if textMatches && cursorMatches {
-            timer?.invalidate()
-            timer = nil
-            let time = startTime.map { Date().timeIntervalSince($0) } ?? 0
-            state = .completed(timeSeconds: time, keystrokeCount: keystrokeCount)
+            completeRep()
+        }
+    }
+
+    private func completeRep() {
+        timer?.invalidate()
+        timer = nil
+
+        let repTime = startTime.map { Date().timeIntervalSince($0) } ?? 0
+        totalTime += repTime
+        totalKeystrokes += keystrokeCount
+        completedReps += 1
+
+        if completedReps >= drillCount {
+            state = .drillCompleted
+        } else {
+            state = .repCompleted
+            // Auto-advance to next rep after brief pause
+            guard let exercise else { return }
+            let nextVariation = exercise.variation(for: completedReps)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                guard let self, self.state == .repCompleted else { return }
+                self.startRep(nextVariation)
+            }
         }
     }
 }

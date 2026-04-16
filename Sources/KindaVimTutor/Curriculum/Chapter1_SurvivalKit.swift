@@ -38,23 +38,37 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l1.e1",
-                instruction: "Move the cursor down to the line that says \"here\" using j",
-                initialText: "Start on this line\n\n\nhere",
+                instruction: "Move the cursor down to the target line using j",
+                initialText: "Start here\n\n\ntarget",
                 initialCursorPosition: 0,
-                expectedText: "Start on this line\n\n\nhere",
-                expectedCursorPosition: 21,
-                hints: ["Press j three times to move down three lines"],
-                difficulty: .learn
+                expectedText: "Start here\n\n\ntarget",
+                expectedCursorPosition: 13,
+                hints: ["Press j to move down one line at a time"],
+                difficulty: .learn,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: "Begin\n\ntarget", initialCursorPosition: 0, expectedText: "Begin\n\ntarget", expectedCursorPosition: 7),
+                    .init(initialText: "Top\n\n\n\ntarget", initialCursorPosition: 0, expectedText: "Top\n\n\n\ntarget", expectedCursorPosition: 8),
+                    .init(initialText: "Here\n\ntarget\nbelow", initialCursorPosition: 0, expectedText: "Here\n\ntarget\nbelow", expectedCursorPosition: 6),
+                    .init(initialText: "Line one\nLine two\ntarget", initialCursorPosition: 0, expectedText: "Line one\nLine two\ntarget", expectedCursorPosition: 19),
+                ]
             ),
             Exercise(
                 id: "ch1.l1.e2",
                 instruction: "Move the cursor right to the X using l",
-                initialText: "Go to the X mark",
+                initialText: "Find the X here",
                 initialCursorPosition: 0,
-                expectedText: "Go to the X mark",
-                expectedCursorPosition: 10,
-                hints: ["Press l repeatedly to move right one character at a time"],
-                difficulty: .learn
+                expectedText: "Find the X here",
+                expectedCursorPosition: 9,
+                hints: ["Press l to move right one character at a time"],
+                difficulty: .learn,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: "Go to X now", initialCursorPosition: 0, expectedText: "Go to X now", expectedCursorPosition: 6),
+                    .init(initialText: "The X is here", initialCursorPosition: 0, expectedText: "The X is here", expectedCursorPosition: 4),
+                    .init(initialText: "Spot the X mark", initialCursorPosition: 0, expectedText: "Spot the X mark", expectedCursorPosition: 9),
+                    .init(initialText: "Here X", initialCursorPosition: 0, expectedText: "Here X", expectedCursorPosition: 5),
+                ]
             ),
             Exercise(
                 id: "ch1.l1.e3",
@@ -63,18 +77,32 @@ extension Curriculum {
                 initialCursorPosition: 23,
                 expectedText: "Get up here\nMiddle line\nYou start here",
                 expectedCursorPosition: 0,
-                hints: ["Press k twice to move up two lines"],
-                difficulty: .learn
+                hints: ["Press k to move up one line at a time"],
+                difficulty: .learn,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: "Target\nStart here", initialCursorPosition: 7, expectedText: "Target\nStart here", expectedCursorPosition: 0),
+                    .init(initialText: "Go here\n\nYou are here", initialCursorPosition: 9, expectedText: "Go here\n\nYou are here", expectedCursorPosition: 0),
+                    .init(initialText: "Top\nMiddle\nBottom", initialCursorPosition: 11, expectedText: "Top\nMiddle\nBottom", expectedCursorPosition: 0),
+                    .init(initialText: "Up\n\n\nDown here", initialCursorPosition: 5, expectedText: "Up\n\n\nDown here", expectedCursorPosition: 0),
+                ]
             ),
             Exercise(
                 id: "ch1.l1.e4",
-                instruction: "Navigate from the top-left to the word \"goal\" using j and l",
+                instruction: "Navigate to the word \"goal\" using j and l",
                 initialText: ". . . . .\n. . . . .\n. . goal .",
                 initialCursorPosition: 0,
                 expectedText: ". . . . .\n. . . . .\n. . goal .",
                 expectedCursorPosition: 24,
-                hints: ["Use j to go down two lines, then l to move right to \"goal\""],
-                difficulty: .practice
+                hints: ["Use j to go down, then l to move right to the target"],
+                difficulty: .practice,
+                drillCount: 5,
+                variations: [
+                    .init(initialText: ". . . . .\n. goal . .\n. . . . .", initialCursorPosition: 0, expectedText: ". . . . .\n. goal . .\n. . . . .", expectedCursorPosition: 12),
+                    .init(initialText: ". . goal .\n. . . . .\n. . . . .", initialCursorPosition: 20, expectedText: ". . goal .\n. . . . .\n. . . . .", expectedCursorPosition: 4),
+                    .init(initialText: ". . . . .\n. . . . .\n. . . goal", initialCursorPosition: 0, expectedText: ". . . . .\n. . . . .\n. . . goal", expectedCursorPosition: 26),
+                    .init(initialText: "goal . . .\n. . . . .\n. . . . .", initialCursorPosition: 22, expectedText: "goal . . .\n. . . . .\n. . . . .", expectedCursorPosition: 0),
+                ]
             ),
         ],
         motionsIntroduced: ["h", "j", "k", "l"]

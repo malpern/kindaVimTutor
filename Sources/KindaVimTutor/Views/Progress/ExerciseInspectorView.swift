@@ -12,59 +12,60 @@ struct ExerciseInspectorView: View {
                 .textCase(.uppercase)
                 .tracking(0.8)
 
-            // Ring
+            // Drill ring
             ZStack {
                 // Background ring
                 Circle()
-                    .stroke(.quaternary, lineWidth: 6)
+                    .stroke(.quaternary, lineWidth: 8)
 
-                // Progress ring — fills based on completion
-                if state.isCompleted {
-                    Circle()
-                        .trim(from: 0, to: 1)
-                        .stroke(.green, style: StrokeStyle(lineWidth: 6, lineCap: .round))
-                        .rotationEffect(.degrees(-90))
-                }
+                // Progress ring
+                Circle()
+                    .trim(from: 0, to: state.drillProgress)
+                    .stroke(
+                        state.isDrillComplete ? .green : .accentColor,
+                        style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .animation(.spring(duration: 0.4), value: state.drillProgress)
 
                 // Center content
                 VStack(spacing: 2) {
-                    if state.isCompleted {
+                    if state.isDrillComplete {
                         Image(systemName: "checkmark")
-                            .font(.system(size: 24, weight: .medium))
+                            .font(.system(size: 28, weight: .medium))
                             .foregroundStyle(.green)
                     } else {
-                        Text(String(format: "%.1f", state.elapsedTime))
-                            .font(.system(size: 28, weight: .light, design: .monospaced))
+                        Text("\(state.completedReps)")
+                            .font(.system(size: 32, weight: .light, design: .monospaced))
                             .foregroundStyle(.primary)
                             .contentTransition(.numericText())
-                        Text("seconds")
-                            .font(.system(size: 11))
+                        Text("of \(state.drillCount)")
+                            .font(.system(size: 12))
                             .foregroundStyle(.tertiary)
                     }
                 }
             }
-            .frame(width: 100, height: 100)
-            .animation(.easeInOut(duration: 0.3), value: state.isCompleted)
+            .frame(width: 110, height: 110)
 
             // Metrics
-            VStack(spacing: 16) {
+            VStack(spacing: 14) {
                 metricRow(
-                    label: "Time",
-                    value: state.isCompleted
-                        ? String(format: "%.1fs", state.completedTime)
-                        : String(format: "%.1fs", state.elapsedTime),
+                    label: "Total Time",
+                    value: String(format: "%.1fs", state.totalTime + state.elapsedTime),
                     best: state.bestTime.map { String(format: "%.1fs", $0) }
                 )
                 metricRow(
                     label: "Keystrokes",
-                    value: "\(state.isCompleted ? state.completedKeystrokes : state.keystrokeCount)",
+                    value: "\(state.totalKeystrokes + state.keystrokeCount)",
                     best: state.bestKeystrokes.map { "\($0)" }
                 )
-                metricRow(
-                    label: "Attempt",
-                    value: "\(state.attemptCount)",
-                    best: nil
-                )
+                if state.completedReps > 0 {
+                    metricRow(
+                        label: "Avg / Rep",
+                        value: String(format: "%.1fs", state.totalTime / Double(state.completedReps)),
+                        best: nil
+                    )
+                }
             }
 
             Spacer()
@@ -94,9 +95,9 @@ struct ExerciseInspectorView: View {
                 }
 
                 Button {
-                    state.onReset?()
+                    state.onResetDrill?()
                 } label: {
-                    Label("Reset", systemImage: "arrow.counterclockwise")
+                    Label("Restart Drill", systemImage: "arrow.counterclockwise")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderless)
@@ -117,7 +118,7 @@ struct ExerciseInspectorView: View {
                 .tracking(0.3)
             Text(value)
                 .font(.system(size: 18, weight: .light, design: .monospaced))
-                .foregroundStyle(state.isCompleted ? .primary : .secondary)
+                .foregroundStyle(state.isDrillComplete ? .primary : .secondary)
                 .contentTransition(.numericText())
             if let best {
                 Text("best \(best)")
