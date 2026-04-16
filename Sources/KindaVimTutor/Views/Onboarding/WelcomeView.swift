@@ -24,16 +24,6 @@ struct WelcomeView: View {
                     .opacity(animateIn ? 1 : 0)
                     .offset(y: animateIn ? 0 : 12)
 
-                HStack(spacing: 12) {
-                    ForEach(["h", "j", "k", "l"], id: \.self) { key in
-                        Text(key)
-                            .font(.system(size: 22, weight: .medium, design: .monospaced))
-                            .foregroundStyle(.secondary)
-                    }
-                }
-                .padding(.top, 8)
-                .opacity(animateIn ? 1 : 0)
-                .offset(y: animateIn ? 0 : 12)
             }
 
             Spacer()

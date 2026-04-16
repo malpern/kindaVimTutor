@@ -127,21 +127,21 @@ struct TypewriterText: View {
             return duration
 
         case .backspace:
-            return Double.random(in: 0.035...0.07)
+            return Double.random(in: 0.028...0.056)
 
         case .type(let char):
-            var delay: TimeInterval = Double.random(in: 0.04...0.09)
+            var delay: TimeInterval = Double.random(in: 0.032...0.072)
 
             if ".!?".contains(char) {
-                delay = Double.random(in: 0.22...0.38)
+                delay = Double.random(in: 0.176...0.304)
             } else if ",;:".contains(char) {
-                delay = Double.random(in: 0.12...0.22)
+                delay = Double.random(in: 0.096...0.176)
             } else if char == " " {
-                delay = Double.random(in: 0.06...0.12)
+                delay = Double.random(in: 0.048...0.096)
             } else if char == "\n" {
-                delay = Double.random(in: 0.14...0.24)
+                delay = Double.random(in: 0.112...0.192)
             } else if char.isUppercase {
-                delay += Double.random(in: 0.02...0.05)
+                delay += Double.random(in: 0.016...0.04)
             }
 
             return delay
