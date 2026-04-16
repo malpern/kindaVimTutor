@@ -1,6 +1,6 @@
 import Foundation
 
-struct Exercise: Identifiable, Sendable {
+struct Exercise: Identifiable, Equatable, Sendable {
     let id: String
     let instruction: String
     let initialText: String
