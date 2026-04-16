@@ -33,7 +33,6 @@ extension Curriculum {
             .keyCommand(keys: ["l"], description: "Move right"),
             .spacer,
             .tip("Think of j as having a little hook at the bottom pointing downward. That's how you remember j goes down."),
-            .important("Make sure kindaVim shows NORMAL mode before trying these. If you're in INSERT mode, press Esc first."),
         ],
         exercises: [
             Exercise(
