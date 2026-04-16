@@ -23,8 +23,11 @@ struct KindaVimTutorApp: App {
                         nextLesson: appState.nextLesson,
                         onNextLesson: { appState.goToNextLesson() }
                     )
+                    .id(lesson.id)
+                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
                 } else {
                     WelcomeView(onStartLearning: { appState.goToFirstLesson() })
+                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
                 }
             }
             .toolbar {

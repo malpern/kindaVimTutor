@@ -23,7 +23,8 @@ struct ExplanationView: View {
         case .heading(let text):
             Text(text)
                 .font(Typography.sectionHeading)
-                .padding(.top, 8)
+                .tracking(Typography.titleTracking)
+                .padding(.top, 12)
 
         case .tip(let text):
             HStack(alignment: .top, spacing: 10) {
@@ -37,6 +38,10 @@ struct ExplanationView: View {
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(AppColors.tipBorder, lineWidth: 1)
+            }
 
         case .important(let text):
             HStack(alignment: .top, spacing: 10) {
@@ -50,6 +55,10 @@ struct ExplanationView: View {
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                    .strokeBorder(AppColors.importantBorder, lineWidth: 1)
+            }
 
         case .keyCommand(let keys, let description):
             HStack(spacing: 14) {

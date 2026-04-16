@@ -7,6 +7,9 @@ struct SidebarView: View {
 
     var body: some View {
         List(selection: $selectedLessonId) {
+            // Progress summary at top
+            sidebarHeader
+
             ForEach(chapters) { chapter in
                 Section {
                     ForEach(chapter.lessons) { lesson in
@@ -24,7 +27,31 @@ struct SidebarView: View {
             }
         }
         .listStyle(.sidebar)
-        .frame(minWidth: 220)
+        .frame(minWidth: 230)
         .navigationTitle("kindaVim Tutor")
+    }
+
+    private var sidebarHeader: some View {
+        VStack(spacing: 8) {
+            HStack {
+                AchievementRingsView(
+                    lessonsProgress: Double(progressStore.completedLessonCount) / max(Double(progressStore.totalLessons), 1),
+                    exercisesProgress: Double(progressStore.completedExerciseCount) / max(Double(progressStore.totalExercises), 1),
+                    streakProgress: 0,
+                    compact: true
+                )
+
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("\(progressStore.completedExerciseCount)/\(progressStore.totalExercises) exercises")
+                        .font(.caption)
+                        .monospacedDigit()
+                    Text("\(progressStore.completedLessonCount)/\(progressStore.totalLessons) lessons")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+            .padding(.vertical, 4)
+        }
     }
 }

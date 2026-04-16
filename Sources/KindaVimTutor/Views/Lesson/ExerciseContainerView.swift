@@ -12,14 +12,25 @@ struct ExerciseContainerView: View {
             HStack(alignment: .firstTextBaseline) {
                 Text("Exercise \(exerciseNumber)")
                     .font(.headline)
+                    .tracking(-0.3)
                 Spacer()
                 if engine.isCompleted {
-                    Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                        .imageScale(.large)
-                        .transition(.scale.combined(with: .opacity))
+                    HStack(spacing: 6) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .imageScale(.large)
+                        Text("Complete")
+                            .font(.caption)
+                            .fontWeight(.semibold)
+                            .foregroundStyle(.green)
+                    }
+                    .transition(.asymmetric(
+                        insertion: .scale(scale: 0.5).combined(with: .opacity),
+                        removal: .opacity
+                    ))
+                } else {
+                    difficultyBadge
                 }
-                difficultyBadge
             }
 
             // Instruction
@@ -45,10 +56,12 @@ struct ExerciseContainerView: View {
                 HStack(spacing: 14) {
                     if case .completed(let time, let keystrokes) = engine.state {
                         Label(String(format: "%.1fs", time), systemImage: "clock")
-                        Label("\(keystrokes) actions", systemImage: "keyboard")
+                            .foregroundStyle(.green)
+                        Label("\(keystrokes)", systemImage: "keyboard")
+                            .foregroundStyle(.green)
                     } else if case .active = engine.state {
                         Label(String(format: "%.1fs", engine.elapsedTime), systemImage: "clock")
-                        Label("\(engine.keystrokeCount) actions", systemImage: "keyboard")
+                        Label("\(engine.keystrokeCount)", systemImage: "keyboard")
                     }
                     Spacer()
                     Button {
@@ -66,14 +79,14 @@ struct ExerciseContainerView: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
-                .background(.primary.opacity(0.03))
+                .background(AppColors.editorStatusBar)
             }
             .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
                     .strokeBorder(engine.isCompleted ? .green : .clear, lineWidth: 2)
             }
-            .shadow(color: .black.opacity(0.2), radius: 4, x: 0, y: 2)
+            .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
 
             // Hints
             if !exercise.hints.isEmpty {
@@ -96,7 +109,12 @@ struct ExerciseContainerView: View {
         .padding(20)
         .background {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(.primary.opacity(0.03))
+                .fill(AppColors.cardBackground)
+                .shadow(color: AppColors.cardBorder, radius: 0, x: 0, y: 0)
+                .overlay {
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .strokeBorder(AppColors.cardBorder, lineWidth: 1)
+                }
         }
         .onAppear {
             engine.start(exercise)

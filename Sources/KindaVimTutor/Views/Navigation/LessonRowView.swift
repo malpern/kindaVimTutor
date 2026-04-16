@@ -7,25 +7,46 @@ struct LessonRowView: View {
     var progress: Double = 0
 
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(chapterNumber).\(lesson.number) \(lesson.title)")
-                    .font(.body)
-                Text(lesson.subtitle)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+        HStack(spacing: 8) {
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 4) {
+                    Text("\(chapterNumber).\(lesson.number)")
+                        .font(.caption)
+                        .foregroundStyle(.tertiary)
+                        .monospacedDigit()
+                    Text(lesson.title)
+                        .font(.system(size: 13, weight: .medium))
+                        .tracking(-0.2)
+                        .lineLimit(1)
+                }
+
+                // Motion keycap badges
+                if !lesson.motionsIntroduced.isEmpty {
+                    HStack(spacing: 3) {
+                        ForEach(lesson.motionsIntroduced.prefix(5), id: \.self) { motion in
+                            KeyCapView(label: motion, size: .small)
+                        }
+                        if lesson.motionsIntroduced.count > 5 {
+                            Text("+\(lesson.motionsIntroduced.count - 5)")
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
             }
+
             Spacer()
+
             if isCompleted {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
-                    .font(.body)
+                    .font(.caption)
             } else if progress > 0 {
                 CircularProgressView(progress: progress)
-                    .frame(width: 16, height: 16)
+                    .frame(width: 14, height: 14)
             }
         }
-        .padding(.vertical, 2)
+        .padding(.vertical, 3)
     }
 }
 

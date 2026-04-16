@@ -27,9 +27,9 @@ struct ExerciseEditorView: NSViewRepresentable {
 
         // Typography
         textView.font = Typography.editorFont
-        textView.textColor = NSColor.white.withAlphaComponent(0.9)
-        textView.insertionPointColor = .white
-        textView.backgroundColor = NSColor(white: 0.12, alpha: 1.0)
+        textView.textColor = NSColor(white: 0.92, alpha: 1.0)
+        textView.insertionPointColor = NSColor(white: 0.92, alpha: 1.0)
+        textView.backgroundColor = NSColor(AppColors.editorBackground)
 
         // Layout
         textView.textContainerInset = NSSize(width: 12, height: 10)
