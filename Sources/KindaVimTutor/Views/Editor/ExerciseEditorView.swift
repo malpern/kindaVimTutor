@@ -25,14 +25,14 @@ struct ExerciseEditorView: NSViewRepresentable {
         textView.isAutomaticLinkDetectionEnabled = false
         textView.isGrammarCheckingEnabled = false
 
-        // Typography
+        // Typography — standard system text, not terminal-style
         textView.font = Typography.editorFont
-        textView.textColor = NSColor(white: 0.92, alpha: 1.0)
-        textView.insertionPointColor = NSColor(white: 0.92, alpha: 1.0)
+        textView.textColor = .labelColor
+        textView.insertionPointColor = .labelColor
         textView.backgroundColor = NSColor(AppColors.editorBackground)
 
-        // Layout
-        textView.textContainerInset = NSSize(width: 12, height: 10)
+        // Generous interior spacing
+        textView.textContainerInset = NSSize(width: 16, height: 14)
         textView.isVerticallyResizable = true
         textView.isHorizontallyResizable = false
         textView.textContainer?.widthTracksTextView = true
@@ -48,8 +48,6 @@ struct ExerciseEditorView: NSViewRepresentable {
 
         // Delegate
         textView.delegate = context.coordinator
-
-        // Store reference for updates
         context.coordinator.textView = textView
 
         scrollView.hasVerticalScroller = false
@@ -61,7 +59,6 @@ struct ExerciseEditorView: NSViewRepresentable {
     }
 
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
-        // Only reset text when exercise changes (tracked by coordinator)
         guard let textView = scrollView.documentView as? NSTextView else { return }
         if context.coordinator.currentInitialText != initialText {
             context.coordinator.currentInitialText = initialText

@@ -7,91 +7,69 @@ struct ExerciseContainerView: View {
     @State private var engine = ExerciseEngine()
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            // Header
-            HStack(alignment: .firstTextBaseline) {
-                Text("Exercise \(exerciseNumber)")
-                    .font(.headline)
-                    .tracking(-0.3)
-                Spacer()
+        VStack(alignment: .leading, spacing: 0) {
+            // Label
+            HStack {
                 if engine.isCompleted {
-                    HStack(spacing: 6) {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                            .imageScale(.large)
-                        Text("Complete")
-                            .font(.caption)
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.green)
-                    }
-                    .transition(.asymmetric(
-                        insertion: .scale(scale: 0.5).combined(with: .opacity),
-                        removal: .opacity
-                    ))
+                    Text("Exercise \(exerciseNumber) ") + Text(Image(systemName: "checkmark"))
                 } else {
-                    difficultyBadge
+                    Text("Exercise \(exerciseNumber)")
                 }
             }
+            .font(.system(size: 12, weight: .semibold))
+            .foregroundStyle(engine.isCompleted ? .secondary : .tertiary)
+            .textCase(.uppercase)
+            .tracking(0.8)
+
+            Spacer().frame(height: 12)
 
             // Instruction
             Text(exercise.instruction)
                 .font(Typography.body)
-                .lineSpacing(2)
+                .lineSpacing(4)
+
+            Spacer().frame(height: 12)
 
             // Editor
-            VStack(spacing: 0) {
-                ExerciseEditorView(
-                    initialText: exercise.initialText,
-                    initialCursorPosition: exercise.initialCursorPosition,
-                    onTextChange: { text, cursor in
-                        engine.textDidChange(currentText: text, cursorPosition: cursor)
-                    },
-                    onSelectionChange: { text, cursor in
-                        engine.selectionDidChange(currentText: text, cursorPosition: cursor)
-                    }
-                )
-                .frame(minHeight: editorHeight, maxHeight: editorHeight)
-
-                // Status bar
-                HStack(spacing: 14) {
-                    if case .completed(let time, let keystrokes) = engine.state {
-                        Label(String(format: "%.1fs", time), systemImage: "clock")
-                            .foregroundStyle(.green)
-                        Label("\(keystrokes)", systemImage: "keyboard")
-                            .foregroundStyle(.green)
-                    } else if case .active = engine.state {
-                        Label(String(format: "%.1fs", engine.elapsedTime), systemImage: "clock")
-                        Label("\(engine.keystrokeCount)", systemImage: "keyboard")
-                    }
-                    Spacer()
-                    Button {
-                        withAnimation(.spring(duration: 0.3)) {
-                            engine.reset()
-                        }
-                    } label: {
-                        Label("Reset", systemImage: "arrow.counterclockwise")
-                    }
-                    .buttonStyle(.borderless)
-                    .foregroundStyle(.secondary)
+            ExerciseEditorView(
+                initialText: exercise.initialText,
+                initialCursorPosition: exercise.initialCursorPosition,
+                onTextChange: { text, cursor in
+                    engine.textDidChange(currentText: text, cursorPosition: cursor)
+                },
+                onSelectionChange: { text, cursor in
+                    engine.selectionDidChange(currentText: text, cursorPosition: cursor)
                 }
-                .font(.caption)
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(AppColors.editorStatusBar)
+            )
+            .frame(minHeight: editorHeight, maxHeight: editorHeight)
+            .background(AppColors.editorBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+            // Completion stats + reset — only shown when relevant
+            HStack(spacing: 12) {
+                if case .completed(let time, let keystrokes) = engine.state {
+                    Text("\(String(format: "%.1f", time))s · \(keystrokes) keystrokes")
+                        .font(.system(size: 12, design: .monospaced))
+                        .foregroundStyle(.tertiary)
+                }
+                Spacer()
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        engine.reset()
+                    }
+                } label: {
+                    Text("Reset")
+                        .font(.system(size: 12))
+                }
+                .buttonStyle(.borderless)
+                .foregroundStyle(.tertiary)
             }
-            .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-            .overlay {
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(engine.isCompleted ? .green : .clear, lineWidth: 2)
-            }
-            .shadow(color: .black.opacity(0.15), radius: 6, x: 0, y: 3)
+            .padding(.top, 8)
 
             // Hints
             if !exercise.hints.isEmpty {
                 DisclosureGroup {
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 4) {
                         ForEach(exercise.hints, id: \.self) { hint in
                             Text(hint)
                                 .font(Typography.bodySecondary)
@@ -101,20 +79,11 @@ struct ExerciseContainerView: View {
                     .padding(.top, 4)
                 } label: {
                     Label("Hint", systemImage: "lightbulb")
-                        .font(Typography.bodySecondary)
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 13))
+                        .foregroundStyle(.tertiary)
                 }
+                .padding(.top, 8)
             }
-        }
-        .padding(20)
-        .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .fill(AppColors.cardBackground)
-                .shadow(color: AppColors.cardBorder, radius: 0, x: 0, y: 0)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 14, style: .continuous)
-                        .strokeBorder(AppColors.cardBorder, lineWidth: 1)
-                }
         }
         .onAppear {
             engine.start(exercise)
@@ -125,7 +94,7 @@ struct ExerciseContainerView: View {
         .onChange(of: exercise) {
             engine.start(exercise)
         }
-        .animation(.spring(duration: 0.3), value: engine.isCompleted)
+        .animation(.easeInOut(duration: 0.2), value: engine.isCompleted)
         .onChange(of: engine.isCompleted) {
             if case .completed(let time, let keystrokes) = engine.state {
                 let result = ExerciseResult(
@@ -143,29 +112,6 @@ struct ExerciseContainerView: View {
 
     private var editorHeight: CGFloat {
         let lineCount = max(exercise.initialText.components(separatedBy: "\n").count, 1)
-        return CGFloat(lineCount) * 22 + 28
-    }
-
-    private var difficultyBadge: some View {
-        Text(exercise.difficulty.rawValue.capitalized)
-            .font(.caption2)
-            .fontWeight(.semibold)
-            .textCase(.uppercase)
-            .tracking(0.5)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background {
-                Capsule()
-                    .fill(difficultyColor.opacity(0.12))
-            }
-            .foregroundStyle(difficultyColor)
-    }
-
-    private var difficultyColor: Color {
-        switch exercise.difficulty {
-        case .learn: .green
-        case .practice: .blue
-        case .master: .orange
-        }
+        return CGFloat(lineCount) * 20 + 32
     }
 }
