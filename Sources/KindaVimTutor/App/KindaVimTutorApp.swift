@@ -16,19 +16,16 @@ struct KindaVimTutorApp: App {
             } detail: {
                 if let lesson = appState.selectedLesson,
                    let chapter = appState.selectedChapter {
-                    LessonView(
+                    StepCanvasView(
                         lesson: lesson,
                         chapterTitle: chapter.title,
                         progressStore: appState.progressStore,
                         inspectorState: appState.inspectorState,
-                        nextLesson: appState.nextLesson,
                         onNextLesson: { appState.goToNextLesson() }
                     )
                     .id(lesson.id)
-                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
                 } else {
                     WelcomeView(onStartLearning: { appState.goToFirstLesson() })
-                    .transition(.opacity.animation(.easeInOut(duration: 0.2)))
                 }
             }
             .inspector(isPresented: .init(
@@ -67,13 +64,6 @@ struct KindaVimTutorApp: App {
         }
         .commands {
             CommandGroup(after: .toolbar) {
-                Button("Next Lesson") {
-                    appState.goToNextLesson()
-                }
-                .keyboardShortcut("]", modifiers: .command)
-
-                Divider()
-
                 Button("Show Progress") {
                     showStats.toggle()
                 }
