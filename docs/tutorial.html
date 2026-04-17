@@ -626,7 +626,7 @@
   }
   .settings-panel .mode-toggle button:hover { opacity: 0.9; }
 
-  /* Resources section — a curated further-reading list with video/article icons. */
+  /* Resources section — a plain bulleted list with video/article icons. */
   .resources {
     margin-top: 96px;
     padding-top: 48px;
@@ -637,15 +637,7 @@
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.02em;
-    margin: 0 0 8px;
-  }
-  .resources .resources-deck {
-    font-family: var(--serif);
-    font-size: 18px;
-    font-style: italic;
-    color: var(--fg-muted);
-    margin: 0 0 32px;
-    text-wrap: balance;
+    margin: 0 0 28px;
   }
   .resources-group { margin-bottom: 28px; }
   .resources-group h3 {
@@ -655,53 +647,36 @@
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: var(--fg-quiet);
-    margin: 0 0 16px;
+    margin: 0 0 10px;
     font-feature-settings: "smcp" 1, "c2sc" 1;
   }
   .resource-list { list-style: none; padding: 0; margin: 0; }
   .resource {
-    display: grid;
-    grid-template-columns: 24px 1fr;
-    gap: 14px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--rule);
-    align-items: start;
-  }
-  .resource:last-child { border-bottom: none; }
-  .resource-icon {
-    padding-top: 4px;
-    color: var(--accent);
-    opacity: 0.75;
-  }
-  .resource-icon svg { display: block; width: 18px; height: 18px; }
-  .resource-title {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 6px 0;
     font-family: var(--serif);
     font-size: 17px;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    line-height: 1.35;
   }
-  .resource-title a {
+  .resource-icon {
+    color: var(--accent);
+    opacity: 0.75;
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(2px);
+  }
+  .resource-icon svg { display: block; width: 14px; height: 14px; }
+  .resource a {
     color: var(--fg);
     border-bottom: none;
     text-decoration: none;
   }
-  .resource-title a:hover { color: var(--accent); }
-  .resource-meta {
-    font-family: var(--sans);
-    font-size: 12px;
-    color: var(--fg-muted);
-    margin-top: 3px;
-    font-feature-settings: "onum";
-  }
-  .resource-blurb {
-    font-family: var(--serif);
-    font-size: 15px;
-    color: var(--fg-soft);
-    line-height: 1.5;
-    margin-top: 6px;
-    max-width: 62ch;
-  }
+  .resource a:hover { color: var(--accent); }
 
   .chapter-number {
     font-family: var(--sans);
@@ -1555,7 +1530,12 @@ struct KindaVimTutorApp: App {
         .sot-truth { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.5; }
         .sot-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 600; fill: #1a1a1a; }
         .sot-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; }
-        .sot-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; font-style: italic; }
+        .sot-legend { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; fill: #5d5343; }
+        .sot-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; font-weight: 500; fill: #5d5343; font-style: italic; }
+        @media (prefers-color-scheme: dark) {
+          .sot-edge { fill: #d6cfc1; }
+          .sot-legend { fill: #c9c5bd; }
+        }
         .sot-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
       </style>
 
@@ -1590,9 +1570,9 @@ struct KindaVimTutorApp: App {
 
       <!-- legend -->
       <line x1="40" y1="250" x2="70" y2="250" class="sot-line"/>
-      <text class="sot-sub" x="78" y="254">solid: write / binding</text>
+      <text class="sot-legend" x="78" y="254">solid: write / binding</text>
       <line x1="240" y1="250" x2="270" y2="250" class="sot-line" stroke-dasharray="4 3"/>
-      <text class="sot-sub" x="278" y="254">dashed: read / observation</text>
+      <text class="sot-legend" x="278" y="254">dashed: read / observation</text>
     </svg>
   </figure>
 
@@ -1898,7 +1878,8 @@ final class LessonStepController {
         .fsm-active { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.4; }
         .fsm-terminal { fill: #e7ddc3; stroke: #a14a2a; stroke-width: 1.3; }
         .fsm-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 600; fill: #1a1a1a; }
-        .fsm-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; font-style: italic; }
+        .fsm-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; font-weight: 500; fill: #5d5343; font-style: italic; }
+        @media (prefers-color-scheme: dark) { .fsm-edge { fill: #d6cfc1; } }
         .fsm-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
       </style>
 
@@ -2331,7 +2312,12 @@ public final class ProgressStore {
         .dg-observe { fill: #f5eeda; stroke: #a14a2a; stroke-width: 1.3; }
         .dg-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 12px; font-weight: 600; fill: #1a1a1a; }
         .dg-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; }
-        .dg-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; font-style: italic; }
+        .dg-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; font-weight: 500; fill: #5d5343; font-style: italic; }
+        .dg-observes { fill: #a14a2a; font-weight: 600; }
+        @media (prefers-color-scheme: dark) {
+          .dg-edge { fill: #d6cfc1; }
+          .dg-observes { fill: #e88c5e; }
+        }
         .dg-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
         .dg-dash { stroke: #a14a2a; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
       </style>
@@ -2366,7 +2352,7 @@ public final class ProgressStore {
       <text class="dg-edge" x="435" y="71" text-anchor="middle">onChange</text>
 
       <line x1="570" y1="80" x2="600" y2="80" class="dg-dash" marker-end="url(#arrDash)"/>
-      <text class="dg-edge" x="585" y="71" text-anchor="middle" fill="#a14a2a">observes</text>
+      <text class="dg-edge dg-observes" x="585" y="71" text-anchor="middle">observes</text>
 
       <!-- Side effect: disk -->
       <line x1="510" y1="110" x2="510" y2="150" class="dg-line" marker-end="url(#arr)"/>
@@ -2415,112 +2401,51 @@ $ swift run
 
 <section class="resources" aria-label="Further reading and watching">
   <h2>Further reading &amp; watching</h2>
-  <p class="resources-deck">A small, curated list. Each item earns its spot by actually clarifying something this tutorial gestures at.</p>
 
   <div class="resources-group">
-    <h3>The big ideas, from Apple</h3>
+    <h3>From Apple</h3>
     <ul class="resource-list">
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://developer.apple.com/tutorials/swiftui">Introducing SwiftUI — the Landmarks tutorial</a></div>
-          <div class="resource-meta">Apple Developer · interactive tutorial</div>
-          <p class="resource-blurb">The canonical "build a small app one feature at a time" walkthrough. This tutorial's format is modeled on it. If you finish here and want more of the same flavor, this is next.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>
+        <a href="https://developer.apple.com/tutorials/swiftui">Introducing SwiftUI — the Landmarks tutorial</a>
       </li>
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://developer.apple.com/videos/play/wwdc2023/10149/">Discover Observation in SwiftUI</a></div>
-          <div class="resource-meta">WWDC 2023 · 23 minutes</div>
-          <p class="resource-blurb">What the <code>@Observable</code> macro actually does, why it replaces <code>ObservableObject</code>, and the performance wins you get for free. Twelve minutes in is the crucial explanation of property-level tracking.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg></span>
+        <a href="https://developer.apple.com/videos/play/wwdc2023/10149/">Discover Observation in SwiftUI (WWDC23)</a>
       </li>
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://developer.apple.com/videos/play/wwdc2021/10022/">Demystify SwiftUI</a></div>
-          <div class="resource-meta">WWDC 2021 · 37 minutes</div>
-          <p class="resource-blurb">Identity, lifetime, and dependencies — the three concepts that explain why SwiftUI redraws what it does when it does. Older, still the clearest explanation of the underlying model.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg></span>
+        <a href="https://developer.apple.com/videos/play/wwdc2021/10022/">Demystify SwiftUI (WWDC21)</a>
       </li>
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://developer.apple.com/documentation/observation">Observation framework reference</a></div>
-          <div class="resource-meta">Apple Developer · documentation</div>
-          <p class="resource-blurb">The formal reference for <code>@Observable</code>, <code>withObservationTracking</code>, and the rest of the framework. Skim it once; come back to it when a view isn't re-rendering and you want to know why.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg></span>
+        <a href="https://developer.apple.com/videos/play/wwdc2022/10054/">The SwiftUI cookbook for navigation (WWDC22)</a>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>
+        <a href="https://developer.apple.com/documentation/observation">Observation framework reference</a>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>
+        <a href="https://developer.apple.com/documentation/swiftui/nsviewrepresentable">NSViewRepresentable reference</a>
       </li>
     </ul>
   </div>
 
   <div class="resources-group">
-    <h3>Explanations that stuck with me</h3>
+    <h3>Practitioners</h3>
     <ul class="resource-list">
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://www.hackingwithswift.com/quick-start/swiftui/how-to-use-observable-to-make-a-class-observable">How to use @Observable to make a class observable</a></div>
-          <div class="resource-meta">Hacking with Swift · Paul Hudson</div>
-          <p class="resource-blurb">A short, warm, example-driven intro to <code>@Observable</code> — and by extension, to the whole Hacking with Swift archive, which is the single best practitioner-focused Swift resource on the web.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>
+        <a href="https://www.hackingwithswift.com/quick-start/swiftui/how-to-use-observable-to-make-a-class-observable">How to use @Observable — Hacking with Swift</a>
       </li>
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://www.swiftbysundell.com/articles/picking-the-right-data-type-for-a-given-swift-value/">Picking the right data type for a given Swift value</a></div>
-          <div class="resource-meta">Swift by Sundell · John Sundell</div>
-          <p class="resource-blurb">Good companion to Chapter 2. When should something be a struct vs. an enum vs. a class? Sundell's framework is the one I actually use.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>
+        <a href="https://www.swiftbysundell.com/articles/picking-the-right-data-type-for-a-given-swift-value/">Picking the right data type — Swift by Sundell</a>
       </li>
       <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://developer.apple.com/documentation/swiftui/nsviewrepresentable">NSViewRepresentable reference</a></div>
-          <div class="resource-meta">Apple Developer · documentation</div>
-          <p class="resource-blurb">The formal reference for Chapter 8's AppKit bridge. Particularly the Coordinator pattern section — terse but complete.</p>
-        </div>
-      </li>
-    </ul>
-  </div>
-
-  <div class="resources-group">
-    <h3>When you need to go deeper</h3>
-    <ul class="resource-list">
-      <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/">The Swift Programming Language: Concurrency</a></div>
-          <div class="resource-meta">Swift.org · book chapter</div>
-          <p class="resource-blurb">When you want to understand <code>@MainActor</code> and <code>Sendable</code> as a system rather than as annotations you sprinkle on things.</p>
-        </div>
-      </li>
-      <li class="resource">
-        <span class="resource-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
-        </span>
-        <div>
-          <div class="resource-title"><a href="https://developer.apple.com/videos/play/wwdc2022/10054/">The SwiftUI cookbook for navigation</a></div>
-          <div class="resource-meta">WWDC 2022 · 32 minutes</div>
-          <p class="resource-blurb">Everything about <code>NavigationSplitView</code>, <code>NavigationStack</code>, and programmatic navigation paths. Chapter 5's simple use is the tip of the iceberg.</p>
-        </div>
+        <span class="resource-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg></span>
+        <a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/">The Swift Programming Language — Concurrency</a>
       </li>
     </ul>
   </div>
