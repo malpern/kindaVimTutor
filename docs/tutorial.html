@@ -182,9 +182,17 @@
     font-size: clamp(48px, 7vw, 80px);
     font-weight: 700;
     letter-spacing: -0.035em;
-    line-height: 1;
+    line-height: 1.05;
     margin: 0 0 24px;
-    text-wrap: balance;
+    /* Override the global `text-wrap: balance` — balance re-flows the
+       whole title after each typed character, which shows up as a
+       flash of "full line, then disappear, then continue" during the
+       typewriter animation. Plain wrap locks the break point once it
+       happens. */
+    text-wrap: wrap;
+    /* Reserve space for a two-line title up front, so the vertical
+       layout doesn't jump when wrapping kicks in mid-typing. */
+    min-height: 2.1em;
   }
   h1.title .title-cursor {
     color: #30d158; /* SwiftUI .green */
