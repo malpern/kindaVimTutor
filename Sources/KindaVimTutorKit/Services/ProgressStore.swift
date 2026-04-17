@@ -12,8 +12,14 @@ public final class ProgressStore {
     private let fileURL: URL
 
     public init() {
-        let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
-        let appDir = appSupport.appendingPathComponent("kindaVimTutor", isDirectory: true)
+        let appDir: URL
+        if let override = ProcessInfo.processInfo.environment["KINDAVIM_PROGRESS_DIR"],
+           !override.isEmpty {
+            appDir = URL(fileURLWithPath: override, isDirectory: true)
+        } else {
+            let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            appDir = appSupport.appendingPathComponent("kindaVimTutor", isDirectory: true)
+        }
         self.fileURL = appDir.appendingPathComponent("progress.json")
 
         if let data = try? Data(contentsOf: fileURL),

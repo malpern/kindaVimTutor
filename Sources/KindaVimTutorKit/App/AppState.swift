@@ -40,6 +40,9 @@ public final class AppState {
         if let spec = Self.initialStateSpec() {
             applyInitialState(spec)
         }
+        if let seeds = Self.launchArg("--seed-progress") {
+            applySeedProgress(seeds)
+        }
     }
 
     public func goToNextLesson() {
@@ -62,11 +65,33 @@ public final class AppState {
     /// falling back to the `KINDAVIM_INITIAL_STATE` env var. Used by the
     /// screenshot capture script to bring the app up in a known state.
     private static func initialStateSpec() -> String? {
+        launchArg("--initial-state") ?? ProcessInfo.processInfo.environment["KINDAVIM_INITIAL_STATE"]
+    }
+
+    /// Generic helper: read `--flag VALUE` from launch args.
+    private static func launchArg(_ name: String) -> String? {
         let args = ProcessInfo.processInfo.arguments
-        if let i = args.firstIndex(of: "--initial-state"), i + 1 < args.count {
+        if let i = args.firstIndex(of: name), i + 1 < args.count {
             return args[i + 1]
         }
-        return ProcessInfo.processInfo.environment["KINDAVIM_INITIAL_STATE"]
+        return nil
+    }
+
+    /// Seed the progress store with fake completions. Spec is a comma-
+    /// separated list of exercise IDs (e.g. `ch1.l1.e1,ch1.l1.e2`).
+    /// Only used by the screenshot harness to capture "completed" states.
+    private func applySeedProgress(_ spec: String) {
+        let ids = spec.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        for id in ids where !id.isEmpty {
+            progressStore.recordCompletion(ExerciseResult(
+                exerciseId: id,
+                completedAt: Date(),
+                timeSeconds: 2.4,
+                keystrokeCount: 5,
+                attempts: 5,
+                hintsUsed: 0
+            ))
+        }
     }
 
     /// Parses specs like `welcome`, `lesson:ch1.l1`, `lesson:ch1.l1:3`.

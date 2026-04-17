@@ -1642,6 +1642,11 @@
 }</code></pre>
   <p class="code-caption">Sources/KindaVimTutorKit/Views/Lesson/LessonHeaderView.swift</p>
 
+  <figure class="screenshot">
+    <img src="screenshots/08-header-detail.png" alt="A close-up of the header: blue eyebrow reading SURVIVAL KIT, large bold lesson title 'Moving the Cursor', grey subtitle 'Navigate with h, j, k, l'.">
+    <figcaption>The four lines of the header rendered.</figcaption>
+  </figure>
+
   <p>A vertical stack with four lines. Chapter label, lesson title, subtitle, and a monospaced row of any new motions the lesson introduces.</p>
 
   <aside class="concept">
@@ -1774,6 +1779,11 @@
     }
 }</code></pre>
   <p class="code-caption">Sources/KindaVimTutorKit/Views/Navigation/SidebarView.swift</p>
+
+  <figure class="screenshot">
+    <img src="screenshots/06-sidebar-detail.png" alt="A close-up of just the sidebar: chapter 'Survival Kit' expanded, showing seven lesson rows with 'Moving the Cursor' selected and highlighted.">
+    <figcaption>The rendered sidebar, expanded. Chapter header plus tagged lesson rows feeding <code>List(selection:)</code>.</figcaption>
+  </figure>
 
   <aside class="concept">
     <span class="label">@State vs. @Binding</span>
@@ -2261,6 +2271,11 @@ final class LessonStepController {
 
   <p>A thoughtful touch inside <code>handleKey</code>: when the user is focused inside the drill editor, <code>l</code> and <code>h</code> are motions they're trying to perform, not nav commands. The canvas only consumes those keys when the editor <em>isn't</em> focused. Details like this are the difference between a tutor that feels right and one you fight.</p>
 
+  <figure class="screenshot" style="max-width: 240px; margin-left: auto; margin-right: auto;">
+    <img src="screenshots/10-step-indicator.png" alt="Six small dots in a row, one highlighted, rendered at the bottom of the detail pane.">
+    <figcaption>The step indicator at the bottom — one dot per step, the active one slightly larger and darker.</figcaption>
+  </figure>
+
   <div class="checkpoint">
     <p class="checkpoint-label">Where we are</p>
     <p>A working lesson flow. Pick a lesson, press <code>l</code> to advance, press <code>h</code> to go back. Title, content, and (stub) drill slides in sequence. The drill itself doesn't do anything yet — but the scaffolding's ready.</p>
@@ -2539,6 +2554,11 @@ final class ExerciseEngine {
   <img class="bull" src="bulls/bull-08-texture.png" alt="An expressive bull, rendered in fine detail.">
   <p class="chapter-number">Chapter eight</p>
   <h2>A real editor</h2>
+
+  <figure class="screenshot">
+    <img src="screenshots/07-editor-detail.png" alt="A close-up of a drill: label EXERCISE 2, instruction 'Move up to the * using k, then delete it with x', and an editor below showing '* &lt;— move here with k, delete with x'.">
+    <figcaption>The real <code>NSTextView</code> in its unfocused state. The rounded rect is a SwiftUI overlay; everything inside is AppKit.</figcaption>
+  </figure>
 
   <div class="goal">
     <span class="goal-label">You'll build</span>
@@ -2825,6 +2845,11 @@ $ swift run
 # Press l through the slides. Hit the drill.
 # Type. The rep completes. The drill completes.
 # Close the app. Open it again. The checkmark is still there.</code></pre>
+
+  <figure class="screenshot" style="max-width: 260px; margin-left: auto; margin-right: auto;">
+    <img src="screenshots/09-sidebar-completed-crop.png" alt="The sidebar on second launch: 'Moving the Cursor' now has a checkmark to the right of its label.">
+    <figcaption>The sidebar after restart. The checkmark is the observable store telling the row's <code>body</code> that the lesson is done.</figcaption>
+  </figure>
 
   <div class="checkpoint">
     <p class="checkpoint-label">Where we are</p>
