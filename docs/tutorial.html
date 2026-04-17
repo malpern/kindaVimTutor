@@ -417,8 +417,8 @@
 
   .chapter-header-row {
     display: flex;
-    align-items: baseline;
-    gap: 10px;
+    align-items: center;
+    gap: 14px;
     margin-bottom: 12px;
   }
   .chapter-header-row .chapter-number { margin: 0; }
@@ -427,23 +427,175 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    border: 1px solid transparent;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--fg-quiet);
-    cursor: pointer;
-    transition: color 0.15s, background 0.15s, border-color 0.15s;
-  }
-  .speak-btn:hover { color: var(--accent); background: rgba(161, 74, 42, 0.08); border-color: rgba(161, 74, 42, 0.18); }
-  .speak-btn.playing {
+    gap: 6px;
+    height: 28px;
+    padding: 0 12px 0 10px;
+    border: 1px solid rgba(161, 74, 42, 0.4);
+    border-radius: 999px;
+    background: rgba(161, 74, 42, 0.06);
     color: var(--accent);
-    background: rgba(161, 74, 42, 0.12);
-    border-color: rgba(161, 74, 42, 0.3);
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s, transform 0.1s;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+    text-transform: uppercase;
   }
-  .speak-btn svg { width: 15px; height: 15px; }
+  .speak-btn:hover {
+    background: rgba(161, 74, 42, 0.14);
+    border-color: rgba(161, 74, 42, 0.7);
+    transform: translateY(-0.5px);
+  }
+  .speak-btn:active { transform: translateY(0); }
+  .speak-btn.playing {
+    color: #fff;
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  @media (prefers-color-scheme: dark) {
+    .speak-btn {
+      color: var(--accent);
+      background: rgba(232, 140, 94, 0.1);
+      border-color: rgba(232, 140, 94, 0.4);
+    }
+    .speak-btn:hover { background: rgba(232, 140, 94, 0.2); border-color: rgba(232, 140, 94, 0.7); }
+    .speak-btn.playing { color: #1a1818; background: var(--accent); border-color: var(--accent); }
+  }
+  .speak-btn svg { width: 12px; height: 12px; }
+
+  /* First-run modal — asks how to read. */
+  .firstrun {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    display: none;
+  }
+  .firstrun.visible { display: block; }
+  .firstrun-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    animation: firstrun-fadein 0.22s ease-out forwards;
+  }
+  .firstrun-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, calc(-50% + 8px));
+    width: min(460px, calc(100vw - 32px));
+    background: var(--paper);
+    color: var(--fg);
+    border-radius: 14px;
+    padding: 32px 32px 24px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.08);
+    opacity: 0;
+    animation: firstrun-rise 0.28s ease-out forwards;
+    font-family: var(--serif);
+  }
+  @keyframes firstrun-fadein { to { opacity: 1; } }
+  @keyframes firstrun-rise { to { opacity: 1; transform: translate(-50%, -50%); } }
+  .firstrun h3 {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin: 0 0 8px;
+    line-height: 1.2;
+  }
+  .firstrun .lede {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--fg-muted);
+    font-style: italic;
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+  .firstrun-option {
+    width: 100%;
+    text-align: left;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    font-family: var(--serif);
+    color: var(--fg);
+  }
+  .firstrun-option:hover {
+    border-color: var(--accent);
+    background: rgba(161, 74, 42, 0.04);
+  }
+  .firstrun-option .option-title {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--fg);
+    letter-spacing: -0.005em;
+    margin-bottom: 4px;
+  }
+  .firstrun-option .option-desc {
+    font-size: 13px;
+    color: var(--fg-muted);
+    line-height: 1.5;
+    margin: 0;
+  }
+  .firstrun-option code { font-size: 0.85em; }
+  .firstrun-option.expanded {
+    background: rgba(161, 74, 42, 0.04);
+    border-color: var(--accent);
+  }
+  .firstrun-option .key-row {
+    display: none;
+    margin-top: 12px;
+    gap: 8px;
+    align-items: center;
+  }
+  .firstrun-option.expanded .key-row { display: flex; }
+  .firstrun-option input.firstrun-key {
+    flex: 1;
+    padding: 7px 10px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--fg);
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .firstrun-option .confirm-openai {
+    padding: 7px 14px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .firstrun-option .confirm-openai:hover { opacity: 0.9; }
+  .firstrun-option .confirm-openai:disabled { opacity: 0.4; cursor: not-allowed; }
+  .firstrun-cancel {
+    display: block;
+    margin: 12px auto 0;
+    background: none;
+    border: none;
+    color: var(--fg-muted);
+    font-family: var(--sans);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 6px 10px;
+  }
+  .firstrun-cancel:hover { color: var(--fg); }
+  @media (prefers-color-scheme: dark) {
+    .firstrun-option input.firstrun-key { background: rgba(255,255,255,0.04); color: #ece8e0; }
+  }
 
   /* Sentence highlight while reading */
   .s {
@@ -625,6 +777,136 @@
     opacity: 1;
   }
   .settings-panel .mode-toggle button:hover { opacity: 0.9; }
+
+  /* Cross-link pill matching architecture.html */
+  .crosslink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: none;
+    padding: 6px 14px 6px 12px;
+    background: rgba(161, 74, 42, 0.06);
+    border: 1px solid rgba(161, 74, 42, 0.25);
+    border-radius: 999px;
+    transition: background 0.15s, border-color 0.15s;
+    font-weight: 500;
+    margin-bottom: 32px;
+    letter-spacing: -0.005em;
+  }
+  .crosslink:hover {
+    background: rgba(161, 74, 42, 0.12);
+    border-color: rgba(161, 74, 42, 0.55);
+    opacity: 1;
+  }
+  @media (prefers-color-scheme: dark) {
+    .crosslink { background: rgba(232, 140, 94, 0.1); border-color: rgba(232, 140, 94, 0.4); }
+    .crosslink:hover { background: rgba(232, 140, 94, 0.2); }
+  }
+
+  /* Cheatsheet — a glanceable recall card near the end. */
+  .cheatsheet {
+    margin-top: 96px;
+    padding-top: 48px;
+    border-top: 1px solid var(--rule);
+  }
+  .cheatsheet h2 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 6px;
+  }
+  .cheatsheet .cheatsheet-deck {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-style: italic;
+    color: var(--fg-muted);
+    margin: 0 0 32px;
+  }
+  .cheatsheet h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-quiet);
+    margin: 32px 0 14px;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+  }
+  .cheatsheet-principles {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px;
+    counter-reset: principle;
+  }
+  .cheatsheet-principles > li {
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    counter-increment: principle;
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .cheatsheet-principles > li:last-child { border-bottom: none; }
+  .cheatsheet-principles > li::before {
+    content: counter(principle, decimal-leading-zero);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .cheatsheet-principles > li strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .cheatsheet-principles > li span {
+    color: var(--fg-muted);
+    font-size: 14px;
+    font-style: italic;
+  }
+
+  .cheatsheet-glossary {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 4px 28px;
+  }
+  .cheatsheet-glossary > li {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 12px;
+    padding: 7px 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--serif);
+    font-size: 14px;
+    line-height: 1.4;
+    align-items: baseline;
+  }
+  .cheatsheet-glossary > li code {
+    background: none;
+    padding: 0;
+    color: var(--accent);
+    font-weight: 600;
+    font-size: 13px;
+  }
+  .cheatsheet-glossary > li span {
+    color: var(--fg-soft);
+    font-size: 13.5px;
+  }
 
   /* Resources section — a plain bulleted list with video/article icons. */
   .resources {
@@ -1038,6 +1320,8 @@
 </nav>
 
 <div class="page">
+
+<a class="crosslink" href="architecture.html">Architecture guide →</a>
 
 <p class="eyebrow">A SwiftUI walkthrough</p>
 <h1 class="title">The KindaVim Tutorial&hellip; Tutorial</h1>
@@ -2399,6 +2683,38 @@ $ swift run
 
 </section>
 
+<section class="cheatsheet" aria-label="Cheatsheet">
+  <h2>Cheatsheet</h2>
+  <p class="cheatsheet-deck">The shape of this app, at a glance. Come back when you've forgotten which annotation does what.</p>
+
+  <h3>Five principles</h3>
+  <ol class="cheatsheet-principles">
+    <li><div><strong>Data first.</strong><span>Model value types before you build a single view.</span></div></li>
+    <li><div><strong>State lifted out of views.</strong><span>One owner per value. Views either own it, or get a <code>@Binding</code> to it.</span></div></li>
+    <li><div><strong>Business logic in its own class.</strong><span>If the test for it needs a view, the logic leaked.</span></div></li>
+    <li><div><strong>AppKit bridged only where it earns its keep.</strong><span><code>NSViewRepresentable</code> is a cost. Pay it for real capabilities, not for novelty.</span></div></li>
+    <li><div><strong>Persistence that fits the data.</strong><span>JSON in Application Support before a database. Graduate only when the data asks.</span></div></li>
+  </ol>
+
+  <h3>Annotations &amp; protocols</h3>
+  <ul class="cheatsheet-glossary">
+    <li><code>@main</code><span>Marks the struct that hosts the app's entry point.</span></li>
+    <li><code>@State</code><span>This view owns this value. SwiftUI keeps it alive across body re-runs.</span></li>
+    <li><code>@Binding</code><span>A read-write handle to state someone else owns.</span></li>
+    <li><code>@Observable</code><span>Makes a class auto-trackable by SwiftUI (Swift 5.9+).</span></li>
+    <li><code>@MainActor</code><span>Guarantees the code runs on the main thread. Required for UI.</span></li>
+    <li><code>@ViewBuilder</code><span>Lets a function's branches return different view types.</span></li>
+    <li><code>@Previewable</code><span>Use <code>@State</code>-ish properties inside a <code>#Preview</code>.</span></li>
+    <li><code>@escaping</code><span>Closure parameter that may outlive the call.</span></li>
+    <li><code>Sendable</code><span>Safe to pass across threads. Free on value types with value fields.</span></li>
+    <li><code>Identifiable</code><span>Has a stable <code>id</code>. Powers <code>List</code> and <code>ForEach</code> identity.</span></li>
+    <li><code>Hashable</code><span>Usable as a <code>Set</code> element or navigation selection.</span></li>
+    <li><code>Codable</code><span>Can encode and decode itself — JSON, plists, etc.</span></li>
+    <li><code>NSViewRepresentable</code><span>Wraps an AppKit <code>NSView</code> for use in SwiftUI.</span></li>
+    <li><code>NavigationSplitView</code><span>The macOS two-pane container — sidebar + detail.</span></li>
+  </ul>
+</section>
+
 <section class="resources" aria-label="Further reading and watching">
   <h2>Further reading &amp; watching</h2>
 
@@ -2456,6 +2772,30 @@ $ swift run
 <footer>
   kindaVim Tutor · essentials branch · <code>docs/tutorial.html</code>
 </footer>
+
+<aside class="firstrun" role="dialog" aria-modal="true" aria-labelledby="firstrun-title">
+  <div class="firstrun-backdrop"></div>
+  <div class="firstrun-panel">
+    <h3 id="firstrun-title">Read this chapter aloud</h3>
+    <p class="lede">Pick a voice. Your choice is saved so we'll only ask this once.</p>
+
+    <button class="firstrun-option" data-choice="web" type="button">
+      <div class="option-title">Use your Mac's built-in voice</div>
+      <p class="option-desc">Free, works offline, respects system voice settings. On macOS the defaults (Samantha, Daniel, Ava) are genuinely pleasant.</p>
+    </button>
+
+    <div class="firstrun-option" data-choice="openai" tabindex="0">
+      <div class="option-title">Use OpenAI's voice</div>
+      <p class="option-desc">Expressive and emotional — a warm British storyteller by default, tuned for this tutorial. Your key is stored only in this browser and sent <strong>directly to <code>api.openai.com</code></strong>. Never to any server of ours.</p>
+      <div class="key-row">
+        <input type="password" class="firstrun-key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+        <button type="button" class="confirm-openai" disabled>Save &amp; start →</button>
+      </div>
+    </div>
+
+    <button class="firstrun-cancel" type="button">Cancel</button>
+  </div>
+</aside>
 
 <aside class="miniplayer" aria-label="Read-aloud player" role="region">
   <span class="chapter-label"></span>
@@ -3090,14 +3430,91 @@ $ swift run
         btn.type = 'button';
         btn.setAttribute('aria-label', 'Listen to this chapter');
         btn.setAttribute('data-chapter', chapter.id);
-        btn.innerHTML = SPEAK_ICON;
+        btn.innerHTML = `${SPEAK_ICON}<span class="speak-btn-label">Listen</span>`;
         btn.addEventListener('click', () => {
-          if (isPlaying && sentences[queueIdx]?.chapterId === chapter.id) stop();
-          else startFromChapter(chapter.id);
+          if (isPlaying && sentences[queueIdx]?.chapterId === chapter.id) { stop(); return; }
+          requestChapterPlayback(chapter.id);
         });
         row.appendChild(btn);
       });
     }
+
+    // First-run chooser: if the user hasn't picked a mode yet, show the
+    // modal. Otherwise start immediately.
+    const firstrun = document.querySelector('.firstrun');
+    const keyInputFR = firstrun?.querySelector('.firstrun-key');
+    const confirmOpenAIBtn = firstrun?.querySelector('.confirm-openai');
+    const cancelBtn = firstrun?.querySelector('.firstrun-cancel');
+    const openaiOption = firstrun?.querySelector('[data-choice="openai"]');
+    const webOption = firstrun?.querySelector('[data-choice="web"]');
+    let pendingChapterId = null;
+
+    function requestChapterPlayback(chapterId) {
+      if (LS.get('choseMode', false)) {
+        startFromChapter(chapterId);
+        return;
+      }
+      pendingChapterId = chapterId;
+      openFirstRun();
+    }
+
+    function openFirstRun() {
+      if (!firstrun) return;
+      firstrun.classList.add('visible');
+      openaiOption?.classList.remove('expanded');
+      if (keyInputFR) keyInputFR.value = config.key || '';
+      updateConfirmState();
+    }
+    function closeFirstRun() {
+      firstrun?.classList.remove('visible');
+      pendingChapterId = null;
+    }
+    function updateConfirmState() {
+      if (confirmOpenAIBtn) confirmOpenAIBtn.disabled = !(keyInputFR && keyInputFR.value.trim().length > 10);
+    }
+
+    webOption?.addEventListener('click', () => {
+      config.mode = 'web';
+      LS.set('mode', 'web');
+      LS.set('choseMode', true);
+      // Reflect in settings panel
+      panel.querySelectorAll('.mode-toggle button').forEach(x => x.classList.toggle('active', x.dataset.mode === 'web'));
+      panel.querySelectorAll('[data-mode-panel]').forEach(x => x.style.display = x.dataset.modePanel === 'web' ? '' : 'none');
+      closeFirstRun();
+      if (pendingChapterId) startFromChapter(pendingChapterId);
+    });
+
+    // Expand the OpenAI option on click (but not when the inner input/button is clicked)
+    openaiOption?.addEventListener('click', (e) => {
+      if (e.target.closest('.key-row')) return;
+      openaiOption.classList.add('expanded');
+      setTimeout(() => keyInputFR?.focus(), 50);
+    });
+    keyInputFR?.addEventListener('input', updateConfirmState);
+    keyInputFR?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !confirmOpenAIBtn.disabled) { confirmOpenAIBtn.click(); }
+    });
+    confirmOpenAIBtn?.addEventListener('click', () => {
+      const key = (keyInputFR?.value || '').trim();
+      if (key.length < 10) return;
+      config.mode = 'openai';
+      config.key = key;
+      LS.set('mode', 'openai');
+      LS.set('key', key);
+      LS.set('choseMode', true);
+      // Reflect in settings panel
+      const panelKey = panel.querySelector('[data-field="key"]');
+      if (panelKey) panelKey.value = key;
+      panel.querySelectorAll('.mode-toggle button').forEach(x => x.classList.toggle('active', x.dataset.mode === 'openai'));
+      panel.querySelectorAll('[data-mode-panel]').forEach(x => x.style.display = x.dataset.modePanel === 'openai' ? '' : 'none');
+      closeFirstRun();
+      if (pendingChapterId) startFromChapter(pendingChapterId);
+    });
+    cancelBtn?.addEventListener('click', closeFirstRun);
+    firstrun?.querySelector('.firstrun-backdrop')?.addEventListener('click', closeFirstRun);
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && firstrun?.classList.contains('visible')) closeFirstRun();
+    });
 
     // ---- Settings panel wiring ----
     function initSettings() {

@@ -3,263 +3,477 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>kindaVim Tutor — Architecture Guide</title>
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>kindaVim Tutor — Architecture</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
 <style>
   :root {
-    --bg: #fbfbfd;
-    --fg: #1d1d1f;
-    --fg-secondary: #6e6e73;
-    --fg-tertiary: #86868b;
-    --accent: #0071e3;
-    --accent-soft: #e8f1fc;
-    --divider: #e5e5e7;
-    --surface: #ffffff;
-    --code-bg: #f5f5f7;
-    --tip-bg: #fef6e6;
-    --note-bg: #eaf4ff;
-    --shadow: 0 2px 16px rgba(0,0,0,0.04);
-    --serif: "New York", "Iowan Old Style", ui-serif, Georgia, serif;
-    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
-    --mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, monospace;
+    --bg: #faf8f3;
+    --paper: #ffffff;
+    --fg: #1a1a1a;
+    --fg-soft: #3a3a3a;
+    --fg-muted: #6e6e73;
+    --fg-quiet: #9a9a9a;
+    --rule: #e8e4d8;
+    --accent: #a14a2a;
+    --accent-soft: #f3e9dd;
+    --code-bg: #d0c097;
+    --code-fg: #1a1a1a;
+    --callout-bg: #fdf7e6;
+    --serif: "New York", "Iowan Old Style", "Charter", Georgia, ui-serif, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --bg: #000;
-      --fg: #f5f5f7;
-      --fg-secondary: #a1a1a6;
-      --fg-tertiary: #6e6e73;
-      --accent: #2997ff;
-      --accent-soft: #0d2a4a;
-      --divider: #2a2a2d;
-      --surface: #1c1c1e;
-      --code-bg: #1c1c1e;
-      --tip-bg: #3a2f12;
-      --note-bg: #0d2a4a;
-      --shadow: 0 2px 16px rgba(0,0,0,0.4);
+      --bg: #1a1818;
+      --paper: #1f1d1b;
+      --fg: #ece8e0;
+      --fg-soft: #c9c5bd;
+      --fg-muted: #8a8680;
+      --fg-quiet: #5e5a54;
+      --rule: #2d2a26;
+      --accent: #e88c5e;
+      --accent-soft: #2d1f16;
+      --code-bg: #2a2622;
+      --code-fg: #ece8e0;
+      --callout-bg: #2b2518;
     }
   }
 
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   body {
     margin: 0;
-    font-family: var(--sans);
-    font-size: 17px;
-    line-height: 1.6;
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.72;
     color: var(--fg);
     background: var(--bg);
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga", "calt", "onum";
+    hanging-punctuation: first last;
   }
+  h1, h2, h3 { text-wrap: balance; }
+  p, li { text-wrap: pretty; orphans: 3; widows: 3; }
 
-  .hero {
-    padding: 120px 24px 80px;
-    text-align: center;
-    background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 100%);
-  }
-  .hero-eyebrow {
-    font-size: 14px;
+  .page { max-width: 720px; margin: 0 auto; padding: 80px 32px 160px; }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--accent);
-    margin-bottom: 16px;
+    margin: 0 0 20px;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
   }
-  .hero h1 {
+
+  h1.title {
     font-family: var(--serif);
-    font-size: clamp(44px, 7vw, 88px);
+    font-size: clamp(48px, 7vw, 80px);
     font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    letter-spacing: -0.035em;
+    line-height: 1;
     margin: 0 0 24px;
   }
-  .hero p {
-    font-size: clamp(18px, 2.2vw, 24px);
-    color: var(--fg-secondary);
-    max-width: 680px;
-    margin: 0 auto;
-    letter-spacing: -0.01em;
+  p.subtitle {
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--fg-muted);
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    margin: 0 0 56px;
+    text-wrap: balance;
   }
 
-  main { max-width: 880px; margin: 0 auto; padding: 0 24px 120px; }
+  p { margin: 0 0 24px; }
 
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; padding-bottom: 1px; transition: opacity 0.15s; }
+  a:hover { opacity: 0.7; }
+
+  /* External links — dashed underline + hover tooltip */
+  a.external {
+    position: relative;
+    border-bottom: none;
+    text-decoration: underline dashed;
+    text-decoration-color: rgba(161, 74, 42, 0.55);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+  a.external:hover { text-decoration-color: var(--accent); opacity: 1; }
+  a.external[data-site]::after {
+    content: attr(data-site);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    background: #1a1818;
+    color: #f5f1e8;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    padding: 6px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s, transform 0.18s;
+    pointer-events: none;
+    z-index: 40;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+  a.external[data-site]::before {
+    content: "↗";
+    font-size: 0.82em;
+    color: var(--accent);
+    opacity: 0.5;
+    margin-right: 2px;
+    transition: opacity 0.15s;
+  }
+  a.external:hover::after, a.external:focus::after { opacity: 1; transform: translateY(0); }
+  a.external:hover::before { opacity: 1; }
+  @media (prefers-color-scheme: dark) {
+    a.external[data-site]::after { background: #ece8e0; color: #1a1a1a; }
+  }
+
+  strong { font-weight: 600; color: var(--fg); }
+  em { font-style: italic; }
+
+  hr.section-rule {
+    border: none;
+    text-align: center;
+    margin: 80px 0;
+    height: 20px;
+    line-height: 20px;
+  }
+  hr.section-rule::after {
+    content: "· · ·";
+    font-family: var(--serif);
+    color: var(--fg-quiet);
+    font-size: 18px;
+    letter-spacing: 0.75em;
+    padding-left: 0.75em;
+  }
+
+  /* TOC */
+  .toc {
+    border-top: 2px solid var(--fg);
+    border-bottom: 1px solid var(--rule);
+    padding: 40px 0;
+    margin: 64px 0 80px;
+  }
+  .toc-heading {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin: 0 0 28px;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+  }
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: toc; }
+  .toc li {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    align-items: baseline;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--rule);
+    counter-increment: toc;
+  }
+  .toc li:last-child { border-bottom: none; }
+  .toc li::before {
+    content: counter(toc, decimal-leading-zero);
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--fg-quiet);
+    font-variant-numeric: tabular-nums;
+  }
+  .toc li a {
+    color: var(--fg);
+    border-bottom: none;
+    font-family: var(--serif);
+    font-size: 18px;
+    letter-spacing: -0.005em;
+  }
+  .toc li a:hover { color: var(--accent); }
+
+  /* Sections */
   section { margin-top: 80px; }
   section h2 {
     font-family: var(--serif);
-    font-size: 40px;
+    font-size: clamp(34px, 4.5vw, 44px);
     font-weight: 700;
-    letter-spacing: -0.02em;
-    line-height: 1.15;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
     margin: 0 0 8px;
   }
   section > .deck {
+    font-family: var(--serif);
     font-size: 20px;
-    color: var(--fg-secondary);
-    margin: 0 0 40px;
+    color: var(--fg-muted);
+    font-style: italic;
+    margin: 0 0 32px;
     letter-spacing: -0.01em;
+    text-wrap: balance;
   }
   section h3 {
+    font-family: var(--serif);
     font-size: 24px;
     font-weight: 600;
-    letter-spacing: -0.01em;
-    margin: 56px 0 12px;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin: 48px 0 14px;
+    text-wrap: balance;
   }
   section h4 {
-    font-size: 18px;
+    font-family: var(--serif);
+    font-size: 19px;
     font-weight: 600;
-    margin: 32px 0 8px;
+    margin: 32px 0 10px;
+    letter-spacing: -0.01em;
   }
 
-  p { margin: 0 0 16px; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
+  /* Code */
   code {
     font-family: var(--mono);
     font-size: 0.9em;
     background: var(--code-bg);
-    padding: 2px 6px;
+    color: var(--code-fg);
+    padding: 1px 6px;
     border-radius: 4px;
+    font-feature-settings: "liga" 0;
   }
   pre {
     font-family: var(--mono);
-    font-size: 13.5px;
-    line-height: 1.55;
-    background: var(--code-bg);
-    padding: 20px 24px;
-    border-radius: 12px;
-    overflow-x: auto;
-    margin: 16px 0 24px;
-  }
-  pre code { background: none; padding: 0; font-size: inherit; }
-
-  .diagram {
-    margin: 24px 0 32px;
-    padding: 32px 24px;
-    background: var(--surface);
-    border-radius: 18px;
-    box-shadow: var(--shadow);
-    overflow-x: auto;
-  }
-  .diagram svg { display: block; margin: 0 auto; max-width: 100%; }
-  .diagram-caption {
-    text-align: center;
     font-size: 14px;
-    color: var(--fg-tertiary);
-    margin-top: 16px;
+    line-height: 1.6;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 24px 28px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 28px 0;
+    font-feature-settings: "liga" 0;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+
+  /* Warm syntax highlighting */
+  .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #635c4f; font-style: italic; }
+  .token.punctuation { color: #3a3a3a; }
+  .token.keyword, .token.atrule, .token.attr-name { color: #9a2f14; font-weight: 700; }
+  .token.boolean, .token.number, .token.constant { color: #6b2a4f; }
+  .token.string, .token.char, .token.attr-value { color: #2d5a22; }
+  .token.class-name, .token.builtin { color: #7a4a10; font-weight: 600; }
+  .token.function, .token.deleted { color: #0f3a5f; font-weight: 600; }
+  .token.operator, .token.entity, .token.url { color: #4a4a4a; }
+  .token.property, .token.tag, .token.symbol { color: #9a2f14; font-weight: 600; }
+  .token.regex, .token.important, .token.variable { color: #6b2a4f; }
+  @media (prefers-color-scheme: dark) {
+    .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #8a857c; }
+    .token.punctuation { color: #c9c5bd; }
+    .token.keyword, .token.atrule, .token.attr-name { color: #ff9a6c; font-weight: 700; }
+    .token.boolean, .token.number, .token.constant { color: #e095b8; }
+    .token.string, .token.char, .token.attr-value { color: #b8db92; }
+    .token.class-name, .token.builtin { color: #f0c878; font-weight: 600; }
+    .token.function, .token.deleted { color: #7bb8e8; font-weight: 600; }
+    .token.operator, .token.entity, .token.url { color: #c9c5bd; }
+    .token.property, .token.tag, .token.symbol { color: #ff9a6c; font-weight: 600; }
+    .token.regex, .token.important, .token.variable { color: #e095b8; }
   }
 
-  .callout {
-    padding: 20px 24px;
-    border-radius: 12px;
-    margin: 24px 0;
-    font-size: 16px;
-    line-height: 1.55;
+  /* Diagram figures — inline SVGs set their own colors */
+  figure.diagram {
+    margin: 24px 0 32px;
+    padding: 24px 0 8px;
   }
-  .callout.note { background: var(--note-bg); }
-  .callout.tip { background: var(--tip-bg); }
-  .callout-label {
-    font-weight: 600;
+  figure.diagram svg { display: block; width: 100%; height: auto; }
+  figure.diagram figcaption {
+    text-align: center;
+    font-family: var(--sans);
     font-size: 13px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    margin-bottom: 6px;
-    display: block;
+    color: var(--fg-muted);
+    font-style: italic;
+    margin-top: 14px;
   }
 
+  /* Callouts */
+  aside.concept {
+    background: var(--callout-bg);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin: 32px 0;
+    font-size: 17px;
+    line-height: 1.6;
+    font-family: var(--serif);
+  }
+  aside.concept .label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+  }
+  aside.concept p:last-child { margin-bottom: 0; }
+
+  /* Module card grid */
   .modules {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
     gap: 16px;
-    margin: 24px 0;
+    margin: 32px 0;
   }
   .module-card {
-    padding: 24px;
-    background: var(--surface);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
+    padding: 20px 22px;
+    background: var(--paper);
+    border-radius: 10px;
+    border: 1px solid var(--rule);
   }
   .module-card h4 {
-    margin: 0 0 8px;
+    margin: 0 0 6px;
+    font-family: var(--serif);
     font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
   }
   .module-card p {
     margin: 0;
     font-size: 14px;
-    color: var(--fg-secondary);
+    color: var(--fg-muted);
+    font-style: italic;
   }
   .module-card ul {
-    margin: 8px 0 0;
+    margin: 10px 0 0;
     padding-left: 18px;
     font-size: 13px;
-    color: var(--fg-tertiary);
+    color: var(--fg-soft);
+    line-height: 1.6;
   }
+  .module-card ul li { margin-bottom: 3px; }
 
-  .toc {
-    position: sticky;
-    top: 24px;
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 20px 24px;
-    box-shadow: var(--shadow);
-    margin: 40px 0;
+  /* Numbered step list for the "reading the code" walkthrough */
+  ol.step-list {
+    list-style: none;
+    padding: 0;
+    margin: 32px 0;
+    counter-reset: step;
   }
-  .toc h4 { margin: 0 0 12px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-tertiary); }
-  .toc ol { margin: 0; padding-left: 20px; font-size: 15px; }
-  .toc ol li { margin-bottom: 6px; }
-  .toc ol li a { color: var(--fg); }
-
-  .step-list { list-style: none; padding: 0; counter-reset: step; }
-  .step-list > li {
+  ol.step-list > li {
     position: relative;
-    padding: 20px 24px 20px 72px;
-    background: var(--surface);
-    border-radius: 14px;
-    box-shadow: var(--shadow);
-    margin-bottom: 12px;
+    padding: 18px 22px 18px 64px;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    margin-bottom: 10px;
     counter-increment: step;
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
   }
-  .step-list > li::before {
-    content: counter(step);
+  ol.step-list > li::before {
+    content: counter(step, decimal-leading-zero);
     position: absolute;
-    left: 20px;
-    top: 22px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: white;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 15px;
+    left: 22px;
+    top: 20px;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
   }
-  .step-list li code { font-size: 13px; }
-  .step-list li strong { display: block; margin-bottom: 4px; font-size: 16px; }
+  ol.step-list > li strong {
+    display: block;
+    font-family: var(--serif);
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    letter-spacing: -0.005em;
+  }
+  ol.step-list > li code { font-size: 0.82em; }
+
+  ul, ol { padding-left: 24px; margin: 0 0 24px; }
+  li { margin-bottom: 8px; }
+  li::marker { color: var(--fg-quiet); }
+
+  blockquote {
+    margin: 40px 0;
+    padding: 0 0 0 32px;
+    border-left: 3px solid var(--accent);
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--fg-soft);
+    letter-spacing: -0.01em;
+  }
+
+  /* Cross-link pill at top */
+  .crosslink {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: none;
+    padding: 6px 14px 6px 12px;
+    background: rgba(161, 74, 42, 0.06);
+    border: 1px solid rgba(161, 74, 42, 0.25);
+    border-radius: 999px;
+    transition: background 0.15s, border-color 0.15s;
+    font-weight: 500;
+    margin-bottom: 32px;
+    letter-spacing: -0.005em;
+  }
+  .crosslink:hover {
+    background: rgba(161, 74, 42, 0.12);
+    border-color: rgba(161, 74, 42, 0.55);
+    opacity: 1;
+  }
+  @media (prefers-color-scheme: dark) {
+    .crosslink { background: rgba(232, 140, 94, 0.1); border-color: rgba(232, 140, 94, 0.4); }
+    .crosslink:hover { background: rgba(232, 140, 94, 0.2); }
+  }
 
   footer {
     text-align: center;
-    padding: 40px 24px;
+    padding: 40px 32px 60px;
+    font-family: var(--sans);
     font-size: 13px;
-    color: var(--fg-tertiary);
-    border-top: 1px solid var(--divider);
-    margin-top: 80px;
+    color: var(--fg-quiet);
+    letter-spacing: 0.05em;
   }
 </style>
 </head>
 <body>
 
-<header class="hero">
-  <div class="hero-eyebrow">Architecture Guide</div>
-  <h1>kindaVim Tutor</h1>
-  <p>A SwiftUI macOS app that teaches Vim motions, one drill at a time. This guide walks through the essentials build — a stripped-down branch of the code — and explains what every file does.</p>
-</header>
+<div class="page">
 
-<main>
+<a class="crosslink" href="tutorial.html">← Back to the tutorial</a>
 
-<nav class="toc" aria-label="Table of contents">
-  <h4>On this page</h4>
+<p class="eyebrow">Architecture guide</p>
+<h1 class="title">How kindaVim Tutor is built</h1>
+<p class="subtitle">The layered shape of the essentials build, the data flow from keystroke to disk, and the macOS primitives this tutorial rests on.</p>
+
+<p>This guide is the reference companion to the <a href="tutorial.html">ten-chapter tutorial</a>. If the tutorial is the walkthrough, this is the map — diagrams of the three layers, the type model, and the exact path a single keystroke takes through the app. Read the tutorial first if you haven't; come back here when you want to see the shape whole.</p>
+
+<nav class="toc" aria-label="Contents">
+  <p class="toc-heading">On this page</p>
   <ol>
     <li><a href="#overview">Overview</a></li>
     <li><a href="#architecture">Architecture</a></li>
@@ -276,206 +490,239 @@
   <p class="deck">What the app does, in three sentences.</p>
   <p>The user opens the app, picks a lesson from the sidebar, and steps through slides with <code>l</code> (forward) and <code>h</code> (back) — exactly the motions Vim uses for cursor movement. Some slides are text; others are <em>drills</em> — a small editor that the user has to transform from a starting state to an expected state, several times in a row. Results are saved to disk so lesson completion persists across launches.</p>
 
-  <div class="callout note">
-    <span class="callout-label">Essentials build</span>
-    This branch (<code>essentials</code>) contains only the core learning loop — roughly 1,000 lines across 20 files. The <code>master</code> branch adds a mode indicator (observes kindaVim via distributed notifications), a progress inspector, achievement rings, telemetry-grade drill recording, file-based logging, and a six-chapter curriculum. Everything here exists in <code>master</code> too; nothing was added for the essentials branch.
-  </div>
+  <aside class="concept">
+    <span class="label">Essentials build</span>
+    <p>This branch (<code>essentials</code>) contains only the core learning loop — roughly 1,000 lines across 20 files. The <code>master</code> branch adds a mode indicator (observes kindaVim via distributed notifications), a progress inspector, achievement rings, telemetry-grade drill recording, file-based logging, and a six-chapter curriculum. Everything here exists in <code>master</code> too; nothing was added for the essentials branch.</p>
+  </aside>
 </section>
+
+<hr class="section-rule">
 
 <section id="architecture">
   <h2>Architecture</h2>
   <p class="deck">Three layers, one direction of dependency.</p>
 
-  <div class="diagram">
-    <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture layer diagram">
+  <figure class="diagram">
+    <svg viewBox="0 0 720 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture layer diagram">
       <defs>
-        <linearGradient id="g-view" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stop-color="#e8f1fc"/>
-          <stop offset="1" stop-color="#d1e4fb"/>
-        </linearGradient>
-        <linearGradient id="g-engine" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stop-color="#fef6e6"/>
-          <stop offset="1" stop-color="#fbe6c5"/>
-        </linearGradient>
-        <linearGradient id="g-model" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stop-color="#f0f0f2"/>
-          <stop offset="1" stop-color="#e2e2e6"/>
-        </linearGradient>
-        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#6e6e73"/>
+        <marker id="a-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
         </marker>
       </defs>
+      <style>
+        .a-view { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .a-engine { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.2; }
+        .a-model { fill: #ecdfbe; stroke: #a69874; stroke-width: 1; }
+        .a-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 700; fill: #1a1a1a; letter-spacing: 0.1em; }
+        .a-names { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; fill: #1a1a1a; }
+        .a-hint { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; fill: #5d5343; font-style: italic; }
+        .a-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; fill: #5d5343; font-style: italic; }
+        @media (prefers-color-scheme: dark) {
+          .a-hint, .a-edge { fill: #d6cfc1; }
+        }
+      </style>
 
-      <!-- View layer -->
-      <rect x="40" y="30" width="680" height="100" rx="12" fill="url(#g-view)" stroke="#4a90e2" stroke-width="1"/>
-      <text x="60" y="60" font-family="-apple-system" font-size="14" font-weight="700" fill="#1d1d1f" letter-spacing="0.08em">VIEWS</text>
-      <text x="60" y="85" font-family="-apple-system" font-size="13" fill="#1d1d1f">KindaVimTutorApp · SidebarView · StepCanvasView · DrillStepView</text>
-      <text x="60" y="105" font-family="-apple-system" font-size="13" fill="#1d1d1f">TitleStepView · ContentStepView · ExerciseEditorView · WelcomeView</text>
-      <text x="60" y="120" font-family="-apple-system" font-size="11" fill="#6e6e73" font-style="italic">Observe @Observable types. Declarative. No business logic.</text>
+      <rect class="a-view" x="10" y="20" width="700" height="100" rx="12"/>
+      <text class="a-label" x="30" y="48">VIEWS</text>
+      <text class="a-names" x="30" y="74">KindaVimTutorApp · SidebarView · StepCanvasView · DrillStepView</text>
+      <text class="a-names" x="30" y="92">TitleStepView · ContentStepView · ExerciseEditorView · WelcomeView</text>
+      <text class="a-hint" x="30" y="110">Observe @Observable types. Declarative. No business logic.</text>
 
-      <!-- Engine layer -->
-      <rect x="40" y="160" width="680" height="90" rx="12" fill="url(#g-engine)" stroke="#d4a645" stroke-width="1"/>
-      <text x="60" y="190" font-family="-apple-system" font-size="14" font-weight="700" fill="#1d1d1f" letter-spacing="0.08em">ENGINE &amp; SERVICES</text>
-      <text x="60" y="215" font-family="-apple-system" font-size="13" fill="#1d1d1f">AppState · ExerciseEngine · LessonStepController · ProgressStore</text>
-      <text x="60" y="235" font-family="-apple-system" font-size="11" fill="#6e6e73" font-style="italic">@Observable @MainActor. Validates drills. Persists progress.</text>
+      <rect class="a-engine" x="10" y="160" width="700" height="90" rx="12"/>
+      <text class="a-label" x="30" y="188">ENGINE &amp; SERVICES</text>
+      <text class="a-names" x="30" y="215">AppState · ExerciseEngine · LessonStepController · ProgressStore</text>
+      <text class="a-hint" x="30" y="235">@Observable @MainActor. Validates drills. Persists progress.</text>
 
-      <!-- Model layer -->
-      <rect x="40" y="280" width="680" height="90" rx="12" fill="url(#g-model)" stroke="#86868b" stroke-width="1"/>
-      <text x="60" y="310" font-family="-apple-system" font-size="14" font-weight="700" fill="#1d1d1f" letter-spacing="0.08em">MODELS &amp; CURRICULUM</text>
-      <text x="60" y="335" font-family="-apple-system" font-size="13" fill="#1d1d1f">Chapter · Lesson · Exercise · ContentBlock · LessonStep · UserProgress · ExerciseResult</text>
-      <text x="60" y="355" font-family="-apple-system" font-size="11" fill="#6e6e73" font-style="italic">Plain Sendable structs and enums. Static curriculum data.</text>
+      <rect class="a-model" x="10" y="290" width="700" height="90" rx="12"/>
+      <text class="a-label" x="30" y="318">MODELS &amp; CURRICULUM</text>
+      <text class="a-names" x="30" y="345">Chapter · Lesson · Exercise · ContentBlock · LessonStep · UserProgress · ExerciseResult</text>
+      <text class="a-hint" x="30" y="365">Plain Sendable structs and enums. Static curriculum data.</text>
 
-      <!-- Arrows -->
-      <line x1="380" y1="250" x2="380" y2="278" stroke="#6e6e73" stroke-width="1.5" marker-end="url(#arrow)"/>
-      <line x1="380" y1="130" x2="380" y2="158" stroke="#6e6e73" stroke-width="1.5" marker-end="url(#arrow)"/>
-
-      <text x="395" y="270" font-family="-apple-system" font-size="11" fill="#6e6e73">depends on</text>
-      <text x="395" y="150" font-family="-apple-system" font-size="11" fill="#6e6e73">depends on</text>
+      <line x1="360" y1="250" x2="360" y2="288" stroke="#8a8070" stroke-width="1.5" marker-end="url(#a-arrow)"/>
+      <line x1="360" y1="120" x2="360" y2="158" stroke="#8a8070" stroke-width="1.5" marker-end="url(#a-arrow)"/>
+      <text class="a-edge" x="375" y="275">depends on</text>
+      <text class="a-edge" x="375" y="144">depends on</text>
     </svg>
-    <div class="diagram-caption">Each layer depends only on the layers below it. No upward references.</div>
-  </div>
+    <figcaption>Each layer depends only on the layers below it. No upward references.</figcaption>
+  </figure>
 
   <h3>Why this shape</h3>
   <p>A common SwiftUI pitfall is letting business logic leak into views — <code>onAppear</code> handlers that mutate state, timers embedded in <code>ViewBuilder</code>s, validation logic scattered across observers. This app keeps all of that in the <strong>Engine</strong> layer. <code>ExerciseEngine</code> is the single source of truth for one drill; views just show what it already computed.</p>
   <p>Persistence sits in <strong>Services</strong> (<code>ProgressStore</code>), which is injected into views that need it. Because state is <code>@Observable</code>, any view that reads a property automatically re-renders when it changes — no manual bindings, no <code>ObservableObject</code> boilerplate.</p>
 </section>
 
+<hr class="section-rule">
+
 <section id="data-flow">
   <h2>Data flow</h2>
   <p class="deck">What happens when you press a key during a drill.</p>
 
-  <div class="diagram">
-    <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data flow diagram">
+  <figure class="diagram">
+    <svg viewBox="0 0 720 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data flow diagram">
       <defs>
-        <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0071e3"/>
+        <marker id="df-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
+        </marker>
+        <marker id="df-arrow-accent" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#a14a2a"/>
         </marker>
       </defs>
+      <style>
+        .df-box { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .df-accent { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.3; }
+        .df-persist { fill: #ecdfbe; stroke: #a69874; stroke-width: 1; }
+        .df-observe { fill: #f5eeda; stroke: #a14a2a; stroke-width: 1.3; }
+        .df-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 12px; font-weight: 700; fill: #1a1a1a; }
+        .df-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; }
+        .df-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; font-weight: 500; fill: #5d5343; font-style: italic; }
+        .df-edge-accent { fill: #a14a2a; font-weight: 600; }
+        .df-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
+        .df-dash { stroke: #a14a2a; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+        @media (prefers-color-scheme: dark) {
+          .df-edge { fill: #d6cfc1; }
+          .df-edge-accent { fill: #e88c5e; }
+        }
+      </style>
 
-      <!-- NSTextView -->
-      <rect x="20" y="40" width="140" height="70" rx="10" fill="#fff" stroke="#d1d1d6" stroke-width="1"/>
-      <text x="90" y="68" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="600" fill="#1d1d1f">NSTextView</text>
-      <text x="90" y="86" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#6e6e73">(AppKit)</text>
-      <text x="90" y="101" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">User types a key</text>
+      <!-- Top row: NSTextView → Coordinator → Engine → ProgressStore → Sidebar -->
+      <rect class="df-box" x="10" y="60" width="110" height="56" rx="8"/>
+      <text class="df-label" x="65" y="86" text-anchor="middle">NSTextView</text>
+      <text class="df-sub" x="65" y="102" text-anchor="middle">AppKit</text>
 
-      <!-- Coordinator -->
-      <rect x="200" y="40" width="150" height="70" rx="10" fill="#fff" stroke="#d1d1d6" stroke-width="1"/>
-      <text x="275" y="68" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="600" fill="#1d1d1f">Coordinator</text>
-      <text x="275" y="86" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#6e6e73">NSTextViewDelegate</text>
-      <text x="275" y="101" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">textDidChange(...)</text>
+      <rect class="df-box" x="150" y="60" width="120" height="56" rx="8"/>
+      <text class="df-label" x="210" y="86" text-anchor="middle">Coordinator</text>
+      <text class="df-sub" x="210" y="102" text-anchor="middle">delegate</text>
 
-      <!-- Engine -->
-      <rect x="390" y="40" width="170" height="70" rx="10" fill="#fef6e6" stroke="#d4a645" stroke-width="1.5"/>
-      <text x="475" y="64" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="700" fill="#1d1d1f">ExerciseEngine</text>
-      <text x="475" y="82" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#1d1d1f">textDidChange(...)</text>
-      <text x="475" y="98" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">count, validate, transition</text>
+      <rect class="df-accent" x="300" y="60" width="130" height="56" rx="8"/>
+      <text class="df-label" x="365" y="86" text-anchor="middle">ExerciseEngine</text>
+      <text class="df-sub" x="365" y="102" text-anchor="middle">validate, transition</text>
 
-      <!-- Engine state -->
-      <rect x="390" y="150" width="170" height="50" rx="8" fill="#e8f1fc" stroke="#4a90e2" stroke-width="1"/>
-      <text x="475" y="170" text-anchor="middle" font-family="-apple-system" font-size="11" font-weight="600" fill="#1d1d1f">@Observable state</text>
-      <text x="475" y="188" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">keystrokeCount, state, ...</text>
+      <rect class="df-persist" x="460" y="60" width="130" height="56" rx="8"/>
+      <text class="df-label" x="525" y="86" text-anchor="middle">ProgressStore</text>
+      <text class="df-sub" x="525" y="102" text-anchor="middle">record &amp; save</text>
 
-      <!-- DrillStepView -->
-      <rect x="600" y="40" width="160" height="70" rx="10" fill="#e8f1fc" stroke="#4a90e2" stroke-width="1.5"/>
-      <text x="680" y="64" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="700" fill="#1d1d1f">DrillStepView</text>
-      <text x="680" y="82" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#1d1d1f">re-renders</text>
-      <text x="680" y="98" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">border, label, status</text>
-
-      <!-- ProgressStore -->
-      <rect x="390" y="240" width="170" height="60" rx="10" fill="#f0f0f2" stroke="#86868b" stroke-width="1"/>
-      <text x="475" y="262" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="600" fill="#1d1d1f">ProgressStore</text>
-      <text x="475" y="280" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">recordCompletion(...)</text>
-      <text x="475" y="293" text-anchor="middle" font-family="-apple-system" font-size="9" fill="#6e6e73">~/Library/Application Support/...</text>
+      <rect class="df-observe" x="610" y="60" width="100" height="56" rx="8"/>
+      <text class="df-label" x="660" y="86" text-anchor="middle">SidebarView</text>
+      <text class="df-sub" x="660" y="102" text-anchor="middle">re-renders ✓</text>
 
       <!-- Arrows -->
-      <line x1="160" y1="75" x2="200" y2="75" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
-      <line x1="350" y1="75" x2="390" y2="75" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
-      <line x1="560" y1="75" x2="600" y2="75" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)" stroke-dasharray="4 3"/>
-      <line x1="475" y1="110" x2="475" y2="148" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
-      <line x1="475" y1="200" x2="475" y2="238" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
+      <line x1="120" y1="88" x2="150" y2="88" class="df-line" marker-end="url(#df-arrow)"/>
+      <text class="df-edge" x="135" y="79" text-anchor="middle">NSEvent</text>
 
-      <text x="180" y="65" font-family="-apple-system" font-size="10" fill="#6e6e73">NSEvent</text>
-      <text x="365" y="65" font-family="-apple-system" font-size="10" fill="#6e6e73">@MainActor</text>
-      <text x="578" y="65" font-family="-apple-system" font-size="10" fill="#6e6e73">observes</text>
-      <text x="490" y="130" font-family="-apple-system" font-size="10" fill="#6e6e73">mutate</text>
-      <text x="490" y="220" font-family="-apple-system" font-size="10" fill="#6e6e73">on drillCompleted</text>
+      <line x1="270" y1="88" x2="300" y2="88" class="df-line" marker-end="url(#df-arrow)"/>
+      <text class="df-edge" x="285" y="79" text-anchor="middle">closure</text>
+
+      <line x1="430" y1="88" x2="460" y2="88" class="df-line" marker-end="url(#df-arrow)"/>
+      <text class="df-edge" x="445" y="79" text-anchor="middle">onChange</text>
+
+      <line x1="590" y1="88" x2="610" y2="88" class="df-dash" marker-end="url(#df-arrow-accent)"/>
+      <text class="df-edge df-edge-accent" x="600" y="79" text-anchor="middle">observes</text>
+
+      <!-- Side effect: disk -->
+      <line x1="525" y1="116" x2="525" y2="178" class="df-line" marker-end="url(#df-arrow)"/>
+      <text class="df-edge" x="525" y="196" text-anchor="middle">~/Library/…/progress.json</text>
     </svg>
-    <div class="diagram-caption">One keystroke → AppKit → Coordinator → Engine → observable mutation → SwiftUI re-render.</div>
-  </div>
+    <figcaption>One keystroke → AppKit delegate → engine validates → observable mutation → SwiftUI re-render. Solid arrows are calls; the dashed arrow is Observation doing its job.</figcaption>
+  </figure>
 
-  <p>The dashed arrow from Engine → View is the Observation framework's magic. <code>DrillStepView</code> never subscribes explicitly; the Swift compiler tracks which observable properties the view's <code>body</code> reads and re-runs <code>body</code> when any of them change. The persistence write (bottom arrow) only happens once, when the final rep of the drill completes.</p>
+  <p>The dashed arrow from <code>ProgressStore</code> back to <code>SidebarView</code> is the Observation framework's magic. The sidebar never subscribes explicitly; the compiler tracks which observable properties its <code>body</code> reads, and re-runs <code>body</code> when any of them change. The persistence write (the vertical arrow down) only happens once, when the final rep of a drill completes.</p>
 </section>
+
+<hr class="section-rule">
 
 <section id="data-model">
   <h2>The data model</h2>
   <p class="deck">Everything the app renders is a composition of these seven types.</p>
 
-  <div class="diagram">
-    <svg viewBox="0 0 780 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data model diagram">
+  <figure class="diagram">
+    <svg viewBox="0 0 720 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data model diagram">
+      <style>
+        .dm-static { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .dm-shape { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1; }
+        .dm-persist { fill: #ecdfbe; stroke: #a69874; stroke-width: 1; }
+        .dm-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 700; fill: #1a1a1a; }
+        .dm-prop { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #5d5343; }
+        .dm-rel { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #1a1a1a; font-weight: 500; }
+        .dm-line { stroke: #8a8070; stroke-width: 1.2; fill: none; }
+        .dm-legend { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; fill: #5d5343; font-style: italic; }
+        @media (prefers-color-scheme: dark) {
+          .dm-prop, .dm-legend { fill: #d6cfc1; }
+          .dm-rel { fill: #ece8e0; }
+        }
+      </style>
+
       <!-- Curriculum -->
-      <rect x="20" y="30" width="140" height="46" rx="8" fill="#fff" stroke="#d1d1d6"/>
-      <text x="90" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Curriculum</text>
-      <text x="90" y="68" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">static namespace</text>
+      <rect class="dm-static" x="10" y="20" width="130" height="44" rx="8"/>
+      <text class="dm-label" x="75" y="42" text-anchor="middle">Curriculum</text>
+      <text class="dm-prop" x="75" y="58" text-anchor="middle">static namespace</text>
 
       <!-- Chapter -->
-      <rect x="220" y="30" width="140" height="80" rx="8" fill="#e8f1fc" stroke="#4a90e2"/>
-      <text x="290" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Chapter</text>
-      <text x="290" y="70" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">id, number, title</text>
-      <text x="290" y="83" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">systemImage</text>
-      <text x="290" y="100" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">lessons: [Lesson]</text>
+      <rect class="dm-static" x="180" y="20" width="130" height="76" rx="8"/>
+      <text class="dm-label" x="245" y="42" text-anchor="middle">Chapter</text>
+      <text class="dm-prop" x="245" y="60" text-anchor="middle">id · number · title</text>
+      <text class="dm-prop" x="245" y="74" text-anchor="middle">systemImage</text>
+      <text class="dm-rel" x="245" y="90" text-anchor="middle">lessons: [Lesson]</text>
 
       <!-- Lesson -->
-      <rect x="420" y="30" width="140" height="120" rx="8" fill="#e8f1fc" stroke="#4a90e2"/>
-      <text x="490" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Lesson</text>
-      <text x="490" y="70" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">id, title, subtitle</text>
-      <text x="490" y="83" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">motionsIntroduced</text>
-      <text x="490" y="105" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">explanation: [ContentBlock]</text>
-      <text x="490" y="125" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">exercises: [Exercise]</text>
+      <rect class="dm-static" x="350" y="20" width="160" height="116" rx="8"/>
+      <text class="dm-label" x="430" y="42" text-anchor="middle">Lesson</text>
+      <text class="dm-prop" x="430" y="60" text-anchor="middle">id · title · subtitle</text>
+      <text class="dm-prop" x="430" y="74" text-anchor="middle">motionsIntroduced</text>
+      <text class="dm-rel" x="430" y="96" text-anchor="middle">explanation: [ContentBlock]</text>
+      <text class="dm-rel" x="430" y="112" text-anchor="middle">exercises: [Exercise]</text>
 
       <!-- ContentBlock -->
-      <rect x="620" y="30" width="140" height="100" rx="8" fill="#fef6e6" stroke="#d4a645"/>
-      <text x="690" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">ContentBlock</text>
-      <text x="690" y="68" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">enum with cases:</text>
-      <text x="690" y="83" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">text, heading, tip</text>
-      <text x="690" y="96" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">keyCommand, code...</text>
+      <rect class="dm-shape" x="550" y="20" width="160" height="96" rx="8"/>
+      <text class="dm-label" x="630" y="42" text-anchor="middle">ContentBlock</text>
+      <text class="dm-prop" x="630" y="60" text-anchor="middle">enum with cases:</text>
+      <text class="dm-prop" x="630" y="76" text-anchor="middle">text · heading · tip</text>
+      <text class="dm-prop" x="630" y="90" text-anchor="middle">keyCommand · code…</text>
 
       <!-- Exercise -->
-      <rect x="420" y="200" width="140" height="105" rx="8" fill="#fef6e6" stroke="#d4a645"/>
-      <text x="490" y="222" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Exercise</text>
-      <text x="490" y="238" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">initial / expected</text>
-      <text x="490" y="251" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">text &amp; cursor</text>
-      <text x="490" y="268" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">drillCount</text>
-      <text x="490" y="283" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">variations: [Variation]</text>
-      <text x="490" y="298" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">hints, difficulty</text>
+      <rect class="dm-shape" x="350" y="195" width="160" height="110" rx="8"/>
+      <text class="dm-label" x="430" y="217" text-anchor="middle">Exercise</text>
+      <text class="dm-prop" x="430" y="234" text-anchor="middle">initial &amp; expected</text>
+      <text class="dm-prop" x="430" y="248" text-anchor="middle">text + cursor</text>
+      <text class="dm-prop" x="430" y="266" text-anchor="middle">drillCount</text>
+      <text class="dm-prop" x="430" y="280" text-anchor="middle">variations: [Variation]</text>
+      <text class="dm-prop" x="430" y="294" text-anchor="middle">hints · difficulty</text>
 
       <!-- LessonStep -->
-      <rect x="220" y="200" width="140" height="60" rx="8" fill="#fef6e6" stroke="#d4a645"/>
-      <text x="290" y="222" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">LessonStep</text>
-      <text x="290" y="238" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">enum: title | content |</text>
-      <text x="290" y="251" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">drill</text>
+      <rect class="dm-shape" x="180" y="195" width="130" height="64" rx="8"/>
+      <text class="dm-label" x="245" y="217" text-anchor="middle">LessonStep</text>
+      <text class="dm-prop" x="245" y="234" text-anchor="middle">enum: title</text>
+      <text class="dm-prop" x="245" y="248" text-anchor="middle">content | drill</text>
 
-      <!-- UserProgress + ExerciseResult -->
-      <rect x="20" y="200" width="140" height="70" rx="8" fill="#f0f0f2" stroke="#86868b"/>
-      <text x="90" y="222" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">UserProgress</text>
-      <text x="90" y="240" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">Codable, persisted</text>
-      <text x="90" y="258" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">[id: ExerciseResult]</text>
+      <!-- UserProgress -->
+      <rect class="dm-persist" x="10" y="195" width="140" height="70" rx="8"/>
+      <text class="dm-label" x="80" y="217" text-anchor="middle">UserProgress</text>
+      <text class="dm-prop" x="80" y="234" text-anchor="middle">Codable, persisted</text>
+      <text class="dm-rel" x="80" y="252" text-anchor="middle">[id: ExerciseResult]</text>
 
-      <rect x="20" y="310" width="140" height="60" rx="8" fill="#f0f0f2" stroke="#86868b"/>
-      <text x="90" y="332" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">ExerciseResult</text>
-      <text x="90" y="348" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">keystrokes, time,</text>
-      <text x="90" y="361" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">completedAt</text>
+      <!-- ExerciseResult -->
+      <rect class="dm-persist" x="10" y="300" width="140" height="66" rx="8"/>
+      <text class="dm-label" x="80" y="322" text-anchor="middle">ExerciseResult</text>
+      <text class="dm-prop" x="80" y="338" text-anchor="middle">keystrokes · time</text>
+      <text class="dm-prop" x="80" y="352" text-anchor="middle">completedAt</text>
 
       <!-- Relations -->
-      <line x1="160" y1="52" x2="218" y2="52" stroke="#6e6e73" stroke-width="1.2"/>
-      <line x1="360" y1="65" x2="418" y2="65" stroke="#6e6e73" stroke-width="1.2"/>
-      <line x1="560" y1="65" x2="618" y2="65" stroke="#6e6e73" stroke-width="1.2"/>
-      <line x1="490" y1="150" x2="490" y2="200" stroke="#6e6e73" stroke-width="1.2"/>
-      <line x1="360" y1="220" x2="420" y2="220" stroke="#6e6e73" stroke-width="1.2" stroke-dasharray="3 2"/>
-      <line x1="160" y1="232" x2="160" y2="232" stroke="none"/>
-      <line x1="90" y1="268" x2="90" y2="308" stroke="#6e6e73" stroke-width="1.2"/>
+      <line x1="140" y1="42" x2="180" y2="42" class="dm-line"/>
+      <line x1="310" y1="58" x2="350" y2="58" class="dm-line"/>
+      <line x1="510" y1="58" x2="550" y2="58" class="dm-line"/>
+      <line x1="430" y1="136" x2="430" y2="195" class="dm-line"/>
+      <line x1="310" y1="220" x2="350" y2="220" class="dm-line" stroke-dasharray="3 2"/>
+      <line x1="80" y1="265" x2="80" y2="298" class="dm-line"/>
+
+      <!-- Legend -->
+      <rect class="dm-static" x="10" y="380" width="14" height="12" rx="3"/>
+      <text class="dm-legend" x="30" y="390">static content</text>
+      <rect class="dm-shape" x="160" y="380" width="14" height="12" rx="3"/>
+      <text class="dm-legend" x="180" y="390">lesson/exercise shape</text>
+      <rect class="dm-persist" x="380" y="380" width="14" height="12" rx="3"/>
+      <text class="dm-legend" x="400" y="390">persisted state</text>
     </svg>
-    <div class="diagram-caption">Blue = static content. Amber = "shape" of lessons/exercises. Grey = persisted state.</div>
-  </div>
+    <figcaption>Solid lines are compositions; the dashed line from LessonStep is a derivation (lessons are expanded into steps at render time).</figcaption>
+  </figure>
 
   <h3>Key concepts</h3>
 
@@ -501,6 +748,8 @@
   <h4>Progress is keyed by exercise ID</h4>
   <p><code>UserProgress.completedExercises</code> is <code>[String: ExerciseResult]</code>. Only the <em>best</em> result is retained — fewer keystrokes wins, ties broken by faster time. Because IDs are stable (<code>"ch1.l1.e1"</code>), renaming a lesson doesn't lose the user's progress; renaming an exercise ID would.</p>
 </section>
+
+<hr class="section-rule">
 
 <section id="modules">
   <h2>Module guide</h2>
@@ -589,14 +838,16 @@
   </div>
 </section>
 
+<hr class="section-rule">
+
 <section id="tutorial">
   <h2>Reading the code</h2>
-  <p class="deck">A guided tour. Follow these steps with the code open and you'll understand the whole app in 15 minutes.</p>
+  <p class="deck">A guided tour. Follow these steps with the code open and you'll understand the whole app in fifteen minutes.</p>
 
   <ol class="step-list">
     <li>
       <strong>Start at the entry point</strong>
-      <code>Sources/KindaVimTutor/App/KindaVimTutorApp.swift</code> is the <code>@main</code> struct. Everything flows from here. Note that it only hosts a <code>NavigationSplitView</code> — no business logic, no timers, no listeners.
+      <code>Sources/KindaVimTutor/KindaVimTutorApp.swift</code> is the <code>@main</code> struct. Everything flows from here. Note that it only hosts a <code>NavigationSplitView</code> — no business logic, no timers, no listeners.
     </li>
     <li>
       <strong>Look at root state</strong>
@@ -633,13 +884,16 @@
   </ol>
 </section>
 
+<hr class="section-rule">
+
 <section id="macos">
   <h2>Beginner macOS developer notes</h2>
-  <p class="deck">If you're coming to this codebase new to Swift/SwiftUI, here are the APIs you'll see on every page.</p>
+  <p class="deck">If you're coming to this codebase new to Swift and SwiftUI, here are the APIs you'll see on every page.</p>
 
   <h3><code>@Observable</code> and the Observation framework</h3>
-  <p>The <code>@Observable</code> macro (Swift 5.9+) lets you define a plain reference type whose properties SwiftUI automatically tracks. Replacing the old <code>ObservableObject</code> + <code>@Published</code> protocol. Views don't declare what they want to observe — the compiler inspects the <code>body</code> and subscribes only to the properties that are actually read. This is why <code>AppState</code>, <code>ExerciseEngine</code>, and <code>ProgressStore</code> don't need any <code>@Published</code> markers.</p>
-<pre><code>@Observable
+  <p>The <a href="https://developer.apple.com/documentation/observation"><code>@Observable</code></a> macro (Swift 5.9+) lets you define a plain reference type whose properties SwiftUI automatically tracks, replacing the old <code>ObservableObject</code> + <code>@Published</code> protocol. Views don't declare what they want to observe — the compiler inspects the <code>body</code> and subscribes only to the properties that are actually read. This is why <code>AppState</code>, <code>ExerciseEngine</code>, and <code>ProgressStore</code> don't need any <code>@Published</code> markers.</p>
+
+<pre><code class="language-swift">@Observable
 @MainActor
 final class ExerciseEngine {
     private(set) var state: State = .idle
@@ -650,12 +904,12 @@ final class ExerciseEngine {
   <p>In a View, <code>@State</code> means <em>this view owns this value for its lifetime</em>. <code>@Binding</code> means <em>something above me owns it; I get read/write access</em>. In <code>StepCanvasView</code>, <code>@State private var controller = LessonStepController()</code> — the canvas owns the controller. In <code>SidebarView</code>, <code>@Binding var selectedLessonId: String?</code> — <code>AppState</code> owns the value; the sidebar mutates it through the binding.</p>
 
   <h3><code>@MainActor</code></h3>
-  <p>Swift's actor system protects against data races. <code>@MainActor</code> means "this runs on the main thread" — which is required for any UIKit/AppKit/SwiftUI work. Every state type in this app is <code>@MainActor</code>; views are implicitly main-actor too. You'll see <code>MainActor.assumeIsolated { ... }</code> used to bridge from AppKit callbacks that Swift can't prove are main-actor.</p>
+  <p>Swift's actor system protects against data races. <code>@MainActor</code> means "this runs on the main thread" — required for any UIKit/AppKit/SwiftUI work. Every state type in this app is <code>@MainActor</code>; views are implicitly main-actor too. You'll see <code>MainActor.assumeIsolated { ... }</code> used to bridge from AppKit callbacks that Swift can't prove are main-actor.</p>
 
-  <h3><code>NavigationSplitView</code></h3>
+  <h3><a href="https://developer.apple.com/documentation/swiftui/navigationsplitview"><code>NavigationSplitView</code></a></h3>
   <p>The two-column layout. First closure is the sidebar; <code>detail:</code> is the right pane. <code>List(selection:)</code> inside the sidebar binds automatically to the selected lesson ID — this is why just changing a <code>@State String?</code> updates the detail view.</p>
 
-  <h3><code>NSViewRepresentable</code> — bridging AppKit</h3>
+  <h3><a href="https://developer.apple.com/documentation/swiftui/nsviewrepresentable"><code>NSViewRepresentable</code></a> — bridging AppKit</h3>
   <p>SwiftUI doesn't ship a text view as capable as <code>NSTextView</code> (rich editing, accessibility identifiers, custom insertion point color). <code>ExerciseEditorView</code> wraps one. Three methods to know:</p>
   <ul>
     <li><code>makeNSView(context:)</code> — build once</li>
@@ -664,29 +918,63 @@ final class ExerciseEngine {
   </ul>
   <p>The Coordinator pattern is how you carry state that AppKit needs (delegates, selectors, cached closures) across the value-type SwiftUI boundary.</p>
 
-  <h3><code>DistributedNotificationCenter</code> (not in essentials; in master)</h3>
+  <h3><code>DistributedNotificationCenter</code> <span style="font-weight: 400; color: var(--fg-muted); font-size: 0.85em;">(not in essentials; in master)</span></h3>
   <p>macOS apps can post system-wide notifications that any other process can observe. kindaVim posts <code>kindaVimDidEnterNormalMode</code> etc. when the user changes modes. The stripped build doesn't use this, but if you look at the <code>master</code> branch's <code>ModeMonitor</code>, that's what it's listening to.</p>
 
   <h3><code>FileManager</code> and Application Support</h3>
   <p>User data that isn't a "document" lives in <code>~/Library/Application Support/&lt;bundle-id&gt;/</code>. Look up the URL with <code>FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)</code>. The directory may not exist on first launch; always <code>createDirectory(at:withIntermediateDirectories: true)</code> before writing. See <code>ProgressStore.save()</code>.</p>
 
   <h3>Swift Package Manager (no Xcode project)</h3>
-  <p>There is no <code>.xcodeproj</code> in this repo. Instead, <code>Package.swift</code> declares a single executable target. You can open the <code>Package.swift</code> file directly in Xcode — it'll resolve dependencies, show previews, and build just like a project. From the terminal, <code>swift build</code> and <code>swift test</code> work. The trade-off: no Asset Catalog, no Storyboards, and a slightly more manual setup for things like app bundles (see <code>Scripts/</code>).</p>
+  <p>There is no <code>.xcodeproj</code> in this repo. Instead, <code>Package.swift</code> declares a library (<code>KindaVimTutorKit</code>) and an executable (<code>KindaVimTutor</code>). You can open the <code>Package.swift</code> file directly in Xcode — it'll resolve dependencies, show previews, and build just like a project. From the terminal, <code>swift build</code> and <code>swift test</code> work. The split exists so SwiftUI previews render against the library without Xcode 16's <code>ENABLE_DEBUG_DYLIB</code> requirement hitting the executable.</p>
 
   <h3>SwiftUI previews (<code>#Preview</code>)</h3>
   <p>Every view file in this project ends with a <code>#Preview("...") { ... }</code> block. With the package open in Xcode, the canvas renders these live. The <code>Views/PreviewSamples.swift</code> file holds shared fixture data so previews stay short. Use previews aggressively — they're the fastest feedback loop in SwiftUI.</p>
 
-  <div class="callout tip">
-    <span class="callout-label">Tip</span>
+  <blockquote>
     When reading a new SwiftUI codebase, go file-by-file in the order: App → State → Models → Engines → Views. That tracks data flow rather than folder names, and the dependency arrows only ever point downward.
-  </div>
+  </blockquote>
 </section>
 
-</main>
+<hr class="section-rule">
+
+<p style="text-align: center; margin: 48px 0 0;">
+  <a class="crosslink" href="tutorial.html">Read the tutorial →</a>
+</p>
+
+</div>
 
 <footer>
-  <p>kindaVim Tutor · essentials branch · <code>docs/architecture.html</code></p>
+  kindaVim Tutor · essentials branch · <code>docs/architecture.html</code>
 </footer>
+
+<script>
+  if (window.Prism) { Prism.highlightAll(); }
+  // Annotate external links with a friendly domain hint on hover.
+  (function () {
+    const friendly = {
+      'developer.apple.com': 'Apple Developer',
+      'docs.swift.org': 'Swift Documentation',
+      'swift.org': 'Swift.org',
+      'github.com': 'GitHub',
+      'www.hackingwithswift.com': 'Hacking with Swift',
+      'hackingwithswift.com': 'Hacking with Swift',
+      'www.swiftbysundell.com': 'Swift by Sundell',
+    };
+    document.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || !href.startsWith('http')) return;
+      try {
+        const u = new URL(href);
+        const host = u.hostname.replace(/^www\./, '');
+        const name = friendly[u.hostname] || friendly[host] || host;
+        a.classList.add('external');
+        a.setAttribute('data-site', name);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      } catch (e) { /* ignore */ }
+    });
+  })();
+</script>
 
 </body>
 </html>
