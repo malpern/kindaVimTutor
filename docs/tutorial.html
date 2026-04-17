@@ -3159,7 +3159,9 @@ $ swift run
       { type: '.' }, { pause: 220 },
       { type: '.' },
       { pause: 700 },
-      ...Array.from(' Tutorial').map((c) => ({ type: c })),
+      // Non-breaking space before "Tutorial" so the comedic second
+      // word never gets orphaned to its own line.
+      ...Array.from('\u00A0Tutorial').map((c) => ({ type: c })),
     ];
 
     function delayFor(ch) {
