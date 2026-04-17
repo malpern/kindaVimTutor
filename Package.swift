@@ -6,15 +6,27 @@ let package = Package(
     platforms: [
         .macOS(.v14),
     ],
+    products: [
+        // The library holds all views, models, engine, and services.
+        // Splitting it out of the executable lets SwiftUI `#Preview` work
+        // in Xcode 16+ without needing ENABLE_DEBUG_DYLIB on an executable.
+        .library(name: "KindaVimTutorKit", targets: ["KindaVimTutorKit"]),
+        .executable(name: "KindaVimTutor", targets: ["KindaVimTutor"]),
+    ],
     targets: [
+        .target(
+            name: "KindaVimTutorKit",
+            path: "Sources/KindaVimTutorKit",
+            exclude: ["Resources/.gitkeep"]
+        ),
         .executableTarget(
             name: "KindaVimTutor",
-            path: "Sources/KindaVimTutor",
-            exclude: ["Resources/.gitkeep"]
+            dependencies: ["KindaVimTutorKit"],
+            path: "Sources/KindaVimTutor"
         ),
         .testTarget(
             name: "KindaVimTutorTests",
-            dependencies: ["KindaVimTutor"],
+            dependencies: ["KindaVimTutorKit"],
             path: "Tests/KindaVimTutorTests"
         )
     ]

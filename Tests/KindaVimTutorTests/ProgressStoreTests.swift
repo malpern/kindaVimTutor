@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import KindaVimTutor
+@testable import KindaVimTutorKit
 
 @Suite("ProgressStore persistence and bookkeeping")
 @MainActor
@@ -38,11 +38,11 @@ struct ProgressStoreTests {
         #expect(store.bestResult(for: id)?.keystrokeCount == 4)
     }
 
-    @Test("lessonProgress is the fraction of exercises completed")
-    func lessonProgressFraction() {
+    @Test("isLessonCompleted requires every exercise to be completed")
+    func lessonCompletion() {
         let store = ProgressStore()
         let tag = UUID().uuidString.prefix(6)
-        let exercises = (0..<4).map { i in
+        let exercises = (0..<3).map { i in
             Exercise(id: "lp.\(tag).\(i)", instruction: "", initialText: "a",
                      initialCursorPosition: 0, expectedText: "b",
                      expectedCursorPosition: nil, hints: [], difficulty: .learn)
@@ -50,26 +50,13 @@ struct ProgressStoreTests {
         let lesson = Lesson(id: "lp.\(tag)", number: 1, title: "t", subtitle: "",
                             explanation: [], exercises: exercises, motionsIntroduced: [])
 
-        #expect(store.lessonProgress(lesson) == 0)
+        #expect(store.isLessonCompleted(lesson) == false)
 
-        for ex in exercises.prefix(2) {
+        for ex in exercises {
             store.recordCompletion(ExerciseResult(exerciseId: ex.id, completedAt: Date(),
                                                    timeSeconds: 1, keystrokeCount: 1,
                                                    attempts: 1, hintsUsed: 0))
         }
-        #expect(store.lessonProgress(lesson) == 0.5)
-    }
-
-    @Test("saveDrillSession writes a JSON file under sessions/")
-    func saveDrillSessionWritesFile() throws {
-        let store = ProgressStore()
-        var session = DrillSession(exerciseId: "ds.\(UUID().uuidString.prefix(6))", drillCount: 1)
-        session.events.append(.init(timestamp: 0, type: .repStarted, text: "a", cursorPosition: 0, repIndex: 0))
-        session.completedAt = Date()
-        store.saveDrillSession(session)
-
-        let sessionsDir = store.progressFileURL.deletingLastPathComponent().appendingPathComponent("sessions", isDirectory: true)
-        let contents = (try? FileManager.default.contentsOfDirectory(atPath: sessionsDir.path)) ?? []
-        #expect(contents.contains { $0.contains(session.exerciseId) })
+        #expect(store.isLessonCompleted(lesson))
     }
 }

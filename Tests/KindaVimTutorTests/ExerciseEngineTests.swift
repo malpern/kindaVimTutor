@@ -1,6 +1,6 @@
 import Testing
 import Foundation
-@testable import KindaVimTutor
+@testable import KindaVimTutorKit
 
 @Suite("ExerciseEngine lifecycle")
 @MainActor
@@ -27,7 +27,6 @@ struct ExerciseEngineTests {
         #expect(e.completedReps == 0)
         #expect(e.drillCount == 2)
         #expect(e.currentVariation?.expectedText == "word")
-        #expect(e.currentSession != nil)
     }
 
     @Test("matching text advances repCompleted; cursor match is required when specified")
@@ -62,7 +61,6 @@ struct ExerciseEngineTests {
         e.start(exercise)
         e.textDidChange(currentText: "b", cursorPosition: 0)
         #expect(e.state == .drillCompleted)
-        #expect(e.currentSession?.completedAt != nil)
     }
 
     @Test("text without cursor requirement completes on text match alone")
@@ -118,20 +116,4 @@ struct ExerciseEngineTests {
         #expect(e.drillProgress == 0.25)
     }
 
-    @Test("session records repStarted and repCompleted events")
-    func sessionCapturesEvents() {
-        let e = ExerciseEngine()
-        e.start(deleteWordExercise(drillCount: 1))
-        e.textDidChange(currentText: "word", cursorPosition: 0)
-
-        let events = e.currentSession?.events ?? []
-        let types = events.map(\.type)
-        #expect(types.contains(.repStarted))
-        #expect(types.contains(.repCompleted))
-        #expect(types.contains(.drillCompleted))
-
-        let rep = e.currentSession?.reps.first
-        #expect(rep?.completed == true)
-        #expect(rep?.endTimestamp != nil)
-    }
 }

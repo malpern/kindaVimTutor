@@ -1,5 +1,5 @@
 import Testing
-@testable import KindaVimTutor
+@testable import KindaVimTutorKit
 
 @Suite("Exercise variations")
 struct ExerciseTests {

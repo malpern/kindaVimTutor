@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kindaVim Tutor — Architecture Guide</title>
+<style>
+  :root {
+    --bg: #fbfbfd;
+    --fg: #1d1d1f;
+    --fg-secondary: #6e6e73;
+    --fg-tertiary: #86868b;
+    --accent: #0071e3;
+    --accent-soft: #e8f1fc;
+    --divider: #e5e5e7;
+    --surface: #ffffff;
+    --code-bg: #f5f5f7;
+    --tip-bg: #fef6e6;
+    --note-bg: #eaf4ff;
+    --shadow: 0 2px 16px rgba(0,0,0,0.04);
+    --serif: "New York", "Iowan Old Style", ui-serif, Georgia, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Arial, sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #000;
+      --fg: #f5f5f7;
+      --fg-secondary: #a1a1a6;
+      --fg-tertiary: #6e6e73;
+      --accent: #2997ff;
+      --accent-soft: #0d2a4a;
+      --divider: #2a2a2d;
+      --surface: #1c1c1e;
+      --code-bg: #1c1c1e;
+      --tip-bg: #3a2f12;
+      --note-bg: #0d2a4a;
+      --shadow: 0 2px 16px rgba(0,0,0,0.4);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--fg);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .hero {
+    padding: 120px 24px 80px;
+    text-align: center;
+    background: linear-gradient(180deg, var(--accent-soft) 0%, var(--bg) 100%);
+  }
+  .hero-eyebrow {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(44px, 7vw, 88px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0 0 24px;
+  }
+  .hero p {
+    font-size: clamp(18px, 2.2vw, 24px);
+    color: var(--fg-secondary);
+    max-width: 680px;
+    margin: 0 auto;
+    letter-spacing: -0.01em;
+  }
+
+  main { max-width: 880px; margin: 0 auto; padding: 0 24px 120px; }
+
+  section { margin-top: 80px; }
+  section h2 {
+    font-family: var(--serif);
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin: 0 0 8px;
+  }
+  section > .deck {
+    font-size: 20px;
+    color: var(--fg-secondary);
+    margin: 0 0 40px;
+    letter-spacing: -0.01em;
+  }
+  section h3 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 56px 0 12px;
+  }
+  section h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 32px 0 8px;
+  }
+
+  p { margin: 0 0 16px; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    background: var(--code-bg);
+    padding: 20px 24px;
+    border-radius: 12px;
+    overflow-x: auto;
+    margin: 16px 0 24px;
+  }
+  pre code { background: none; padding: 0; font-size: inherit; }
+
+  .diagram {
+    margin: 24px 0 32px;
+    padding: 32px 24px;
+    background: var(--surface);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    overflow-x: auto;
+  }
+  .diagram svg { display: block; margin: 0 auto; max-width: 100%; }
+  .diagram-caption {
+    text-align: center;
+    font-size: 14px;
+    color: var(--fg-tertiary);
+    margin-top: 16px;
+  }
+
+  .callout {
+    padding: 20px 24px;
+    border-radius: 12px;
+    margin: 24px 0;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .callout.note { background: var(--note-bg); }
+  .callout.tip { background: var(--tip-bg); }
+  .callout-label {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .modules {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin: 24px 0;
+  }
+  .module-card {
+    padding: 24px;
+    background: var(--surface);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+  }
+  .module-card h4 {
+    margin: 0 0 8px;
+    font-size: 17px;
+  }
+  .module-card p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--fg-secondary);
+  }
+  .module-card ul {
+    margin: 8px 0 0;
+    padding-left: 18px;
+    font-size: 13px;
+    color: var(--fg-tertiary);
+  }
+
+  .toc {
+    position: sticky;
+    top: 24px;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: var(--shadow);
+    margin: 40px 0;
+  }
+  .toc h4 { margin: 0 0 12px; font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-tertiary); }
+  .toc ol { margin: 0; padding-left: 20px; font-size: 15px; }
+  .toc ol li { margin-bottom: 6px; }
+  .toc ol li a { color: var(--fg); }
+
+  .step-list { list-style: none; padding: 0; counter-reset: step; }
+  .step-list > li {
+    position: relative;
+    padding: 20px 24px 20px 72px;
+    background: var(--surface);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    counter-increment: step;
+  }
+  .step-list > li::before {
+    content: counter(step);
+    position: absolute;
+    left: 20px;
+    top: 22px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .step-list li code { font-size: 13px; }
+  .step-list li strong { display: block; margin-bottom: 4px; font-size: 16px; }
+
+  footer {
+    text-align: center;
+    padding: 40px 24px;
+    font-size: 13px;
+    color: var(--fg-tertiary);
+    border-top: 1px solid var(--divider);
+    margin-top: 80px;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="hero-eyebrow">Architecture Guide</div>
+  <h1>kindaVim Tutor</h1>
+  <p>A SwiftUI macOS app that teaches Vim motions, one drill at a time. This guide walks through the essentials build — a stripped-down branch of the code — and explains what every file does.</p>
+</header>
+
+<main>
+
+<nav class="toc" aria-label="Table of contents">
+  <h4>On this page</h4>
+  <ol>
+    <li><a href="#overview">Overview</a></li>
+    <li><a href="#architecture">Architecture</a></li>
+    <li><a href="#data-flow">Data flow</a></li>
+    <li><a href="#data-model">The data model</a></li>
+    <li><a href="#modules">Module guide</a></li>
+    <li><a href="#tutorial">Reading the code</a></li>
+    <li><a href="#macos">Beginner macOS developer notes</a></li>
+  </ol>
+</nav>
+
+<section id="overview">
+  <h2>Overview</h2>
+  <p class="deck">What the app does, in three sentences.</p>
+  <p>The user opens the app, picks a lesson from the sidebar, and steps through slides with <code>l</code> (forward) and <code>h</code> (back) — exactly the motions Vim uses for cursor movement. Some slides are text; others are <em>drills</em> — a small editor that the user has to transform from a starting state to an expected state, several times in a row. Results are saved to disk so lesson completion persists across launches.</p>
+
+  <div class="callout note">
+    <span class="callout-label">Essentials build</span>
+    This branch (<code>essentials</code>) contains only the core learning loop — roughly 1,000 lines across 20 files. The <code>master</code> branch adds a mode indicator (observes kindaVim via distributed notifications), a progress inspector, achievement rings, telemetry-grade drill recording, file-based logging, and a six-chapter curriculum. Everything here exists in <code>master</code> too; nothing was added for the essentials branch.
+  </div>
+</section>
+
+<section id="architecture">
+  <h2>Architecture</h2>
+  <p class="deck">Three layers, one direction of dependency.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 760 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Architecture layer diagram">
+      <defs>
+        <linearGradient id="g-view" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#e8f1fc"/>
+          <stop offset="1" stop-color="#d1e4fb"/>
+        </linearGradient>
+        <linearGradient id="g-engine" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#fef6e6"/>
+          <stop offset="1" stop-color="#fbe6c5"/>
+        </linearGradient>
+        <linearGradient id="g-model" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#f0f0f2"/>
+          <stop offset="1" stop-color="#e2e2e6"/>
+        </linearGradient>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#6e6e73"/>
+        </marker>
+      </defs>
+
+      <!-- View layer -->
+      <rect x="40" y="30" width="680" height="100" rx="12" fill="url(#g-view)" stroke="#4a90e2" stroke-width="1"/>
+      <text x="60" y="60" font-family="-apple-system" font-size="14" font-weight="700" fill="#1d1d1f" letter-spacing="0.08em">VIEWS</text>
+      <text x="60" y="85" font-family="-apple-system" font-size="13" fill="#1d1d1f">KindaVimTutorApp · SidebarView · StepCanvasView · DrillStepView</text>
+      <text x="60" y="105" font-family="-apple-system" font-size="13" fill="#1d1d1f">TitleStepView · ContentStepView · ExerciseEditorView · WelcomeView</text>
+      <text x="60" y="120" font-family="-apple-system" font-size="11" fill="#6e6e73" font-style="italic">Observe @Observable types. Declarative. No business logic.</text>
+
+      <!-- Engine layer -->
+      <rect x="40" y="160" width="680" height="90" rx="12" fill="url(#g-engine)" stroke="#d4a645" stroke-width="1"/>
+      <text x="60" y="190" font-family="-apple-system" font-size="14" font-weight="700" fill="#1d1d1f" letter-spacing="0.08em">ENGINE &amp; SERVICES</text>
+      <text x="60" y="215" font-family="-apple-system" font-size="13" fill="#1d1d1f">AppState · ExerciseEngine · LessonStepController · ProgressStore</text>
+      <text x="60" y="235" font-family="-apple-system" font-size="11" fill="#6e6e73" font-style="italic">@Observable @MainActor. Validates drills. Persists progress.</text>
+
+      <!-- Model layer -->
+      <rect x="40" y="280" width="680" height="90" rx="12" fill="url(#g-model)" stroke="#86868b" stroke-width="1"/>
+      <text x="60" y="310" font-family="-apple-system" font-size="14" font-weight="700" fill="#1d1d1f" letter-spacing="0.08em">MODELS &amp; CURRICULUM</text>
+      <text x="60" y="335" font-family="-apple-system" font-size="13" fill="#1d1d1f">Chapter · Lesson · Exercise · ContentBlock · LessonStep · UserProgress · ExerciseResult</text>
+      <text x="60" y="355" font-family="-apple-system" font-size="11" fill="#6e6e73" font-style="italic">Plain Sendable structs and enums. Static curriculum data.</text>
+
+      <!-- Arrows -->
+      <line x1="380" y1="250" x2="380" y2="278" stroke="#6e6e73" stroke-width="1.5" marker-end="url(#arrow)"/>
+      <line x1="380" y1="130" x2="380" y2="158" stroke="#6e6e73" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+      <text x="395" y="270" font-family="-apple-system" font-size="11" fill="#6e6e73">depends on</text>
+      <text x="395" y="150" font-family="-apple-system" font-size="11" fill="#6e6e73">depends on</text>
+    </svg>
+    <div class="diagram-caption">Each layer depends only on the layers below it. No upward references.</div>
+  </div>
+
+  <h3>Why this shape</h3>
+  <p>A common SwiftUI pitfall is letting business logic leak into views — <code>onAppear</code> handlers that mutate state, timers embedded in <code>ViewBuilder</code>s, validation logic scattered across observers. This app keeps all of that in the <strong>Engine</strong> layer. <code>ExerciseEngine</code> is the single source of truth for one drill; views just show what it already computed.</p>
+  <p>Persistence sits in <strong>Services</strong> (<code>ProgressStore</code>), which is injected into views that need it. Because state is <code>@Observable</code>, any view that reads a property automatically re-renders when it changes — no manual bindings, no <code>ObservableObject</code> boilerplate.</p>
+</section>
+
+<section id="data-flow">
+  <h2>Data flow</h2>
+  <p class="deck">What happens when you press a key during a drill.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 780 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data flow diagram">
+      <defs>
+        <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0071e3"/>
+        </marker>
+      </defs>
+
+      <!-- NSTextView -->
+      <rect x="20" y="40" width="140" height="70" rx="10" fill="#fff" stroke="#d1d1d6" stroke-width="1"/>
+      <text x="90" y="68" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="600" fill="#1d1d1f">NSTextView</text>
+      <text x="90" y="86" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#6e6e73">(AppKit)</text>
+      <text x="90" y="101" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">User types a key</text>
+
+      <!-- Coordinator -->
+      <rect x="200" y="40" width="150" height="70" rx="10" fill="#fff" stroke="#d1d1d6" stroke-width="1"/>
+      <text x="275" y="68" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="600" fill="#1d1d1f">Coordinator</text>
+      <text x="275" y="86" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#6e6e73">NSTextViewDelegate</text>
+      <text x="275" y="101" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">textDidChange(...)</text>
+
+      <!-- Engine -->
+      <rect x="390" y="40" width="170" height="70" rx="10" fill="#fef6e6" stroke="#d4a645" stroke-width="1.5"/>
+      <text x="475" y="64" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="700" fill="#1d1d1f">ExerciseEngine</text>
+      <text x="475" y="82" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#1d1d1f">textDidChange(...)</text>
+      <text x="475" y="98" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">count, validate, transition</text>
+
+      <!-- Engine state -->
+      <rect x="390" y="150" width="170" height="50" rx="8" fill="#e8f1fc" stroke="#4a90e2" stroke-width="1"/>
+      <text x="475" y="170" text-anchor="middle" font-family="-apple-system" font-size="11" font-weight="600" fill="#1d1d1f">@Observable state</text>
+      <text x="475" y="188" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">keystrokeCount, state, ...</text>
+
+      <!-- DrillStepView -->
+      <rect x="600" y="40" width="160" height="70" rx="10" fill="#e8f1fc" stroke="#4a90e2" stroke-width="1.5"/>
+      <text x="680" y="64" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="700" fill="#1d1d1f">DrillStepView</text>
+      <text x="680" y="82" text-anchor="middle" font-family="-apple-system" font-size="11" fill="#1d1d1f">re-renders</text>
+      <text x="680" y="98" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">border, label, status</text>
+
+      <!-- ProgressStore -->
+      <rect x="390" y="240" width="170" height="60" rx="10" fill="#f0f0f2" stroke="#86868b" stroke-width="1"/>
+      <text x="475" y="262" text-anchor="middle" font-family="-apple-system" font-size="12" font-weight="600" fill="#1d1d1f">ProgressStore</text>
+      <text x="475" y="280" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">recordCompletion(...)</text>
+      <text x="475" y="293" text-anchor="middle" font-family="-apple-system" font-size="9" fill="#6e6e73">~/Library/Application Support/...</text>
+
+      <!-- Arrows -->
+      <line x1="160" y1="75" x2="200" y2="75" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
+      <line x1="350" y1="75" x2="390" y2="75" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
+      <line x1="560" y1="75" x2="600" y2="75" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)" stroke-dasharray="4 3"/>
+      <line x1="475" y1="110" x2="475" y2="148" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
+      <line x1="475" y1="200" x2="475" y2="238" stroke="#0071e3" stroke-width="2" marker-end="url(#arrow2)"/>
+
+      <text x="180" y="65" font-family="-apple-system" font-size="10" fill="#6e6e73">NSEvent</text>
+      <text x="365" y="65" font-family="-apple-system" font-size="10" fill="#6e6e73">@MainActor</text>
+      <text x="578" y="65" font-family="-apple-system" font-size="10" fill="#6e6e73">observes</text>
+      <text x="490" y="130" font-family="-apple-system" font-size="10" fill="#6e6e73">mutate</text>
+      <text x="490" y="220" font-family="-apple-system" font-size="10" fill="#6e6e73">on drillCompleted</text>
+    </svg>
+    <div class="diagram-caption">One keystroke → AppKit → Coordinator → Engine → observable mutation → SwiftUI re-render.</div>
+  </div>
+
+  <p>The dashed arrow from Engine → View is the Observation framework's magic. <code>DrillStepView</code> never subscribes explicitly; the Swift compiler tracks which observable properties the view's <code>body</code> reads and re-runs <code>body</code> when any of them change. The persistence write (bottom arrow) only happens once, when the final rep of the drill completes.</p>
+</section>
+
+<section id="data-model">
+  <h2>The data model</h2>
+  <p class="deck">Everything the app renders is a composition of these seven types.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 780 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data model diagram">
+      <!-- Curriculum -->
+      <rect x="20" y="30" width="140" height="46" rx="8" fill="#fff" stroke="#d1d1d6"/>
+      <text x="90" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Curriculum</text>
+      <text x="90" y="68" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">static namespace</text>
+
+      <!-- Chapter -->
+      <rect x="220" y="30" width="140" height="80" rx="8" fill="#e8f1fc" stroke="#4a90e2"/>
+      <text x="290" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Chapter</text>
+      <text x="290" y="70" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">id, number, title</text>
+      <text x="290" y="83" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">systemImage</text>
+      <text x="290" y="100" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">lessons: [Lesson]</text>
+
+      <!-- Lesson -->
+      <rect x="420" y="30" width="140" height="120" rx="8" fill="#e8f1fc" stroke="#4a90e2"/>
+      <text x="490" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Lesson</text>
+      <text x="490" y="70" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">id, title, subtitle</text>
+      <text x="490" y="83" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">motionsIntroduced</text>
+      <text x="490" y="105" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">explanation: [ContentBlock]</text>
+      <text x="490" y="125" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">exercises: [Exercise]</text>
+
+      <!-- ContentBlock -->
+      <rect x="620" y="30" width="140" height="100" rx="8" fill="#fef6e6" stroke="#d4a645"/>
+      <text x="690" y="52" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">ContentBlock</text>
+      <text x="690" y="68" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">enum with cases:</text>
+      <text x="690" y="83" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">text, heading, tip</text>
+      <text x="690" y="96" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">keyCommand, code...</text>
+
+      <!-- Exercise -->
+      <rect x="420" y="200" width="140" height="105" rx="8" fill="#fef6e6" stroke="#d4a645"/>
+      <text x="490" y="222" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">Exercise</text>
+      <text x="490" y="238" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">initial / expected</text>
+      <text x="490" y="251" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">text &amp; cursor</text>
+      <text x="490" y="268" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">drillCount</text>
+      <text x="490" y="283" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">variations: [Variation]</text>
+      <text x="490" y="298" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">hints, difficulty</text>
+
+      <!-- LessonStep -->
+      <rect x="220" y="200" width="140" height="60" rx="8" fill="#fef6e6" stroke="#d4a645"/>
+      <text x="290" y="222" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">LessonStep</text>
+      <text x="290" y="238" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">enum: title | content |</text>
+      <text x="290" y="251" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">drill</text>
+
+      <!-- UserProgress + ExerciseResult -->
+      <rect x="20" y="200" width="140" height="70" rx="8" fill="#f0f0f2" stroke="#86868b"/>
+      <text x="90" y="222" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">UserProgress</text>
+      <text x="90" y="240" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">Codable, persisted</text>
+      <text x="90" y="258" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#1d1d1f">[id: ExerciseResult]</text>
+
+      <rect x="20" y="310" width="140" height="60" rx="8" fill="#f0f0f2" stroke="#86868b"/>
+      <text x="90" y="332" text-anchor="middle" font-family="-apple-system" font-size="13" font-weight="700">ExerciseResult</text>
+      <text x="90" y="348" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">keystrokes, time,</text>
+      <text x="90" y="361" text-anchor="middle" font-family="-apple-system" font-size="10" fill="#6e6e73">completedAt</text>
+
+      <!-- Relations -->
+      <line x1="160" y1="52" x2="218" y2="52" stroke="#6e6e73" stroke-width="1.2"/>
+      <line x1="360" y1="65" x2="418" y2="65" stroke="#6e6e73" stroke-width="1.2"/>
+      <line x1="560" y1="65" x2="618" y2="65" stroke="#6e6e73" stroke-width="1.2"/>
+      <line x1="490" y1="150" x2="490" y2="200" stroke="#6e6e73" stroke-width="1.2"/>
+      <line x1="360" y1="220" x2="420" y2="220" stroke="#6e6e73" stroke-width="1.2" stroke-dasharray="3 2"/>
+      <line x1="160" y1="232" x2="160" y2="232" stroke="none"/>
+      <line x1="90" y1="268" x2="90" y2="308" stroke="#6e6e73" stroke-width="1.2"/>
+    </svg>
+    <div class="diagram-caption">Blue = static content. Amber = "shape" of lessons/exercises. Grey = persisted state.</div>
+  </div>
+
+  <h3>Key concepts</h3>
+
+  <h4>The whole curriculum is a compile-time constant</h4>
+  <p>Open <code>Curriculum/Chapter1_SurvivalKit.swift</code>. It's a Swift file full of literal <code>Exercise(id: ..., initialText: "...")</code> calls. There is no server, no JSON, no CMS. Changing a lesson means editing the file and recompiling. This keeps the tutor simple, offline-only, and lets you refactor content with Swift's type checker.</p>
+
+  <h4>An <code>Exercise</code> is "initial state → expected state"</h4>
+  <p>Every drill is defined by four values: the initial text, the initial cursor position, the expected text, and the expected cursor position. Success is simply <code>currentText == expectedText &amp;&amp; currentCursor == expectedCursor</code>. That's the whole validation rule (<code>ExerciseEngine.validate(currentText:cursorPosition:)</code>).</p>
+  <p>Variations let one exercise reuse the same <em>task</em> across reps but change the concrete strings, so the user can't pass a drill by muscle memory on a single input.</p>
+
+  <h4><code>ContentBlock</code> is a small DSL</h4>
+  <p>Rather than templating lesson explanations as HTML or markdown, the app describes them as an array of enum cases: <code>.heading</code>, <code>.text</code>, <code>.tip</code>, <code>.keyCommand</code>, <code>.codeExample</code>. <code>ContentStepView</code> switches over the cases and renders each. Adding a new kind of explanation means adding an enum case and a new <code>case</code> in the switch — the compiler tells you both places to update.</p>
+
+  <h4><code>LessonStep</code> is the <em>presentation</em> of a lesson</h4>
+  <p>Lessons in the data model are unordered bags of content + exercises. <code>LessonStep.steps(from:chapterTitle:)</code> flattens a lesson into an ordered sequence of slides:</p>
+  <ol>
+    <li>A <code>.title</code> step (chapter + lesson name)</li>
+    <li>One <code>.content</code> step per heading-delimited group of blocks</li>
+    <li>One <code>.drill</code> step per exercise</li>
+  </ol>
+  <p>This decouples "what the lesson says" from "how it's presented". The step-based canvas only knows about steps; it never reaches into a raw Lesson.</p>
+
+  <h4>Progress is keyed by exercise ID</h4>
+  <p><code>UserProgress.completedExercises</code> is <code>[String: ExerciseResult]</code>. Only the <em>best</em> result is retained — fewer keystrokes wins, ties broken by faster time. Because IDs are stable (<code>"ch1.l1.e1"</code>), renaming a lesson doesn't lose the user's progress; renaming an exercise ID would.</p>
+</section>
+
+<section id="modules">
+  <h2>Module guide</h2>
+  <p class="deck">A quick tour of every folder. Open each in Xcode's file navigator as you read.</p>
+
+  <div class="modules">
+    <div class="module-card">
+      <h4>App/</h4>
+      <p>The SwiftUI scene and root state holder.</p>
+      <ul>
+        <li><code>KindaVimTutorApp.swift</code> — <code>@main</code> entry</li>
+        <li><code>AppState.swift</code> — selected lesson, progress store</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Models/</h4>
+      <p>Plain data types. No behavior, no dependencies.</p>
+      <ul>
+        <li><code>Chapter</code>, <code>Lesson</code>, <code>Exercise</code></li>
+        <li><code>ContentBlock</code>, <code>LessonStep</code></li>
+        <li><code>UserProgress</code>, <code>ExerciseResult</code></li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Curriculum/</h4>
+      <p>Static course content as Swift literals.</p>
+      <ul>
+        <li><code>Curriculum.swift</code> — namespace</li>
+        <li><code>Chapter1_SurvivalKit.swift</code> — lessons</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Engine/</h4>
+      <p>The pieces that actually <em>do</em> things.</p>
+      <ul>
+        <li><code>ExerciseEngine</code> — drill state machine</li>
+        <li><code>LessonStepController</code> — slide navigation</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Services/</h4>
+      <p>Talks to the outside world (disk).</p>
+      <ul>
+        <li><code>ProgressStore</code> — JSON read/write</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Style/</h4>
+      <p>Design tokens shared by views.</p>
+      <ul>
+        <li><code>Colors</code>, <code>Typography</code></li>
+        <li><code>KeyCapView</code> — reusable key cap</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Views/Canvas/</h4>
+      <p>The step-based lesson flow.</p>
+      <ul>
+        <li><code>StepCanvasView</code> — host</li>
+        <li><code>TitleStepView</code>, <code>ContentStepView</code>, <code>DrillStepView</code></li>
+        <li><code>StepIndicatorView</code> — dot pager</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Views/Editor/</h4>
+      <p>The editable text buffer used in drills.</p>
+      <ul>
+        <li><code>ExerciseEditorView</code> — <code>NSViewRepresentable</code></li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Views/Navigation/</h4>
+      <p>The left-hand lesson sidebar.</p>
+      <ul>
+        <li><code>SidebarView</code> — chapter list</li>
+        <li><code>LessonRowView</code> — row cell</li>
+      </ul>
+    </div>
+    <div class="module-card">
+      <h4>Views/Onboarding/</h4>
+      <p>First-launch welcome.</p>
+      <ul>
+        <li><code>WelcomeView</code></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="tutorial">
+  <h2>Reading the code</h2>
+  <p class="deck">A guided tour. Follow these steps with the code open and you'll understand the whole app in 15 minutes.</p>
+
+  <ol class="step-list">
+    <li>
+      <strong>Start at the entry point</strong>
+      <code>Sources/KindaVimTutor/App/KindaVimTutorApp.swift</code> is the <code>@main</code> struct. Everything flows from here. Note that it only hosts a <code>NavigationSplitView</code> — no business logic, no timers, no listeners.
+    </li>
+    <li>
+      <strong>Look at root state</strong>
+      <code>AppState</code> is <code>@Observable</code>, <code>@MainActor</code>. It owns the curriculum and the selected lesson. The app binds <code>selectedLessonId</code> into the sidebar so <code>List(selection:)</code> can mutate it directly.
+    </li>
+    <li>
+      <strong>Follow the sidebar selection</strong>
+      <code>SidebarView</code> receives a <code>@Binding var selectedLessonId</code>. When the user clicks a row, <code>List</code> writes to it, which mutates <code>AppState</code>, which causes the detail pane to re-render with the new lesson.
+    </li>
+    <li>
+      <strong>Enter the detail pane</strong>
+      <code>StepCanvasView</code> holds its own <code>@State private var controller = LessonStepController()</code>. On <code>onAppear</code> (and on lesson change), it loads the lesson into the controller, which runs <code>LessonStep.steps(from:)</code> to produce the slide sequence.
+    </li>
+    <li>
+      <strong>Understand step transitions</strong>
+      The canvas renders <code>controller.currentStep</code> inside a <code>switch</code>. Each case picks a view. The <code>.transition(...)</code> modifier combined with <code>.id(step.id)</code> gives SwiftUI the hint to slide-animate between steps.
+    </li>
+    <li>
+      <strong>Hit a drill</strong>
+      <code>DrillStepView</code> creates an <code>ExerciseEngine</code> and calls <code>engine.start(exercise)</code> on appear. It hosts <code>ExerciseEditorView</code> (an <code>NSViewRepresentable</code> wrapping <code>NSTextView</code>) and wires the text/selection callbacks into the engine.
+    </li>
+    <li>
+      <strong>Trace a keystroke</strong>
+      Open <code>ExerciseEngine.textDidChange(currentText:cursorPosition:)</code>. It increments a counter, then calls <code>validate</code>. <code>validate</code> compares against <code>currentVariation.expectedText</code>; on a match, <code>completeRep</code> transitions state and starts the next variation.
+    </li>
+    <li>
+      <strong>See the completion side effect</strong>
+      Back in <code>DrillStepView</code>, <code>onChange(of: engine.isDrillComplete)</code> builds an <code>ExerciseResult</code> and calls <code>progressStore.recordCompletion(...)</code>. <code>ProgressStore</code> writes JSON to <code>~/Library/Application Support/kindaVimTutor/progress.json</code>.
+    </li>
+    <li>
+      <strong>Confirm the sidebar updates</strong>
+      Next time <code>SidebarView</code>'s body runs — which happens when <em>anything</em> it observes changes — <code>progressStore.isLessonCompleted(lesson)</code> returns <code>true</code> and <code>LessonRowView</code> renders a checkmark. You didn't wire this; Observation did.
+    </li>
+  </ol>
+</section>
+
+<section id="macos">
+  <h2>Beginner macOS developer notes</h2>
+  <p class="deck">If you're coming to this codebase new to Swift/SwiftUI, here are the APIs you'll see on every page.</p>
+
+  <h3><code>@Observable</code> and the Observation framework</h3>
+  <p>The <code>@Observable</code> macro (Swift 5.9+) lets you define a plain reference type whose properties SwiftUI automatically tracks. Replacing the old <code>ObservableObject</code> + <code>@Published</code> protocol. Views don't declare what they want to observe — the compiler inspects the <code>body</code> and subscribes only to the properties that are actually read. This is why <code>AppState</code>, <code>ExerciseEngine</code>, and <code>ProgressStore</code> don't need any <code>@Published</code> markers.</p>
+<pre><code>@Observable
+@MainActor
+final class ExerciseEngine {
+    private(set) var state: State = .idle
+    // Reading `state` in any View.body subscribes automatically.
+}</code></pre>
+
+  <h3><code>@State</code>, <code>@Binding</code>, and ownership</h3>
+  <p>In a View, <code>@State</code> means <em>this view owns this value for its lifetime</em>. <code>@Binding</code> means <em>something above me owns it; I get read/write access</em>. In <code>StepCanvasView</code>, <code>@State private var controller = LessonStepController()</code> — the canvas owns the controller. In <code>SidebarView</code>, <code>@Binding var selectedLessonId: String?</code> — <code>AppState</code> owns the value; the sidebar mutates it through the binding.</p>
+
+  <h3><code>@MainActor</code></h3>
+  <p>Swift's actor system protects against data races. <code>@MainActor</code> means "this runs on the main thread" — which is required for any UIKit/AppKit/SwiftUI work. Every state type in this app is <code>@MainActor</code>; views are implicitly main-actor too. You'll see <code>MainActor.assumeIsolated { ... }</code> used to bridge from AppKit callbacks that Swift can't prove are main-actor.</p>
+
+  <h3><code>NavigationSplitView</code></h3>
+  <p>The two-column layout. First closure is the sidebar; <code>detail:</code> is the right pane. <code>List(selection:)</code> inside the sidebar binds automatically to the selected lesson ID — this is why just changing a <code>@State String?</code> updates the detail view.</p>
+
+  <h3><code>NSViewRepresentable</code> — bridging AppKit</h3>
+  <p>SwiftUI doesn't ship a text view as capable as <code>NSTextView</code> (rich editing, accessibility identifiers, custom insertion point color). <code>ExerciseEditorView</code> wraps one. Three methods to know:</p>
+  <ul>
+    <li><code>makeNSView(context:)</code> — build once</li>
+    <li><code>updateNSView(_:context:)</code> — called when SwiftUI inputs change; reconcile</li>
+    <li><code>makeCoordinator()</code> — create a helper class that can be the <code>NSTextViewDelegate</code> and hold closures</li>
+  </ul>
+  <p>The Coordinator pattern is how you carry state that AppKit needs (delegates, selectors, cached closures) across the value-type SwiftUI boundary.</p>
+
+  <h3><code>DistributedNotificationCenter</code> (not in essentials; in master)</h3>
+  <p>macOS apps can post system-wide notifications that any other process can observe. kindaVim posts <code>kindaVimDidEnterNormalMode</code> etc. when the user changes modes. The stripped build doesn't use this, but if you look at the <code>master</code> branch's <code>ModeMonitor</code>, that's what it's listening to.</p>
+
+  <h3><code>FileManager</code> and Application Support</h3>
+  <p>User data that isn't a "document" lives in <code>~/Library/Application Support/&lt;bundle-id&gt;/</code>. Look up the URL with <code>FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)</code>. The directory may not exist on first launch; always <code>createDirectory(at:withIntermediateDirectories: true)</code> before writing. See <code>ProgressStore.save()</code>.</p>
+
+  <h3>Swift Package Manager (no Xcode project)</h3>
+  <p>There is no <code>.xcodeproj</code> in this repo. Instead, <code>Package.swift</code> declares a single executable target. You can open the <code>Package.swift</code> file directly in Xcode — it'll resolve dependencies, show previews, and build just like a project. From the terminal, <code>swift build</code> and <code>swift test</code> work. The trade-off: no Asset Catalog, no Storyboards, and a slightly more manual setup for things like app bundles (see <code>Scripts/</code>).</p>
+
+  <h3>SwiftUI previews (<code>#Preview</code>)</h3>
+  <p>Every view file in this project ends with a <code>#Preview("...") { ... }</code> block. With the package open in Xcode, the canvas renders these live. The <code>Views/PreviewSamples.swift</code> file holds shared fixture data so previews stay short. Use previews aggressively — they're the fastest feedback loop in SwiftUI.</p>
+
+  <div class="callout tip">
+    <span class="callout-label">Tip</span>
+    When reading a new SwiftUI codebase, go file-by-file in the order: App → State → Models → Engines → Views. That tracks data flow rather than folder names, and the dependency arrows only ever point downward.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p>kindaVim Tutor · essentials branch · <code>docs/architecture.html</code></p>
+</footer>
+
+</body>
+</html>

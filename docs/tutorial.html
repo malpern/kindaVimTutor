@@ -1,0 +1,3271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>The KindaVim Tutorial… Tutorial</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<style>
+  :root {
+    --bg: #faf8f3;
+    --paper: #ffffff;
+    --fg: #1a1a1a;
+    --fg-soft: #3a3a3a;
+    --fg-muted: #6e6e73;
+    --fg-quiet: #9a9a9a;
+    --rule: #e8e4d8;
+    --accent: #a14a2a;
+    --accent-soft: #f3e9dd;
+    --code-bg: #d0c097;
+    --code-fg: #1a1a1a;
+    --callout-bg: #fdf7e6;
+    --serif: "New York", "Iowan Old Style", "Charter", Georgia, ui-serif, serif;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
+    --sans-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif;
+    --mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1818;
+      --paper: #1f1d1b;
+      --fg: #ece8e0;
+      --fg-soft: #c9c5bd;
+      --fg-muted: #8a8680;
+      --fg-quiet: #5e5a54;
+      --rule: #2d2a26;
+      --accent: #e88c5e;
+      --accent-soft: #2d1f16;
+      --code-bg: #2a2622;
+      --code-fg: #ece8e0;
+      --callout-bg: #2b2518;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 19px;
+    line-height: 1.72;
+    color: var(--fg);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    font-feature-settings: "kern", "liga", "calt", "onum";
+    hanging-punctuation: first last;
+  }
+
+  /* Modern text balancing — keeps titles from breaking awkwardly
+     and body copy from leaving one-word widows. Safari/Chrome today,
+     harmless elsewhere. */
+  h1, h2, h3 { text-wrap: balance; }
+  p, li { text-wrap: pretty; orphans: 3; widows: 3; }
+
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 80px 32px 160px;
+  }
+
+  /* Sticky chapter-context header — appears on scroll past the hero,
+     shows prev / current / next chapter for orientation. */
+  .chapter-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 40;
+    background: rgba(250, 248, 243, 0.88);
+    backdrop-filter: saturate(1.2) blur(14px);
+    -webkit-backdrop-filter: saturate(1.2) blur(14px);
+    border-bottom: 1px solid var(--rule);
+    transform: translateY(-100%);
+    transition: transform 0.3s ease, opacity 0.25s ease;
+    opacity: 0;
+    pointer-events: none;
+    font-family: var(--sans);
+  }
+  .chapter-nav.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .chapter-nav-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 12px 24px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 24px;
+    align-items: center;
+  }
+  .chapter-nav a {
+    color: var(--fg-muted);
+    text-decoration: none;
+    border: none;
+    font-size: 12px;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    transition: color 0.15s;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chapter-nav a:hover { color: var(--accent); opacity: 1; }
+  .chapter-nav .nav-arrow {
+    font-size: 14px;
+    color: var(--fg-quiet);
+    flex-shrink: 0;
+  }
+  .chapter-nav .nav-prev { justify-self: start; }
+  .chapter-nav .nav-next { justify-self: end; text-align: right; }
+  .chapter-nav .nav-prev .nav-title,
+  .chapter-nav .nav-next .nav-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 24ch;
+  }
+  .chapter-nav .nav-current {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    text-align: center;
+    font-feature-settings: "onum";
+    letter-spacing: -0.005em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chapter-nav .nav-num {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--fg-quiet);
+    font-feature-settings: "tnum" 1, "smcp" 1, "c2sc" 1;
+  }
+  .chapter-nav .nav-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.18s ease-out;
+    opacity: 0.7;
+  }
+  @media (prefers-color-scheme: dark) {
+    .chapter-nav {
+      background: rgba(26, 24, 24, 0.88);
+    }
+  }
+  @media (max-width: 720px) {
+    .chapter-nav .nav-prev .nav-title,
+    .chapter-nav .nav-next .nav-title { display: none; }
+    .chapter-nav .nav-current { font-size: 12px; }
+  }
+
+  h1.title {
+    font-family: var(--serif);
+    font-size: clamp(48px, 7vw, 80px);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    margin: 0 0 24px;
+    text-wrap: balance;
+  }
+
+  .subtitle {
+    font-family: var(--serif);
+    font-size: clamp(22px, 2.5vw, 28px);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--fg-muted);
+    letter-spacing: -0.015em;
+    line-height: 1.35;
+    margin: 0 0 56px;
+    text-wrap: balance;
+  }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 20px;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+  }
+
+  p { margin: 0 0 24px; }
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 1px;
+    transition: opacity 0.15s;
+  }
+  a:hover { opacity: 0.7; }
+
+  /* External links — dashed underline + hover tooltip showing destination. */
+  a.external {
+    position: relative;
+    border-bottom: none;
+    text-decoration: underline dashed;
+    text-decoration-color: rgba(161, 74, 42, 0.55);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 4px;
+  }
+  a.external:hover {
+    text-decoration-color: var(--accent);
+    opacity: 1;
+  }
+  a.external[data-site]::after {
+    content: attr(data-site);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    background: #1a1818;
+    color: #f5f1e8;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.4;
+    padding: 6px 10px;
+    border-radius: 5px;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s, transform 0.18s;
+    pointer-events: none;
+    z-index: 40;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+  }
+  a.external[data-site]::before {
+    content: "↗";
+    display: inline;
+    font-size: 0.82em;
+    color: var(--accent);
+    opacity: 0.5;
+    margin-right: 2px;
+    transition: opacity 0.15s;
+  }
+  a.external:hover::after,
+  a.external:focus::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  a.external:hover::before { opacity: 1; }
+  @media (prefers-color-scheme: dark) {
+    a.external[data-site]::after { background: #ece8e0; color: #1a1a1a; }
+  }
+
+  strong { font-weight: 600; color: var(--fg); }
+  em { font-style: italic; }
+
+  /* True small caps on the uppercase-tracked sans labels. Prettier than
+     all-caps with letter-spacing when the font supports it (SF Pro does). */
+  .eyebrow,
+  .chapter-number,
+  .goal-label,
+  .checkpoint-label,
+  .toc-heading,
+  aside.concept .label {
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+  }
+
+  hr.section-rule {
+    border: none;
+    text-align: center;
+    margin: 80px 0;
+    height: 20px;
+    line-height: 20px;
+  }
+  hr.section-rule::after {
+    content: "· · ·";
+    font-family: var(--serif);
+    color: var(--fg-quiet);
+    font-size: 18px;
+    letter-spacing: 0.75em;
+    padding-left: 0.75em; /* compensate for last spacing slot */
+  }
+
+  /* Table of contents — scrolls with the page, deliberately. */
+  .toc {
+    border-top: 2px solid var(--fg);
+    border-bottom: 1px solid var(--rule);
+    padding: 40px 0;
+    margin: 64px 0 80px;
+  }
+  .toc-heading {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg);
+    margin: 0 0 32px;
+  }
+  .toc-list { list-style: none; padding: 0; margin: 0; }
+  .toc-item {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 20px;
+    align-items: baseline;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  .toc-item:last-child { border-bottom: none; }
+  .toc-num {
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--fg-quiet);
+    font-variant-numeric: tabular-nums;
+  }
+  .toc-title {
+    font-family: var(--serif);
+    font-size: 21px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+    line-height: 1.3;
+  }
+  .toc-title a { color: inherit; border-bottom: none; }
+  .toc-title a:hover { color: var(--accent); }
+  .toc-blurb {
+    font-family: var(--serif);
+    font-size: 15px;
+    font-style: italic;
+    color: var(--fg-muted);
+    margin-top: 4px;
+    line-height: 1.45;
+  }
+
+  /* Chapter structure */
+  .chapter { margin-top: 96px; }
+  .chapter:first-of-type { margin-top: 0; }
+
+  /* Charcoal bull marker at each chapter */
+  .bull {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    margin: 0 auto 36px;
+    filter: drop-shadow(0 1px 0 rgba(0,0,0,0.03));
+    mix-blend-mode: multiply;
+  }
+  @media (prefers-color-scheme: dark) {
+    .bull {
+      mix-blend-mode: screen;
+      opacity: 0.92;
+    }
+  }
+
+  /* Sequence / architecture diagram figure */
+  figure.diagram {
+    margin: 32px 0 12px;
+    padding: 24px 0 16px;
+  }
+  figure.diagram svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  /* Screenshot frame */
+  figure.screenshot {
+    margin: 40px 0;
+    padding: 0;
+  }
+  figure.screenshot img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 14px 30px rgba(0,0,0,0.14), 0 2px 4px rgba(0,0,0,0.06);
+  }
+  figure.screenshot figcaption {
+    text-align: center;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--fg-muted);
+    font-style: italic;
+    margin-top: 14px;
+  }
+
+  /* =========================================================
+     Read-aloud: sentence highlight, per-chapter speak button,
+     mini-player, and settings panel.
+     ========================================================= */
+
+  .chapter-header-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .chapter-header-row .chapter-number { margin: 0; }
+
+  .speak-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--fg-quiet);
+    cursor: pointer;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+  }
+  .speak-btn:hover { color: var(--accent); background: rgba(161, 74, 42, 0.08); border-color: rgba(161, 74, 42, 0.18); }
+  .speak-btn.playing {
+    color: var(--accent);
+    background: rgba(161, 74, 42, 0.12);
+    border-color: rgba(161, 74, 42, 0.3);
+  }
+  .speak-btn svg { width: 15px; height: 15px; }
+
+  /* Sentence highlight while reading */
+  .s {
+    transition: background 0.2s ease, opacity 0.3s ease;
+    border-radius: 2px;
+  }
+  body.speaking .s:not(.s-active) { opacity: 0.4; }
+  body.speaking .s.s-active {
+    background: rgba(253, 237, 190, 0.85);
+    box-shadow: 0 0 0 3px rgba(253, 237, 190, 0.85);
+  }
+  @media (prefers-color-scheme: dark) {
+    body.speaking .s.s-active {
+      background: rgba(90, 74, 36, 0.65);
+      box-shadow: 0 0 0 3px rgba(90, 74, 36, 0.65);
+    }
+  }
+
+  /* Mini-player */
+  .miniplayer {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: #1a1818;
+    color: #ece8e0;
+    padding: 6px 6px 6px 14px;
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.06);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 90;
+    max-width: 540px;
+  }
+  .miniplayer.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .miniplayer button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px;
+    border-radius: 999px;
+    transition: background 0.12s;
+  }
+  .miniplayer button:hover { background: rgba(255,255,255,0.1); }
+  .miniplayer svg { width: 14px; height: 14px; }
+  .miniplayer .chapter-label {
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0.88;
+    padding: 0 10px 0 4px;
+    border-right: 1px solid rgba(255,255,255,0.1);
+    margin-right: 4px;
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+  .miniplayer .speed {
+    font-variant-numeric: tabular-nums;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 9px;
+    min-width: 38px;
+    border-radius: 5px;
+    letter-spacing: 0.02em;
+  }
+
+  /* Settings panel */
+  .settings-panel {
+    position: fixed;
+    bottom: 84px;
+    left: 50%;
+    transform: translateX(-50%) translateY(16px);
+    width: 400px;
+    max-width: calc(100vw - 32px);
+    max-height: calc(100vh - 140px);
+    overflow-y: auto;
+    background: #1a1818;
+    color: #ece8e0;
+    padding: 22px 24px 20px;
+    border-radius: 14px;
+    font-family: var(--sans);
+    font-size: 13px;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s, transform 0.25s;
+    z-index: 91;
+  }
+  .settings-panel.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+  .settings-panel h4 {
+    margin: 0 0 14px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+    font-weight: 700;
+  }
+  .settings-panel label {
+    display: block;
+    margin-bottom: 14px;
+  }
+  .settings-panel label > span.field-label {
+    display: block;
+    font-size: 11px;
+    opacity: 0.7;
+    margin-bottom: 5px;
+    letter-spacing: 0.02em;
+  }
+  .settings-panel input[type=password],
+  .settings-panel input[type=text],
+  .settings-panel select,
+  .settings-panel textarea {
+    width: 100%;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #ece8e0;
+    border-radius: 6px;
+    font-family: var(--sans);
+    font-size: 13px;
+    box-sizing: border-box;
+  }
+  .settings-panel input:focus,
+  .settings-panel select:focus,
+  .settings-panel textarea:focus {
+    outline: none;
+    border-color: rgba(232, 140, 94, 0.6);
+  }
+  .settings-panel textarea {
+    min-height: 84px;
+    resize: vertical;
+    line-height: 1.45;
+    font-family: var(--serif);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .settings-panel .note {
+    font-size: 11px;
+    opacity: 0.55;
+    margin: -8px 0 14px;
+    line-height: 1.5;
+  }
+  .settings-panel .mode-toggle {
+    display: flex;
+    background: rgba(255,255,255,0.06);
+    padding: 3px;
+    border-radius: 8px;
+    gap: 0;
+    margin-bottom: 18px;
+  }
+  .settings-panel .mode-toggle button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: inherit;
+    padding: 7px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    opacity: 0.65;
+    letter-spacing: 0.02em;
+  }
+  .settings-panel .mode-toggle button.active {
+    background: rgba(255,255,255,0.12);
+    opacity: 1;
+  }
+  .settings-panel .mode-toggle button:hover { opacity: 0.9; }
+
+  /* Resources section — a curated further-reading list with video/article icons. */
+  .resources {
+    margin-top: 96px;
+    padding-top: 48px;
+    border-top: 1px solid var(--rule);
+  }
+  .resources h2 {
+    font-family: var(--serif);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+  .resources .resources-deck {
+    font-family: var(--serif);
+    font-size: 18px;
+    font-style: italic;
+    color: var(--fg-muted);
+    margin: 0 0 32px;
+    text-wrap: balance;
+  }
+  .resources-group { margin-bottom: 28px; }
+  .resources-group h3 {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-quiet);
+    margin: 0 0 16px;
+    font-feature-settings: "smcp" 1, "c2sc" 1;
+  }
+  .resource-list { list-style: none; padding: 0; margin: 0; }
+  .resource {
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: 14px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--rule);
+    align-items: start;
+  }
+  .resource:last-child { border-bottom: none; }
+  .resource-icon {
+    padding-top: 4px;
+    color: var(--accent);
+    opacity: 0.75;
+  }
+  .resource-icon svg { display: block; width: 18px; height: 18px; }
+  .resource-title {
+    font-family: var(--serif);
+    font-size: 17px;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+  }
+  .resource-title a {
+    color: var(--fg);
+    border-bottom: none;
+    text-decoration: none;
+  }
+  .resource-title a:hover { color: var(--accent); }
+  .resource-meta {
+    font-family: var(--sans);
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin-top: 3px;
+    font-feature-settings: "onum";
+  }
+  .resource-blurb {
+    font-family: var(--serif);
+    font-size: 15px;
+    color: var(--fg-soft);
+    line-height: 1.5;
+    margin-top: 6px;
+    max-width: 62ch;
+  }
+
+  .chapter-number {
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fg-quiet);
+    margin: 0 0 12px;
+  }
+  .chapter h2 {
+    font-family: var(--serif);
+    font-size: clamp(34px, 4.5vw, 46px);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+    margin: 0 0 32px;
+    text-wrap: balance;
+  }
+
+  /* Drop cap on the first body paragraph of each chapter — the editorial
+     "once upon a time" move. Uses modern initial-letter with ::first-letter
+     fallback for Firefox. */
+  .chapter-opener {
+    text-indent: 0;
+  }
+  .chapter-opener::first-letter {
+    font-family: var(--serif);
+    font-size: 4.6em;
+    line-height: 0.86;
+    font-weight: 700;
+    color: var(--accent);
+    float: left;
+    padding: 8px 12px 0 0;
+    margin-top: 4px;
+  }
+  @supports (initial-letter: 3) {
+    .chapter-opener::first-letter {
+      -webkit-initial-letter: 3 2;
+      initial-letter: 3 2;
+      font-size: unset;
+      line-height: unset;
+      float: none;
+      padding: 0;
+      margin: 0;
+      color: var(--accent);
+      font-weight: 700;
+    }
+  }
+
+  /* "What you'll build" panel at the top of each chapter */
+  .goal {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 6px;
+    padding: 20px 24px;
+    margin: 0 0 40px;
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.55;
+  }
+  .goal-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    white-space: nowrap;
+    padding-top: 3px;
+  }
+  .goal p { margin: 0; color: var(--fg-soft); }
+
+  .chapter h3 {
+    font-family: var(--serif);
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.25;
+    margin: 48px 0 16px;
+    text-wrap: balance;
+  }
+
+  /* Code blocks */
+  code {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-feature-settings: "liga" 0;
+  }
+  pre {
+    font-family: var(--mono);
+    font-size: 14px;
+    line-height: 1.6;
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 24px 28px;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin: 28px 0;
+    font-feature-settings: "liga" 0;
+    position: relative;
+  }
+
+  /* Copy button — fades in when the reader hovers the code block. */
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 4px 10px;
+    border: 1px solid transparent;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.0);
+    color: var(--fg-muted);
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out, color 0.12s, background 0.12s, border-color 0.12s;
+  }
+  pre:hover .copy-btn,
+  .copy-btn:focus-visible {
+    opacity: 1;
+    transform: translateY(0);
+    border-color: rgba(0, 0, 0, 0.08);
+    background: rgba(255, 255, 255, 0.35);
+  }
+  .copy-btn:hover { color: var(--fg); background: rgba(255, 255, 255, 0.6); }
+  .copy-btn.copied { color: #2d5a22; background: rgba(185, 219, 150, 0.25); border-color: rgba(45, 90, 34, 0.25); }
+  @media (prefers-color-scheme: dark) {
+    pre:hover .copy-btn, .copy-btn:focus-visible { background: rgba(255, 255, 255, 0.06); border-color: rgba(255, 255, 255, 0.08); }
+    .copy-btn:hover { background: rgba(255, 255, 255, 0.1); }
+    .copy-btn.copied { color: #b8db92; background: rgba(184, 219, 146, 0.12); border-color: rgba(184, 219, 146, 0.3); }
+  }
+
+  /* Glossary tooltip — hover a known Swift attribute in code, get a
+     one-line definition. Subtle, editorial, doesn't fight the code. */
+  .tt {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dotted rgba(154, 47, 20, 0.35);
+  }
+  .tt::after {
+    content: attr(data-tt);
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(-4px);
+    width: max-content;
+    max-width: 280px;
+    padding: 10px 14px;
+    background: #1a1818;
+    color: #f5f1e8;
+    font-family: var(--sans);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
+    border-radius: 6px;
+    white-space: normal;
+    text-align: left;
+    font-feature-settings: "liga";
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease-out, transform 0.16s ease-out;
+    z-index: 50;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+  }
+  .tt::before {
+    content: "";
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-bottom-color: #1a1818;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.16s ease-out;
+  }
+  .tt:hover::after, .tt:focus::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .tt:hover::before, .tt:focus::before { opacity: 1; }
+  @media (prefers-color-scheme: dark) {
+    .tt::after { background: #ece8e0; color: #1a1a1a; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); }
+    .tt::before { border-bottom-color: #ece8e0; }
+  }
+  pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
+
+  /* Syntax highlighting — warm palette with better contrast on cream paper */
+  .token.comment,
+  .token.prolog,
+  .token.doctype,
+  .token.cdata { color: #635c4f; font-style: italic; }
+  .token.punctuation { color: #3a3a3a; }
+  .token.keyword,
+  .token.atrule,
+  .token.attr-name { color: #9a2f14; font-weight: 700; }
+  .token.boolean,
+  .token.number,
+  .token.constant { color: #6b2a4f; }
+  .token.string,
+  .token.char,
+  .token.attr-value { color: #2d5a22; }
+  .token.class-name,
+  .token.builtin { color: #7a4a10; font-weight: 600; }
+  .token.function,
+  .token.deleted { color: #0f3a5f; font-weight: 600; }
+  .token.operator,
+  .token.entity,
+  .token.url { color: #4a4a4a; }
+  .token.property,
+  .token.tag,
+  .token.symbol { color: #9a2f14; font-weight: 600; }
+  .token.regex,
+  .token.important,
+  .token.variable { color: #6b2a4f; }
+
+  @media (prefers-color-scheme: dark) {
+    .token.comment,
+    .token.prolog,
+    .token.doctype,
+    .token.cdata { color: #8a857c; }
+    .token.punctuation { color: #c9c5bd; }
+    .token.keyword,
+    .token.atrule,
+    .token.attr-name { color: #ff9a6c; font-weight: 700; }
+    .token.boolean,
+    .token.number,
+    .token.constant { color: #e095b8; }
+    .token.string,
+    .token.char,
+    .token.attr-value { color: #b8db92; }
+    .token.class-name,
+    .token.builtin { color: #f0c878; font-weight: 600; }
+    .token.function,
+    .token.deleted { color: #7bb8e8; font-weight: 600; }
+    .token.operator,
+    .token.entity,
+    .token.url { color: #c9c5bd; }
+    .token.property,
+    .token.tag,
+    .token.symbol { color: #ff9a6c; font-weight: 600; }
+    .token.regex,
+    .token.important,
+    .token.variable { color: #e095b8; }
+  }
+
+  .code-caption {
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--fg-muted);
+    margin: -20px 0 28px;
+    font-style: italic;
+    padding-left: 4px;
+  }
+
+  /* Inline concept callout — appears when a new concept shows up in context */
+  aside.concept {
+    background: var(--callout-bg);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin: 32px 0;
+    font-size: 17px;
+    line-height: 1.6;
+    font-family: var(--serif);
+  }
+  aside.concept .label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+  aside.concept .label::before { content: "— "; color: var(--fg-quiet); }
+  aside.concept p:last-child { margin-bottom: 0; }
+
+  /* "What works now" end-of-chapter checkpoint */
+  .checkpoint {
+    border-top: 1px solid var(--rule);
+    padding-top: 28px;
+    margin-top: 48px;
+  }
+  .checkpoint-label {
+    font-family: var(--sans);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--fg-quiet);
+    margin: 0 0 10px;
+  }
+  .checkpoint p { margin: 0; font-style: italic; color: var(--fg-soft); }
+
+  ul, ol {
+    padding-left: 24px;
+    margin: 0 0 24px;
+  }
+  li { margin-bottom: 8px; }
+  li::marker { color: var(--fg-quiet); }
+
+  /* Editorial em-dash markers for prose lists inside chapters and asides. */
+  .chapter > ul > li::marker,
+  aside.concept ul > li::marker {
+    content: "—  ";
+    color: var(--fg-quiet);
+  }
+
+  blockquote {
+    margin: 40px 0;
+    padding: 0 0 0 32px;
+    border-left: 3px solid var(--accent);
+    font-style: italic;
+    font-size: 22px;
+    line-height: 1.5;
+    color: var(--fg-soft);
+    letter-spacing: -0.01em;
+  }
+
+  footer {
+    text-align: center;
+    padding: 40px 32px 60px;
+    font-family: var(--sans);
+    font-size: 13px;
+    color: var(--fg-quiet);
+    letter-spacing: 0.05em;
+  }
+</style>
+</head>
+<body>
+
+<nav class="chapter-nav" aria-label="Chapter navigation">
+  <div class="chapter-nav-inner">
+    <a class="nav-prev" href="#" aria-label="Previous chapter">
+      <span class="nav-arrow">←</span>
+      <span class="nav-title"></span>
+    </a>
+    <div class="nav-current">
+      <span class="nav-num"></span>
+      <span class="nav-title"></span>
+    </div>
+    <a class="nav-next" href="#" aria-label="Next chapter">
+      <span class="nav-title"></span>
+      <span class="nav-arrow">→</span>
+    </a>
+  </div>
+  <div class="nav-progress"></div>
+</nav>
+
+<div class="page">
+
+<p class="eyebrow">A SwiftUI walkthrough</p>
+<h1 class="title">The KindaVim Tutorial&hellip; Tutorial</h1>
+<p class="subtitle">I deleted 3,000 lines of my working macOS app to make it teachable. What's left — about 1,000 lines — is the part worth learning from, and this is how you'd build it.</p>
+
+<p><strong>kindaVim</strong> is a macOS accessibility tool that gives you Vim motions in any text field — Mail, Slack, Notes, Xcode, anywhere. Transformative if you know Vim. A brick wall if you don't. This tutorial builds the companion: a tutor app that teaches those motions through short, repeatable drills.</p>
+
+<p>The finished app is about a thousand lines of Swift. That smallness is the point. Every decision has visible consequences; every new concept earns its place by solving a problem you just hit. The format follows <a href="https://developer.apple.com/tutorials/swiftui">Apple's Landmarks tutorial</a>: each chapter is a feature, not a concept. Concepts appear in small callouts the moment they're needed.</p>
+
+<aside class="concept" style="margin-top: 32px;">
+  <span class="label">What you'll take away</span>
+  <ul style="margin-top: 4px; padding-left: 22px;">
+    <li>How to structure a SwiftUI macOS app that grows past one screen</li>
+    <li>When to reach for <code>@State</code>, <code>@Binding</code>, and <code>@Observable</code> — and why <code>@MainActor</code> shows up everywhere</li>
+    <li>A clean pattern for extracting business logic out of views</li>
+    <li>How to bridge AppKit into SwiftUI with <code>NSViewRepresentable</code></li>
+    <li>Local-first persistence in about five lines</li>
+  </ul>
+</aside>
+
+<!-- TOC -->
+
+<nav class="toc" aria-label="Table of contents">
+  <p class="toc-heading">Nine chapters</p>
+  <ol class="toc-list">
+    <li class="toc-item">
+      <span class="toc-num">01</span>
+      <div>
+        <div class="toc-title"><a href="#ch1">What you're building</a></div>
+        <div class="toc-blurb">A look at the finished app, and the shape of the journey ahead.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">02</span>
+      <div>
+        <div class="toc-title"><a href="#ch2">Modeling the curriculum</a></div>
+        <div class="toc-blurb">Define what a lesson <em>is</em>, before thinking about how it'll look on screen.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">03</span>
+      <div>
+        <div class="toc-title"><a href="#ch3">One lesson on screen</a></div>
+        <div class="toc-blurb">A static render of a single lesson. Layout, modifiers, and live previews doing the feedback loop.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">04</span>
+      <div>
+        <div class="toc-title"><a href="#ch4">A sidebar to pick from</a></div>
+        <div class="toc-blurb">The left-hand list. <code>List</code>, <code>ForEach</code>, and the macOS sidebar idiom.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">05</span>
+      <div>
+        <div class="toc-title"><a href="#ch5">Two panes, one source of truth</a></div>
+        <div class="toc-blurb"><code>NavigationSplitView</code> wired to an <code>@Observable</code> state object that owns what the app knows.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">06</span>
+      <div>
+        <div class="toc-title"><a href="#ch6">Slides instead of scrolling</a></div>
+        <div class="toc-blurb">Turning a lesson into a linear sequence of steps the user flicks through with <code>l</code> and <code>h</code>.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">07</span>
+      <div>
+        <div class="toc-title"><a href="#ch7">The drill engine</a></div>
+        <div class="toc-blurb">What goes wrong when business logic lives in a view — and how a tiny state machine fixes it.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">08</span>
+      <div>
+        <div class="toc-title"><a href="#ch8">A real editor</a></div>
+        <div class="toc-blurb">SwiftUI's text editor isn't enough. Bridging <code>NSTextView</code> with <code>NSViewRepresentable</code>.</div>
+      </div>
+    </li>
+    <li class="toc-item">
+      <span class="toc-num">09</span>
+      <div>
+        <div class="toc-title"><a href="#ch9">Remembering the user</a></div>
+        <div class="toc-blurb">Persisting progress as JSON in Application Support, and tracing a drill completion from keystroke to disk.</div>
+      </div>
+    </li>
+  </ol>
+</nav>
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 1 — What you're building -->
+<!-- ====================================================================== -->
+
+<section id="ch1" class="chapter">
+  <img class="bull" src="bulls/bull-01-glyph.png" alt="A single-gesture charcoal bull — the most abstract plate.">
+  <p class="chapter-number">Chapter one</p>
+  <h2>What you're building</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll see</span>
+    <p>The finished product running, and the shape of the journey ahead.</p>
+  </div>
+
+  <figure class="screenshot">
+    <img src="screenshots/01-welcome.png" alt="The kindaVim Tutor welcome screen: sidebar on the left, 'Press L to begin' hint on the right.">
+    <figcaption>The app on first launch. A chapter on the left, a welcome on the right, and a gentle nudge to press L.</figcaption>
+  </figure>
+
+  <p class="chapter-opener">The app is a single window with two panes. A list of lessons on the left; whichever lesson is selected on the right, shown as a sequence of slides. Navigation uses the motion keys themselves — <code>l</code> forward, <code>h</code> back — so your fingers are practicing from the moment you open it.</p>
+
+  <p>Some slides explain the motion. Others are <em>drills</em>: a tiny editor seeded with a sentence, an instruction ("delete the word <em>bad</em>"), and an expected result. You type. The app validates every keystroke. When your text and cursor match, the drill advances. Five reps in, the sidebar shows a checkmark and the work is written to disk.</p>
+
+  <p>This tutorial assumes you're comfortable reading Swift — structs, closures, optionals, enums with associated values. If those feel fluent, you're ready; if not, the <a href="https://docs.swift.org/swift-book/">Swift book</a> is a good afternoon.</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>Nothing yet. Next chapter we start with the data.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 2 — Modeling the curriculum -->
+<!-- ====================================================================== -->
+
+<section id="ch2" class="chapter">
+  <img class="bull" src="bulls/bull-02-gesture.png" alt="A bull in six essential strokes.">
+  <p class="chapter-number">Chapter two</p>
+  <h2>Modeling the curriculum</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p>Plain Swift types for <code>Chapter</code>, <code>Lesson</code>, <code>Exercise</code>, and <code>ContentBlock</code> — the shape of everything the app teaches.</p>
+  </div>
+
+  <p class="chapter-opener">"Modeled the data first" is on every experienced SwiftUI developer's list of things they wish they'd done sooner. The temptation is to start with the screen you can picture. It works for five minutes. Then three views each half-understand the data, and changing anything means changing all three.</p>
+
+  <p>What does the app talk about? A <strong>Chapter</strong> (a theme like "Survival Kit") contains <strong>Lessons</strong>. Each <code>Lesson</code> has explanation and zero or more <strong>Exercises</strong>. An exercise is "transform this starting text into this expected text." Four types, one file each.</p>
+
+<pre><code class="language-swift">struct Lesson: Identifiable, Hashable, Sendable {
+    let id: String
+    let number: Int
+    let title: String
+    let subtitle: String
+    let explanation: [ContentBlock]
+    let exercises: [Exercise]
+    let motionsIntroduced: [String]
+}</code></pre>
+  <p class="code-caption">Sources/KindaVimTutorKit/Models/Lesson.swift</p>
+
+  <p>Three conformances earn their place. <code>Identifiable</code> lets SwiftUI's <code>List</code> and <code>ForEach</code> track rows across refreshes. <code>Hashable</code> makes <code>Lesson</code> usable as a <code>NavigationSplitView</code> selection. <a href="https://developer.apple.com/documentation/swift/sendable"><code>Sendable</code></a> is the Swift 6 "safe across threads" stamp — free on value types with value-type properties. Stick to structs and enums and the compiler will shrug and let you work.</p>
+
+  <p>The <code>Exercise</code> struct carries the whole validation rule:</p>
+
+<pre><code class="language-swift">struct Exercise: Identifiable, Equatable, Sendable {
+    let id: String
+    let instruction: String
+    let initialText: String
+    let initialCursorPosition: Int
+    let expectedText: String
+    let expectedCursorPosition: Int?
+    let hints: [String]
+    let drillCount: Int
+    let variations: [Variation]
+    // ...
+}</code></pre>
+
+  <blockquote>
+    A rep of a drill is done when <em>current text equals <code>expectedText</code> and current cursor equals <code>expectedCursorPosition</code></em>. That's the whole rule. The engine will run it on every keystroke.
+  </blockquote>
+
+  <p>Variations exist so the user practices the <em>motion</em>, not the specific input — one <code>Exercise</code> ships several starting/expected pairs, and the engine rotates through them across reps.</p>
+
+  <p>Last piece: lesson explanations are a closed set of block kinds, expressed as an enum.</p>
+
+<pre><code class="language-swift">enum ContentBlock: Sendable {
+    case heading(String)
+    case text(String)
+    case tip(String)
+    case keyCommand(keys: [String], description: String)
+    case codeExample(before: String, after: String, motion: String)
+    // ...
+}</code></pre>
+
+  <aside class="concept">
+    <span class="label">Why an enum, not Markdown</span>
+    <p>A closed set of cases means the compiler complains at every <code>switch</code> if you add a new case and forget to render it. You give up free-form authoring; you get "every block I can produce, every view must handle" as a compile-time invariant.</p>
+  </aside>
+
+  <p>The whole curriculum is a static Swift constant — <code>Curriculum.chapters</code> is typed, grep-able, refactorable. No server, no JSON, no CMS.</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>Data compiles. Nothing visible yet. You could already write a test that walks every exercise and checks no <code>expectedText</code> is empty — in fact, one exists in the project.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 3 — One lesson on screen -->
+<!-- ====================================================================== -->
+
+<section id="ch3" class="chapter">
+  <img class="bull" src="bulls/bull-03-contour.png" alt="The bull as pure contour line.">
+  <p class="chapter-number">Chapter three</p>
+  <h2>One lesson on screen</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll see</span>
+    <p>A single rendered lesson — chapter label, title, subtitle, motion row — all driven off the data from chapter two and visible in Xcode's live preview.</p>
+  </div>
+
+  <p class="chapter-opener">Let's render something. Forget navigation for now, forget drills; just take a <code>Lesson</code> and put its header on screen. This is where SwiftUI starts to feel fast — you write a view, the preview shows it, you tweak, the preview redraws.</p>
+
+<pre><code class="language-swift">struct LessonHeaderView: View {
+    let lesson: Lesson
+    let chapterTitle: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(chapterTitle.uppercased())
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.tint)
+                .tracking(1.2)
+
+            Text(lesson.title)
+                .font(.system(size: 32, weight: .bold))
+                .tracking(-0.5)
+
+            Text(lesson.subtitle)
+                .font(.system(size: 17))
+                .foregroundStyle(.secondary)
+
+            if !lesson.motionsIntroduced.isEmpty {
+                Text(lesson.motionsIntroduced.joined(separator: "   "))
+                    .font(.system(size: 17, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 4)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}</code></pre>
+  <p class="code-caption">Sources/KindaVimTutorKit/Views/Lesson/LessonHeaderView.swift</p>
+
+  <p>A vertical stack with four lines. Chapter label, lesson title, subtitle, and a monospaced row of any new motions the lesson introduces.</p>
+
+  <aside class="concept">
+    <span class="label">Modifiers return views</span>
+    <p>Each <code>.font(...)</code> or <code>.foregroundStyle(...)</code> is a <em>modifier</em> — it takes the view on its left, wraps it with styling, and returns a new view. The chain reads top-down as a recipe. You never mutate; you build up a description.</p>
+  </aside>
+
+  <p>Add a <code>#Preview</code> block at the bottom of the file and Xcode renders it live in the canvas. Change a font size; see it update. This is the feedback loop for the rest of the tutorial — use it aggressively.</p>
+
+<pre><code class="language-swift">#Preview {
+    LessonHeaderView(
+        lesson: PreviewSamples.lesson,
+        chapterTitle: "Survival Kit"
+    )
+    .padding()
+    .frame(width: 640)
+}</code></pre>
+
+  <h3>Rendering the explanation</h3>
+
+  <p>The header is easy because every lesson has the same shape. The explanation is harder — its content varies per block. This is where Swift's enums-with-associated-values pay off: one <code>switch</code> exhaustively renders every case.</p>
+
+<pre><code class="language-swift">struct ContentStepView: View {
+    let blocks: [ContentBlock]
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            ForEach(Array(blocks.enumerated()), id: \.offset) { _, block in
+                contentBlockView(block)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func contentBlockView(_ block: ContentBlock) -&gt; some View {
+        switch block {
+        case .heading(let text):
+            Text(text).font(.system(size: 28, weight: .bold))
+
+        case .text(let text):
+            Text(text).font(.system(size: 16)).lineSpacing(6)
+
+        case .tip(let text):
+            calloutRow(icon: "lightbulb", text: text,
+                       background: AppColors.tipBackground)
+
+        case .keyCommand(let keys, let description):
+            HStack(alignment: .top, spacing: 16) {
+                Text(keys.joined(separator: " "))
+                    .font(.system(size: 18, weight: .medium, design: .monospaced))
+                Text(description)
+                    .foregroundStyle(.secondary)
+            }
+
+        // ... other cases
+        }
+    }
+}</code></pre>
+
+  <aside class="concept">
+    <span class="label">@ViewBuilder</span>
+    <p>A function marked <code>@ViewBuilder</code> can return different view types from each branch — one branch returns a <code>Text</code>, another an <code>HStack</code>, and the compiler stitches them into a single opaque return type. Without it, every case would need to erase to <code>AnyView</code>, which is slower and reads worse.</p>
+  </aside>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>Two views that can render any <code>Lesson</code> fed to them. The preview canvas shows it live. Still no way to pick a lesson, still no state — just descriptions of data.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 4 — A sidebar to pick from -->
+<!-- ====================================================================== -->
+
+<section id="ch4" class="chapter">
+  <img class="bull" src="bulls/bull-04-details.png" alt="An outlined bull with a few details starting to appear.">
+  <p class="chapter-number">Chapter four</p>
+  <h2>A sidebar to pick from</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p>The left-hand sidebar that lists every lesson in every chapter, with completion checkmarks. Think Xcode's file navigator, but simpler.</p>
+  </div>
+
+  <p class="chapter-opener">SwiftUI's <code>List</code> with <code>.listStyle(.sidebar)</code> is the native macOS sidebar. Correct padding, background, collapse behavior — all for free.</p>
+
+<pre><code class="language-swift">struct SidebarView: View {
+    let chapters: [Chapter]
+    @Binding var selectedLessonId: String?
+    let progressStore: ProgressStore
+
+    @State private var expandedChapterId: String?
+
+    var body: some View {
+        List(selection: $selectedLessonId) {
+            ForEach(chapters) { chapter in
+                let isExpanded = expandedChapterId == chapter.id
+
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        expandedChapterId = isExpanded ? nil : chapter.id
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: chapter.systemImage)
+                        Text(chapter.title).fontWeight(.semibold)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    }
+                }
+                .buttonStyle(.plain)
+
+                if isExpanded {
+                    ForEach(chapter.lessons) { lesson in
+                        LessonRowView(
+                            lesson: lesson,
+                            chapterNumber: chapter.number,
+                            isCompleted: progressStore.isLessonCompleted(lesson)
+                        )
+                        .tag(lesson.id)
+                    }
+                }
+            }
+        }
+        .listStyle(.sidebar)
+        .frame(minWidth: 200)
+    }
+}</code></pre>
+  <p class="code-caption">Sources/KindaVimTutorKit/Views/Navigation/SidebarView.swift</p>
+
+  <aside class="concept">
+    <span class="label">@State vs. @Binding</span>
+    <p><code>@State private var expandedChapterId</code> is state this view <em>owns</em> — nobody else has any business mutating it. <code>@Binding var selectedLessonId</code> is a two-way handle to state someone else owns. The app owns the selected lesson; the sidebar just needs permission to read and write it.</p>
+    <p>Rule of thumb: if you declared the value, use <code>@State</code>. If it lives somewhere else and you need write access, use <code>@Binding</code>.</p>
+  </aside>
+
+  <p>The <code>$</code> prefix — as in <code>List(selection: $selectedLessonId)</code> — is how you get the binding for a state-ish property. Bare name reads the value; <code>$name</code> reads the read-write handle. Each lesson row's <code>.tag(lesson.id)</code> supplies what gets written when the user clicks.</p>
+
+  <p>Chapters are toggleable but not selectable — the chapter row is a <code>Button</code> that flips <code>expandedChapterId</code>, and lessons only render when the chapter is expanded.</p>
+
+  <h3>Lesson rows</h3>
+
+  <p>The row itself is tiny — a title, and a checkmark if the lesson is complete:</p>
+
+<pre><code class="language-swift">struct LessonRowView: View {
+    let lesson: Lesson
+    let chapterNumber: Int
+    var isCompleted: Bool = false
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Text(lesson.title)
+                .foregroundStyle(isCompleted ? .secondary : .primary)
+            Spacer()
+            if isCompleted {
+                Image(systemName: "checkmark")
+                    .foregroundStyle(.tertiary)
+            }
+        }
+        .padding(.vertical, 2)
+    }
+}</code></pre>
+
+  <p><code>progressStore.isLessonCompleted(lesson)</code> doesn't exist yet. That's fine — the sidebar can call it as if it does. When we build <code>ProgressStore</code> in chapter nine, the row will light up on its own.</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>The sidebar renders, the chapters expand and collapse, clicking a row mutates <code>selectedLessonId</code>… but we haven't wired that variable up to anything yet. That's the next chapter.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 5 — Two panes in conversation -->
+<!-- ====================================================================== -->
+
+<section id="ch5" class="chapter">
+  <img class="bull" src="bulls/bull-05-form.png" alt="Interior structural lines suggest form.">
+  <p class="chapter-number">Chapter five</p>
+  <h2>Two panes, one source of truth</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p>A two-pane split view wired to a single observable object that owns the app's state.</p>
+  </div>
+
+  <p class="chapter-opener">A macOS two-pane app uses <a href="https://developer.apple.com/documentation/swiftui/navigationsplitview"><code>NavigationSplitView</code></a>. Give it a closure for the sidebar and one for the detail pane; macOS handles the divider, column sizing, and the collapse-the-sidebar behavior. A first cut:</p>
+
+<pre><code class="language-swift">@main
+struct KindaVimTutorApp: App {
+    @State private var selectedLessonId: String?
+
+    var body: some Scene {
+        Window("kindaVim Tutor", id: "main") {
+            NavigationSplitView {
+                SidebarView(
+                    chapters: Curriculum.chapters,
+                    selectedLessonId: $selectedLessonId,
+                    progressStore: ProgressStore() // placeholder
+                )
+            } detail: {
+                if let lesson = Curriculum.chapters
+                    .flatMap(\.lessons)
+                    .first(where: { $0.id == selectedLessonId }) {
+                    LessonHeaderView(lesson: lesson, chapterTitle: "TBD")
+                } else {
+                    Text("Pick a lesson.")
+                }
+            }
+        }
+    }
+}</code></pre>
+
+  <p>This runs. Click a row, the right pane updates. You didn't write any wiring — the flow is inferred from who reads and who writes each value.</p>
+
+  <aside class="concept">
+    <span class="label">The re-render is automatic</span>
+    <p>The user clicks a row. <code>List</code> writes to <code>selectedLessonId</code> through the binding. SwiftUI notices that the <code>detail:</code> closure reads <code>selectedLessonId</code>, so it re-runs the closure, and the new view animates into place. No subscribe, no notification, no <code>reloadData</code>.</p>
+  </aside>
+
+  <p>But the snippet has two problems that are really the same problem. <code>@main</code>'s body is computing <code>.flatMap(\.lessons).first(where:)</code> — that's business logic in a view. And it's instantiating <code>ProgressStore()</code> inline, which risks a fresh instance every time <code>body</code> runs. Both facts belong to <em>the app</em>, not to any view.</p>
+
+  <h3>Lifting state out</h3>
+
+  <p>One object owns the selection and the progress store. The two panes read what they need from it, and the sidebar writes the selected lesson back through a binding. The data flow is a triangle:</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sot-title">
+      <title id="sot-title">Source of truth: sidebar writes to AppState, panes read from it</title>
+      <defs>
+        <marker id="arrSot" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
+        </marker>
+      </defs>
+      <style>
+        .sot-box { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .sot-truth { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.5; }
+        .sot-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 600; fill: #1a1a1a; }
+        .sot-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; }
+        .sot-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; font-style: italic; }
+        .sot-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
+      </style>
+
+      <!-- AppState at top center -->
+      <rect class="sot-truth" x="280" y="20" width="160" height="70" rx="10"/>
+      <text class="sot-label" x="360" y="48" text-anchor="middle">AppState</text>
+      <text class="sot-sub" x="360" y="65" text-anchor="middle">@Observable @MainActor</text>
+      <text class="sot-sub" x="360" y="79" text-anchor="middle">selectedLessonId · progressStore</text>
+
+      <!-- SidebarView bottom left -->
+      <rect class="sot-box" x="40" y="170" width="180" height="60" rx="10"/>
+      <text class="sot-label" x="130" y="198" text-anchor="middle">SidebarView</text>
+      <text class="sot-sub" x="130" y="215" text-anchor="middle">pick a lesson</text>
+
+      <!-- Detail (StepCanvasView) bottom right -->
+      <rect class="sot-box" x="500" y="170" width="180" height="60" rx="10"/>
+      <text class="sot-label" x="590" y="198" text-anchor="middle">StepCanvasView</text>
+      <text class="sot-sub" x="590" y="215" text-anchor="middle">render selected lesson</text>
+
+      <!-- Sidebar → AppState (write via @Binding) -->
+      <line x1="160" y1="170" x2="305" y2="95" class="sot-line" marker-end="url(#arrSot)"/>
+      <text class="sot-edge" x="190" y="132" text-anchor="start">$selectedLessonId</text>
+      <text class="sot-edge" x="190" y="146" text-anchor="start">(binding, writes)</text>
+
+      <!-- AppState → Sidebar (reads chapters, progress) -->
+      <line x1="310" y1="90" x2="180" y2="170" class="sot-line" marker-end="url(#arrSot)" stroke-dasharray="4 3"/>
+      <text class="sot-edge" x="165" y="112" text-anchor="end" transform="rotate(-20, 165, 112)">chapters · progress</text>
+
+      <!-- AppState → Canvas (reads selectedLesson) -->
+      <line x1="410" y1="90" x2="555" y2="170" class="sot-line" marker-end="url(#arrSot)" stroke-dasharray="4 3"/>
+      <text class="sot-edge" x="540" y="112" text-anchor="start" transform="rotate(20, 540, 112)">selectedLesson</text>
+
+      <!-- legend -->
+      <line x1="40" y1="250" x2="70" y2="250" class="sot-line"/>
+      <text class="sot-sub" x="78" y="254">solid: write / binding</text>
+      <line x1="240" y1="250" x2="270" y2="250" class="sot-line" stroke-dasharray="4 3"/>
+      <text class="sot-sub" x="278" y="254">dashed: read / observation</text>
+    </svg>
+  </figure>
+
+  <p>Both panes get only the slice they need. When the sidebar writes, the canvas re-renders automatically because its <code>body</code> reads <code>selectedLesson</code>, and Observation knows to subscribe it.</p>
+
+  <p>Here's the class:</p>
+
+<pre><code class="language-swift">@Observable
+@MainActor
+public final class AppState {
+    public var selectedLessonId: String?
+    public let progressStore = ProgressStore()
+    public let chapters: [Chapter] = Curriculum.chapters
+
+    private var allLessons: [Lesson] { chapters.flatMap(\.lessons) }
+
+    public var selectedLesson: Lesson? {
+        guard let id = selectedLessonId else { return nil }
+        return allLessons.first { $0.id == id }
+    }
+
+    public var selectedChapter: Chapter? {
+        guard let lesson = selectedLesson else { return nil }
+        return chapters.first { $0.lessons.contains(lesson) }
+    }
+
+    public init() {}
+
+    public func goToFirstLesson() {
+        selectedLessonId = allLessons.first?.id
+    }
+}</code></pre>
+  <p class="code-caption">Sources/KindaVimTutorKit/App/AppState.swift — elided for brevity.</p>
+
+  <p>Two annotations carry the weight.</p>
+
+  <aside class="concept">
+    <span class="label">@Observable</span>
+    <p>A Swift 5.9+ macro (<a href="https://developer.apple.com/documentation/observation">Observation framework</a>) that makes a plain class trackable by SwiftUI. You don't annotate properties or write <code>@Published</code> — the macro rewrites the class so SwiftUI can see which properties each view's <code>body</code> reads, and subscribe only to those. Change <code>selectedLessonId</code> and the sidebar re-renders; change something else and it doesn't. Finer-grained than the old <code>ObservableObject</code> protocol, and cheaper.</p>
+  </aside>
+
+  <aside class="concept">
+    <span class="label">@MainActor</span>
+    <p>Swift's actor system prevents data races — only one task at a time inside an actor. <code>@MainActor</code> means "this runs on the main thread," which is mandatory for UI. Marking <code>AppState</code> as such means the compiler will refuse to let anyone touch it from a background task without explicitly awaiting onto the main actor.</p>
+  </aside>
+
+  <p>The final <code>@main</code> is almost a one-liner:</p>
+
+<pre><code class="language-swift">@main
+struct KindaVimTutorApp: App {
+    @State private var appState = AppState()
+
+    var body: some Scene {
+        Window("kindaVim Tutor", id: "main") {
+            NavigationSplitView {
+                SidebarView(
+                    chapters: appState.chapters,
+                    selectedLessonId: $appState.selectedLessonId,
+                    progressStore: appState.progressStore
+                )
+            } detail: {
+                if let lesson = appState.selectedLesson,
+                   let chapter = appState.selectedChapter {
+                    LessonHeaderView(lesson: lesson, chapterTitle: chapter.title)
+                } else {
+                    WelcomeView(onStartLearning: { appState.goToFirstLesson() })
+                }
+            }
+            .frame(minWidth: 900, minHeight: 600)
+        }
+    }
+}</code></pre>
+
+  <p><code>@State private var appState = AppState()</code> holds a class instance the same way it would hold a struct. Its job is "keep this alive across <code>body</code> invocations and notify me when it changes."</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>Two panes, one observable source of truth. The root scene is short. Every downstream view gets just the slice of state it needs — nothing more.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 7 — Slides instead of scrolling -->
+<!-- ====================================================================== -->
+
+<section id="ch6" class="chapter">
+  <img class="bull" src="bulls/bull-06-shading.png" alt="Musculature defined; the anatomy emerges.">
+  <p class="chapter-number">Chapter six</p>
+  <h2>Slides instead of scrolling</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p>A slide-based presentation of a lesson — title, content pages, drills — navigable with <code>l</code> and <code>h</code>.</p>
+  </div>
+
+  <p class="chapter-opener">The first prototype had a scrolling page: read the text, scroll down, do the drill. It worked, and it didn't feel like Vim. Vim is modal and step-at-a-time, so the tutor should be too. Slides, advanced with the motion keys the user is learning.</p>
+
+  <figure class="screenshot">
+    <img src="screenshots/02-title-slide.png" alt="Title slide: SURVIVAL KIT / Moving the Cursor / Navigate with h, j, k, l / L press to begin">
+    <figcaption>The title slide you land on when a lesson is selected. The sidebar lists the lessons in the chapter; the detail pane shows a single slide.</figcaption>
+  </figure>
+
+  <p>A <code>Lesson</code> is an unordered bag of content. We turn it into an ordered sequence of <em>steps</em> — each a title slide, a chunk of explanation, or a drill:</p>
+
+<pre><code class="language-swift">enum LessonStep: Identifiable {
+    case title(lesson: Lesson, chapterTitle: String)
+    case content(id: String, blocks: [ContentBlock])
+    case drill(exercise: Exercise, exerciseNumber: Int)
+
+    var id: String {
+        switch self {
+        case .title(let lesson, _): "title-\(lesson.id)"
+        case .content(let id, _): "content-\(id)"
+        case .drill(let exercise, _): "drill-\(exercise.id)"
+        }
+    }
+}</code></pre>
+
+  <p>A small static function expands a <code>Lesson</code> into steps. Headings divide the explanation into groups — one content step per heading-delimited chunk. Drills come at the end:</p>
+
+<pre><code class="language-swift">extension LessonStep {
+    static func steps(from lesson: Lesson, chapterTitle: String) -&gt; [LessonStep] {
+        var result: [LessonStep] = [.title(lesson: lesson, chapterTitle: chapterTitle)]
+
+        var currentGroup: [ContentBlock] = []
+        var groupIndex = 0
+        for block in lesson.explanation {
+            if case .heading = block, !currentGroup.isEmpty {
+                result.append(.content(id: "\(lesson.id).c\(groupIndex)",
+                                       blocks: currentGroup))
+                currentGroup = []
+                groupIndex += 1
+            }
+            if case .spacer = block { continue }
+            currentGroup.append(block)
+        }
+        if !currentGroup.isEmpty {
+            result.append(.content(id: "\(lesson.id).c\(groupIndex)",
+                                   blocks: currentGroup))
+        }
+
+        for (i, ex) in lesson.exercises.enumerated() {
+            result.append(.drill(exercise: ex, exerciseNumber: i + 1))
+        }
+        return result
+    }
+}</code></pre>
+
+  <p>This function is pure data in, data out — no SwiftUI, trivially testable, and the project tests it.</p>
+
+  <h3>Navigating the slides</h3>
+
+  <p>Which step are we on, how do we advance? Another small <code>@Observable</code> class. It knows nothing about views.</p>
+
+<pre><code class="language-swift">@Observable
+@MainActor
+final class LessonStepController {
+    private(set) var steps: [LessonStep] = []
+    var currentStepIndex: Int = 0
+    var navigationDirection: NavigationDirection = .forward
+
+    enum NavigationDirection { case forward, backward }
+
+    var currentStep: LessonStep? {
+        guard currentStepIndex &gt;= 0, currentStepIndex &lt; steps.count else { return nil }
+        return steps[currentStepIndex]
+    }
+    var isFirstStep: Bool { currentStepIndex == 0 }
+    var isLastStep: Bool { currentStepIndex &gt;= steps.count - 1 }
+
+    func loadLesson(_ lesson: Lesson, chapterTitle: String) {
+        steps = LessonStep.steps(from: lesson, chapterTitle: chapterTitle)
+        currentStepIndex = 0
+    }
+
+    func nextStep() {
+        guard !isLastStep else { return }
+        navigationDirection = .forward
+        withAnimation(.easeInOut(duration: 0.3)) { currentStepIndex += 1 }
+    }
+
+    func previousStep() {
+        guard !isFirstStep else { return }
+        navigationDirection = .backward
+        withAnimation(.easeInOut(duration: 0.3)) { currentStepIndex -= 1 }
+    }
+}</code></pre>
+
+  <p>And the view that hosts all this — the canvas — renders the current step and listens for keypresses:</p>
+
+<pre><code class="language-swift">struct StepCanvasView: View {
+    let lesson: Lesson
+    let chapterTitle: String
+    let progressStore: ProgressStore
+
+    @State private var controller = LessonStepController()
+    @State private var isEditorFocused = false
+
+    var body: some View {
+        ZStack {
+            if let step = controller.currentStep {
+                Group {
+                    switch step {
+                    case .title(let l, let c):
+                        TitleStepView(lesson: l, chapterTitle: c)
+                    case .content(_, let blocks):
+                        ContentStepView(blocks: blocks)
+                    case .drill(let ex, let n):
+                        DrillStepView(
+                            exercise: ex,
+                            exerciseNumber: n,
+                            progressStore: progressStore,
+                            isEditorFocused: $isEditorFocused
+                        )
+                    }
+                }
+                .id(step.id)
+                .transition(slideTransition)
+            }
+        }
+        .focusable()
+        .onAppear { controller.loadLesson(lesson, chapterTitle: chapterTitle) }
+        .onKeyPress { keyPress in handleKey(keyPress) }
+    }
+}</code></pre>
+
+  <aside class="concept">
+    <span class="label">.onKeyPress</span>
+    <p>Declarative keyboard handling. Return <code>.handled</code> to consume the event, <code>.ignored</code> otherwise. The one essential partner modifier is <code>.focusable()</code> — the view has to be able to <em>be</em> first responder before it receives keypresses.</p>
+  </aside>
+
+  <p>A thoughtful touch inside <code>handleKey</code>: when the user is focused inside the drill editor, <code>l</code> and <code>h</code> are motions they're trying to perform, not nav commands. The canvas only consumes those keys when the editor <em>isn't</em> focused. Details like this are the difference between a tutor that feels right and one you fight.</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>A working lesson flow. Pick a lesson, press <code>l</code> to advance, press <code>h</code> to go back. Title, content, and (stub) drill slides in sequence. The drill itself doesn't do anything yet — but the scaffolding's ready.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 8 — The drill engine -->
+<!-- ====================================================================== -->
+
+<section id="ch7" class="chapter">
+  <img class="bull" src="bulls/bull-07-muscle.png" alt="Hide texture and dramatic chiaroscuro.">
+  <p class="chapter-number">Chapter seven</p>
+  <h2>The drill engine</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p><code>ExerciseEngine</code>, a self-contained state machine for one drill: validate on every keystroke, rotate variations, transition to completion.</p>
+  </div>
+
+  <h3>What happens if we don't</h3>
+
+  <p>Before the engine, the temptation. You'd start by dropping the logic straight into <code>DrillStepView</code>, because why not — it's all happening right there:</p>
+
+<pre><code class="language-swift">struct DrillStepView: View {
+    let exercise: Exercise
+    @State private var currentText = ""
+    @State private var currentCursor = 0
+    @State private var keystrokes = 0
+    @State private var completedReps = 0
+    @State private var startTime = Date()
+
+    var body: some View {
+        ExerciseEditorView(/* ... */)
+            .onChange(of: currentText) {
+                keystrokes += 1
+                if currentText == exercise.expectedText,
+                   currentCursor == exercise.expectedCursorPosition {
+                    completedReps += 1
+                    if completedReps &gt;= exercise.drillCount {
+                        // save progress here? or somewhere else?
+                    } else {
+                        // reset for next rep, rotate variation...
+                    }
+                }
+            }
+    }
+}</code></pre>
+
+  <p>It works. Then you add timing, then rotating variations, then a "reset the current rep" button, then a guard against <code>onChange</code> firing after the view disappeared. Each requirement jams another branch into the same closure. The validation rule now lives in three <code>if</code>s across two files. You can't test any of it without spinning up a view. You end up with a drill component you're afraid to touch.</p>
+
+  <h3>The extract</h3>
+
+  <p>Pull the logic into its own type. It has a lifecycle, four states, and a handful of transitions — that's the whole machine:</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="fsm-title">
+      <title id="fsm-title">ExerciseEngine state machine: idle, active, repCompleted, drillCompleted</title>
+      <defs>
+        <marker id="arrFsm" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
+        </marker>
+      </defs>
+      <style>
+        .fsm-box { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .fsm-active { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.4; }
+        .fsm-terminal { fill: #e7ddc3; stroke: #a14a2a; stroke-width: 1.3; }
+        .fsm-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 600; fill: #1a1a1a; }
+        .fsm-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; font-style: italic; }
+        .fsm-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
+      </style>
+
+      <rect class="fsm-box" x="10" y="80" width="120" height="56" rx="10"/>
+      <text class="fsm-label" x="70" y="113" text-anchor="middle">.idle</text>
+
+      <rect class="fsm-active" x="200" y="80" width="130" height="56" rx="10"/>
+      <text class="fsm-label" x="265" y="113" text-anchor="middle">.active</text>
+
+      <rect class="fsm-box" x="400" y="80" width="150" height="56" rx="10"/>
+      <text class="fsm-label" x="475" y="113" text-anchor="middle">.repCompleted</text>
+
+      <rect class="fsm-terminal" x="585" y="80" width="130" height="56" rx="10"/>
+      <text class="fsm-label" x="650" y="113" text-anchor="middle">.drillCompleted</text>
+
+      <line x1="130" y1="108" x2="200" y2="108" class="fsm-line" marker-end="url(#arrFsm)"/>
+      <text class="fsm-edge" x="165" y="98" text-anchor="middle">start()</text>
+
+      <path d="M 330 100 Q 365 66 400 100" class="fsm-line" marker-end="url(#arrFsm)"/>
+      <text class="fsm-edge" x="365" y="60" text-anchor="middle">match, more reps</text>
+
+      <path d="M 400 116 Q 365 150 330 116" class="fsm-line" marker-end="url(#arrFsm)"/>
+      <text class="fsm-edge" x="365" y="174" text-anchor="middle">after 0.4s</text>
+
+      <path d="M 330 124 Q 450 180 585 124" class="fsm-line" marker-end="url(#arrFsm)"/>
+      <text class="fsm-edge" x="455" y="197" text-anchor="middle">match, final rep</text>
+
+      <!-- Self-loop: active → active (keystroke that doesn't match) -->
+      <path d="M 240 80 Q 240 40 290 40 Q 290 40 290 80" class="fsm-line" marker-end="url(#arrFsm)" fill="none"/>
+      <text class="fsm-edge" x="265" y="32" text-anchor="middle">keystroke</text>
+    </svg>
+  </figure>
+
+<pre><code class="language-swift">@Observable
+@MainActor
+final class ExerciseEngine {
+    enum State: Equatable {
+        case idle
+        case active
+        case repCompleted
+        case drillCompleted
+    }
+
+    private(set) var state: State = .idle
+    private(set) var exercise: Exercise?
+    private(set) var keystrokeCount: Int = 0
+    private(set) var elapsedTime: TimeInterval = 0
+    private(set) var completedReps: Int = 0
+    private(set) var drillCount: Int = 5
+    private(set) var totalTime: TimeInterval = 0
+    private(set) var totalKeystrokes: Int = 0
+    private(set) var currentVariation: Exercise.Variation?
+
+    private var startTime: Date?
+    private var timer: Timer?
+}</code></pre>
+
+  <p>Four cases: <code>idle</code>, <code>active</code> while a rep is in progress, <code>repCompleted</code> for a brief settled moment, <code>drillCompleted</code> at the end. All mutation goes through a few small methods.</p>
+
+<pre><code class="language-swift">extension ExerciseEngine {
+    func start(_ exercise: Exercise) {
+        self.exercise = exercise
+        self.drillCount = exercise.drillCount
+        completedReps = 0
+        totalTime = 0
+        totalKeystrokes = 0
+        startRep(exercise.variation(for: 0))
+    }
+
+    func textDidChange(currentText: String, cursorPosition: Int) {
+        guard state == .active else { return }
+        keystrokeCount += 1
+        validate(currentText: currentText, cursorPosition: cursorPosition)
+    }
+
+    func selectionDidChange(currentText: String, cursorPosition: Int) {
+        guard state == .active, let variation = currentVariation else { return }
+        // For motion-only exercises, cursor moves count too.
+        if variation.initialText == variation.expectedText {
+            keystrokeCount += 1
+        }
+        validate(currentText: currentText, cursorPosition: cursorPosition)
+    }
+}</code></pre>
+
+  <p>The <code>guard state == .active</code> is defensive — if the engine isn't active (view disappeared mid-keystroke, say), drop the event.</p>
+
+  <h3>The validation rule</h3>
+
+<pre><code class="language-swift">extension ExerciseEngine {
+    private func validate(currentText: String, cursorPosition: Int) {
+        guard let variation = currentVariation else { return }
+        let textMatches = currentText == variation.expectedText
+        let cursorMatches: Bool = variation.expectedCursorPosition
+            .map { $0 == cursorPosition } ?? true
+        if textMatches &amp;&amp; cursorMatches {
+            completeRep()
+        }
+    }
+
+    private func completeRep() {
+        timer?.invalidate()
+        timer = nil
+        let repTime = startTime.map { Date().timeIntervalSince($0) } ?? 0
+        totalTime += repTime
+        totalKeystrokes += keystrokeCount
+        completedReps += 1
+
+        if completedReps &gt;= drillCount {
+            state = .drillCompleted
+        } else {
+            state = .repCompleted
+            guard let exercise else { return }
+            let nextVariation = exercise.variation(for: completedReps)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) { [weak self] in
+                guard let self, self.state == .repCompleted else { return }
+                self.startRep(nextVariation)
+            }
+        }
+    }
+}</code></pre>
+
+  <p>The 0.4-second pause is deliberate. Without it, the editor resets mid-keystroke and the user fights a moving target. With it, there's a beat of "yes, good, here's the next one" before the next challenge appears.</p>
+
+  <aside class="concept">
+    <span class="label">[weak self] in asyncAfter</span>
+    <p>The dispatched closure outlives the instant it's scheduled. A strong <code>self</code> capture would keep the engine alive until the closure fires — fine at 0.4s, a bad habit in general. <code>[weak self]</code> plus <code>guard let self</code> is the idiomatic shape.</p>
+  </aside>
+
+  <h3>Wiring the engine into the drill view</h3>
+
+  <figure class="screenshot">
+    <img src="screenshots/05-drill.png" alt="A drill slide. Label reads EXERCISE 2. Instruction: 'Move up to the * using k, then delete it with x'. An editor below contains the starter text.">
+    <figcaption>A drill in its starting state — instruction on top, editor below. The engine validates on every keystroke, and when the text + cursor match the expected state, the rep completes.</figcaption>
+  </figure>
+
+  <p>The view owns the engine as <code>@State</code>, starts it on appear, forwards editor callbacks, records the result on completion:</p>
+
+<pre><code class="language-swift">struct DrillStepView: View {
+    let exercise: Exercise
+    let exerciseNumber: Int
+    let progressStore: ProgressStore
+    @Binding var isEditorFocused: Bool
+
+    @State private var engine = ExerciseEngine()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("Exercise \(exerciseNumber)").font(.caption.bold())
+            Text(exercise.instruction).font(.title3)
+
+            if let variation = engine.currentVariation {
+                ExerciseEditorView(
+                    initialText: variation.initialText,
+                    initialCursorPosition: variation.initialCursorPosition,
+                    onTextChange: { text, cursor in
+                        engine.textDidChange(currentText: text, cursorPosition: cursor)
+                    },
+                    onSelectionChange: { text, cursor in
+                        engine.selectionDidChange(currentText: text, cursorPosition: cursor)
+                    },
+                    onFocusChange: { isEditorFocused = $0 }
+                )
+                .id(variation.initialText + "\(variation.initialCursorPosition)")
+            }
+        }
+        .onAppear { engine.start(exercise) }
+        .onDisappear { engine.stop() }
+        .onChange(of: engine.isDrillComplete) {
+            if engine.isDrillComplete {
+                let result = ExerciseResult(
+                    exerciseId: exercise.id,
+                    completedAt: Date(),
+                    timeSeconds: engine.totalTime,
+                    keystrokeCount: engine.totalKeystrokes,
+                    attempts: engine.drillCount,
+                    hintsUsed: 0
+                )
+                progressStore.recordCompletion(result)
+            }
+        }
+    }
+}</code></pre>
+
+  <blockquote>
+    A good test of this kind of split: if you can write a meaningful test for the logic class without importing SwiftUI, the separation is right. If the test needs to build a view, the logic leaked.
+  </blockquote>
+
+  <p><code>ExerciseEngineTests.swift</code> does exactly that: instantiate the engine, feed it fake keystrokes, assert on state. No view, no UI. Pure I/O.</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>The drill view is wired up, but its editor is still a placeholder. The engine's state machine runs correctly in tests. Next, a real editor — which means an unexpected visit to AppKit.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 9 — A real editor -->
+<!-- ====================================================================== -->
+
+<section id="ch8" class="chapter">
+  <img class="bull" src="bulls/bull-08-texture.png" alt="An expressive bull, rendered in fine detail.">
+  <p class="chapter-number">Chapter eight</p>
+  <h2>A real editor</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p><code>ExerciseEditorView</code>: a SwiftUI view that wraps <code>NSTextView</code> so kindaVim's system-level interception actually works on it.</p>
+  </div>
+
+  <p class="chapter-opener">SwiftUI alone can't solve this. kindaVim works by hooking the macOS accessibility system and intercepting events on standard text fields — and "standard" means <code>NSTextView</code>, the AppKit control that Mail, Notes, Slack, and Xcode all use. SwiftUI's <code>TextEditor</code> is newer; kindaVim's detection of it isn't reliable. So the drill needs a real <code>NSTextView</code>. Which means <code>NSViewRepresentable</code>.</p>
+
+  <aside class="concept">
+    <span class="label">The Representable contract</span>
+    <p>Three methods. <code>makeNSView</code> runs once — build and configure. <code>updateNSView</code> runs when SwiftUI's inputs change — reconcile the AppKit view with the new state. <code>makeCoordinator</code> creates a helper object that outlives individual updates and holds non-SwiftUI state (delegate, callbacks, references).</p>
+  </aside>
+
+<pre><code class="language-swift">struct ExerciseEditorView: NSViewRepresentable {
+    let initialText: String
+    let initialCursorPosition: Int
+    var onTextChange: (String, Int) -&gt; Void
+    var onSelectionChange: (String, Int) -&gt; Void
+    var onFocusChange: ((Bool) -&gt; Void)?
+
+    func makeNSView(context: Context) -&gt; NSScrollView {
+        let scrollView = NSTextView.scrollableTextView()
+        guard let textView = scrollView.documentView as? NSTextView else {
+            return scrollView
+        }
+
+        // Turn off every flavor of auto-correct so kindaVim motions
+        // produce exactly the keystrokes the engine expects.
+        textView.isRichText = false
+        textView.isAutomaticQuoteSubstitutionEnabled = false
+        textView.isAutomaticDashSubstitutionEnabled = false
+        textView.isAutomaticTextReplacementEnabled = false
+        textView.isAutomaticSpellingCorrectionEnabled = false
+        textView.isContinuousSpellCheckingEnabled = false
+        textView.isAutomaticTextCompletionEnabled = false
+
+        textView.font = Typography.editorFont
+        textView.string = initialText
+        let safePosition = min(initialCursorPosition, textView.string.count)
+        textView.setSelectedRange(NSRange(location: safePosition, length: 0))
+
+        textView.delegate = context.coordinator
+        context.coordinator.textView = textView
+        context.coordinator.onFocusChange = onFocusChange
+
+        return scrollView
+    }
+
+    func updateNSView(_ scrollView: NSScrollView, context: Context) {
+        guard let textView = scrollView.documentView as? NSTextView else { return }
+        if context.coordinator.currentInitialText != initialText {
+            context.coordinator.currentInitialText = initialText
+            context.coordinator.isResetting = true
+            textView.string = initialText
+            let safePosition = min(initialCursorPosition, textView.string.count)
+            textView.setSelectedRange(NSRange(location: safePosition, length: 0))
+            context.coordinator.isResetting = false
+        }
+    }
+
+    func makeCoordinator() -&gt; Coordinator {
+        Coordinator(
+            onTextChange: onTextChange,
+            onSelectionChange: onSelectionChange,
+            initialText: initialText
+        )
+    }
+}</code></pre>
+
+  <p>Most of <code>makeNSView</code> is ceremony — flipping off every auto-correct flavor so kindaVim's keystrokes land exactly as the engine expects. <code>updateNSView</code> is the subtle one: SwiftUI can call it for any reason, and you have to decide what that means. Here, we only reset the buffer if the seed text changed (new rep). Otherwise the user's in-progress edits stay.</p>
+
+  <aside class="concept">
+    <span class="label">Why the isResetting flag</span>
+    <p>Assigning <code>textView.string</code> fires <code>textDidChange</code>, which would feed the reset back into the engine as a phantom keystroke. The flag lets the coordinator ignore callbacks during programmatic resets — standard loopback defense when bridging callback APIs into reactive ones.</p>
+  </aside>
+
+  <h3>The Coordinator</h3>
+
+<pre><code class="language-swift">@MainActor
+final class Coordinator: NSObject, NSTextViewDelegate {
+    var onTextChange: (String, Int) -&gt; Void
+    var onSelectionChange: (String, Int) -&gt; Void
+    var onFocusChange: ((Bool) -&gt; Void)?
+    var currentInitialText: String
+    var isResetting = false
+    weak var textView: NSTextView?
+
+    init(onTextChange: @escaping (String, Int) -&gt; Void,
+         onSelectionChange: @escaping (String, Int) -&gt; Void,
+         initialText: String) {
+        self.onTextChange = onTextChange
+        self.onSelectionChange = onSelectionChange
+        self.currentInitialText = initialText
+    }
+
+    func textDidChange(_ notification: Notification) {
+        guard !isResetting, let textView = notification.object as? NSTextView else { return }
+        onTextChange(textView.string, textView.selectedRange().location)
+    }
+
+    func textViewDidChangeSelection(_ notification: Notification) {
+        guard !isResetting, let textView = notification.object as? NSTextView else { return }
+        onSelectionChange(textView.string, textView.selectedRange().location)
+    }
+
+    nonisolated func textDidBeginEditing(_ notification: Notification) {
+        MainActor.assumeIsolated { onFocusChange?(true) }
+    }
+
+    nonisolated func textDidEndEditing(_ notification: Notification) {
+        MainActor.assumeIsolated { onFocusChange?(false) }
+    }
+}</code></pre>
+
+  <p>The full chain: user types → <code>NSTextView</code> notifies delegate → coordinator calls the SwiftUI-supplied closure → closure calls <code>engine.textDidChange</code> → engine mutates observable state → every view reading that state re-renders. Four layers, no glue code you had to invent.</p>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>The drill is functional end-to-end. Pick a lesson, press <code>l</code> through the slides, hit the drill, type with kindaVim active, watch the rep complete, watch the drill advance. There's just one thing missing: the app forgets everything when you close it.</p>
+  </div>
+</section>
+
+<hr class="section-rule">
+
+<!-- ====================================================================== -->
+<!-- CHAPTER 10 — Remembering the user -->
+<!-- ====================================================================== -->
+
+<section id="ch9" class="chapter">
+  <img class="bull" src="bulls/bull-09-expression.png" alt="The finished academic study — fully realized in charcoal.">
+  <p class="chapter-number">Chapter nine</p>
+  <h2>Remembering the user</h2>
+
+  <div class="goal">
+    <span class="goal-label">You'll build</span>
+    <p><code>ProgressStore</code>: a tiny observable class that reads user progress on startup, writes on every completed drill, and answers aggregate questions for the sidebar.</p>
+  </div>
+
+  <p class="chapter-opener">You don't need a database. A stable directory, a <code>Codable</code> type, and an atomic write is the whole recipe.</p>
+
+  <p>The directory is <code>~/Library/Application Support/&lt;your-app-name&gt;/</code>, found via <code>FileManager</code> — create it on first launch before writing. <code>Codable</code> is whatever model you're persisting (here, <code>UserProgress</code>). Atomic means the file is written to a temp location and renamed, so a crash mid-write can't corrupt what's already there.</p>
+
+<pre><code class="language-swift">@Observable
+@MainActor
+public final class ProgressStore {
+    public private(set) var progress: UserProgress
+    private let fileURL: URL
+
+    public init() {
+        let base = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask)
+            .first!
+        self.fileURL = base
+            .appendingPathComponent("kindaVimTutor", isDirectory: true)
+            .appendingPathComponent("progress.json")
+
+        if let data = try? Data(contentsOf: fileURL),
+           let saved = try? JSONDecoder().decode(UserProgress.self, from: data) {
+            self.progress = saved
+        } else {
+            self.progress = UserProgress()
+        }
+    }
+
+    public func recordCompletion(_ result: ExerciseResult) {
+        if let existing = progress.completedExercises[result.exerciseId] {
+            // Keep the best result: fewest keystrokes, then fastest time.
+            if result.keystrokeCount &lt; existing.keystrokeCount
+                || (result.keystrokeCount == existing.keystrokeCount
+                    &amp;&amp; result.timeSeconds &lt; existing.timeSeconds) {
+                progress.completedExercises[result.exerciseId] = result
+            }
+        } else {
+            progress.completedExercises[result.exerciseId] = result
+        }
+        progress.totalTimeSpent += result.timeSeconds
+        progress.lastPracticeDate = Date()
+        save()
+    }
+
+    public func isExerciseCompleted(_ id: String) -&gt; Bool {
+        progress.completedExercises[id] != nil
+    }
+
+    public func isLessonCompleted(_ lesson: Lesson) -&gt; Bool {
+        lesson.exercises.allSatisfy { isExerciseCompleted($0.id) }
+    }
+
+    private func save() {
+        let dir = fileURL.deletingLastPathComponent()
+        try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+        if let data = try? JSONEncoder().encode(progress) {
+            try? data.write(to: fileURL, options: .atomic)
+        }
+    }
+}</code></pre>
+
+  <p><code>progress</code> is <code>private(set)</code> — callers read the whole state but only mutate through <code>recordCompletion</code>. That's the difference between a store and a dictionary. And the "keep the best result" rule lives in the store, not in views — centralize the policy and you get one answer to "which result does the app remember?"</p>
+
+  <aside class="concept">
+    <span class="label">When JSON stops being enough</span>
+    <p>A few kilobytes, written once per drill, read once at launch — JSON is plenty. Reach for SwiftData or SQLite when you have hundreds of thousands of records, concurrent writes, or queryable relationships. Most Mac apps never need one.</p>
+  </aside>
+
+  <h3>Tracing a keystroke, end to end</h3>
+
+  <p>One final keystroke of one final rep of a drill, at a glance:</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="kstrace-title">
+      <title id="kstrace-title">Keystroke flow from NSTextView to the sidebar's checkmark</title>
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
+        </marker>
+        <marker id="arrDash" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#a14a2a"/>
+        </marker>
+      </defs>
+      <style>
+        .dg-box { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .dg-accent { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.3; }
+        .dg-persist { fill: #ecdfbe; stroke: #a69874; stroke-width: 1; }
+        .dg-observe { fill: #f5eeda; stroke: #a14a2a; stroke-width: 1.3; }
+        .dg-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 12px; font-weight: 600; fill: #1a1a1a; }
+        .dg-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; }
+        .dg-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #7d6f50; font-style: italic; }
+        .dg-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
+        .dg-dash { stroke: #a14a2a; stroke-width: 1.2; fill: none; stroke-dasharray: 4 3; }
+      </style>
+
+      <rect class="dg-box" x="0" y="50" width="120" height="60" rx="8"/>
+      <text class="dg-label" x="60" y="76" text-anchor="middle">NSTextView</text>
+      <text class="dg-sub" x="60" y="93" text-anchor="middle">AppKit</text>
+
+      <rect class="dg-box" x="150" y="50" width="120" height="60" rx="8"/>
+      <text class="dg-label" x="210" y="76" text-anchor="middle">Coordinator</text>
+      <text class="dg-sub" x="210" y="93" text-anchor="middle">delegate</text>
+
+      <rect class="dg-accent" x="300" y="50" width="120" height="60" rx="8"/>
+      <text class="dg-label" x="360" y="76" text-anchor="middle">ExerciseEngine</text>
+      <text class="dg-sub" x="360" y="93" text-anchor="middle">validate</text>
+
+      <rect class="dg-persist" x="450" y="50" width="120" height="60" rx="8"/>
+      <text class="dg-label" x="510" y="76" text-anchor="middle">ProgressStore</text>
+      <text class="dg-sub" x="510" y="93" text-anchor="middle">record &amp; save</text>
+
+      <rect class="dg-observe" x="600" y="50" width="120" height="60" rx="8"/>
+      <text class="dg-label" x="660" y="76" text-anchor="middle">SidebarView</text>
+      <text class="dg-sub" x="660" y="93" text-anchor="middle">re-renders ✓</text>
+
+      <line x1="120" y1="80" x2="150" y2="80" class="dg-line" marker-end="url(#arr)"/>
+      <text class="dg-edge" x="135" y="71" text-anchor="middle">delegate</text>
+
+      <line x1="270" y1="80" x2="300" y2="80" class="dg-line" marker-end="url(#arr)"/>
+      <text class="dg-edge" x="285" y="71" text-anchor="middle">closure</text>
+
+      <line x1="420" y1="80" x2="450" y2="80" class="dg-line" marker-end="url(#arr)"/>
+      <text class="dg-edge" x="435" y="71" text-anchor="middle">onChange</text>
+
+      <line x1="570" y1="80" x2="600" y2="80" class="dg-dash" marker-end="url(#arrDash)"/>
+      <text class="dg-edge" x="585" y="71" text-anchor="middle" fill="#a14a2a">observes</text>
+
+      <!-- Side effect: disk -->
+      <line x1="510" y1="110" x2="510" y2="150" class="dg-line" marker-end="url(#arr)"/>
+      <text class="dg-edge" x="510" y="168" text-anchor="middle">~/Library/…/progress.json</text>
+    </svg>
+  </figure>
+
+  <p>Solid arrows are explicit calls; the dashed arrow is the Observation framework noticing <code>ProgressStore</code> changed and re-running the sidebar's <code>body</code>. You wrote none of that last step. The sidebar just <em>reads</em> <code>isLessonCompleted</code>, the compiler subscribes it to what it read, and SwiftUI handles the rest. That's the promise of the declarative model — and it holds.</p>
+
+  <h3>Running the finished app</h3>
+
+<pre><code class="language-bash">$ swift build
+Build complete!
+
+$ swift run
+# Window opens. Pick "Moving the Cursor".
+# Press l through the slides. Hit the drill.
+# Type. The rep completes. The drill completes.
+# Close the app. Open it again. The checkmark is still there.</code></pre>
+
+  <div class="checkpoint">
+    <p class="checkpoint-label">Where we are</p>
+    <p>Done. Nine chapters, about a thousand lines of Swift, and an app that does something real — teaches a skill, remembers what you've done, feels at home on the Mac.</p>
+  </div>
+
+  <h3 style="margin-top: 56px;">What to do next</h3>
+
+  <p>The five principles that carried this app are the same five you'll reach for in every Mac app you write after this one:</p>
+
+  <blockquote style="font-size: 19px; margin-top: 24px;">
+    Data first. State lifted out of views. Business logic in its own class. AppKit bridged only where it earns its keep. Persistence that fits the data.
+  </blockquote>
+
+  <p style="margin-top: 32px;">Some concrete things to try from here:</p>
+
+  <ul>
+    <li><strong>Read the <code>master</code> branch.</strong> The progress inspector, distributed-notification mode detection, achievement rings, and the drill-event recorder are all built on the primitives you just wrote. The diff is the reference for "what does a second feature look like?"</li>
+    <li><strong>Fork the essentials branch and ship one feature.</strong> A streak counter. A "mark for review" toggle. A sharing panel that exports progress as JSON. Any one of these is the right size to consolidate what's in your head — a single-chapter worth of code.</li>
+    <li><strong>Replace a piece.</strong> Swap <code>ProgressStore</code>'s JSON for SwiftData. Replace <code>ExerciseEditorView</code> with a custom <code>NSTextView</code> subclass that draws the cursor differently. Rewrite <code>ExerciseEngine</code> in an <code>actor</code> instead of <code>@MainActor</code>. Each is a focused exercise with visible consequences.</li>
+    <li><strong>Dig into the shape.</strong> The <a href="architecture.html">architecture guide</a> has the full layer and data-flow diagrams, a module-by-module tour, and a separate "beginner macOS developer notes" section that goes deeper on the Swift/SwiftUI primitives you saw here.</li>
+  </ul>
+
+  <p>If you built something from this, or read something that changed how you'd shape your own SwiftUI app, I'd genuinely love to hear about it. The <a href="https://github.com/malpern/kindaVimTutor">repo is on GitHub</a>; issues and pull requests are open.</p>
+
+</section>
+
+<section class="resources" aria-label="Further reading and watching">
+  <h2>Further reading &amp; watching</h2>
+  <p class="resources-deck">A small, curated list. Each item earns its spot by actually clarifying something this tutorial gestures at.</p>
+
+  <div class="resources-group">
+    <h3>The big ideas, from Apple</h3>
+    <ul class="resource-list">
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://developer.apple.com/tutorials/swiftui">Introducing SwiftUI — the Landmarks tutorial</a></div>
+          <div class="resource-meta">Apple Developer · interactive tutorial</div>
+          <p class="resource-blurb">The canonical "build a small app one feature at a time" walkthrough. This tutorial's format is modeled on it. If you finish here and want more of the same flavor, this is next.</p>
+        </div>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://developer.apple.com/videos/play/wwdc2023/10149/">Discover Observation in SwiftUI</a></div>
+          <div class="resource-meta">WWDC 2023 · 23 minutes</div>
+          <p class="resource-blurb">What the <code>@Observable</code> macro actually does, why it replaces <code>ObservableObject</code>, and the performance wins you get for free. Twelve minutes in is the crucial explanation of property-level tracking.</p>
+        </div>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://developer.apple.com/videos/play/wwdc2021/10022/">Demystify SwiftUI</a></div>
+          <div class="resource-meta">WWDC 2021 · 37 minutes</div>
+          <p class="resource-blurb">Identity, lifetime, and dependencies — the three concepts that explain why SwiftUI redraws what it does when it does. Older, still the clearest explanation of the underlying model.</p>
+        </div>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://developer.apple.com/documentation/observation">Observation framework reference</a></div>
+          <div class="resource-meta">Apple Developer · documentation</div>
+          <p class="resource-blurb">The formal reference for <code>@Observable</code>, <code>withObservationTracking</code>, and the rest of the framework. Skim it once; come back to it when a view isn't re-rendering and you want to know why.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="resources-group">
+    <h3>Explanations that stuck with me</h3>
+    <ul class="resource-list">
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://www.hackingwithswift.com/quick-start/swiftui/how-to-use-observable-to-make-a-class-observable">How to use @Observable to make a class observable</a></div>
+          <div class="resource-meta">Hacking with Swift · Paul Hudson</div>
+          <p class="resource-blurb">A short, warm, example-driven intro to <code>@Observable</code> — and by extension, to the whole Hacking with Swift archive, which is the single best practitioner-focused Swift resource on the web.</p>
+        </div>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://www.swiftbysundell.com/articles/picking-the-right-data-type-for-a-given-swift-value/">Picking the right data type for a given Swift value</a></div>
+          <div class="resource-meta">Swift by Sundell · John Sundell</div>
+          <p class="resource-blurb">Good companion to Chapter 2. When should something be a struct vs. an enum vs. a class? Sundell's framework is the one I actually use.</p>
+        </div>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://developer.apple.com/documentation/swiftui/nsviewrepresentable">NSViewRepresentable reference</a></div>
+          <div class="resource-meta">Apple Developer · documentation</div>
+          <p class="resource-blurb">The formal reference for Chapter 8's AppKit bridge. Particularly the Coordinator pattern section — terse but complete.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <div class="resources-group">
+    <h3>When you need to go deeper</h3>
+    <ul class="resource-list">
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="14" height="18" rx="2"/><path d="M8 8h6M8 12h6M8 16h4"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://docs.swift.org/swift-book/documentation/the-swift-programming-language/concurrency/">The Swift Programming Language: Concurrency</a></div>
+          <div class="resource-meta">Swift.org · book chapter</div>
+          <p class="resource-blurb">When you want to understand <code>@MainActor</code> and <code>Sendable</code> as a system rather than as annotations you sprinkle on things.</p>
+        </div>
+      </li>
+      <li class="resource">
+        <span class="resource-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4" fill="currentColor" stroke="none"/></svg>
+        </span>
+        <div>
+          <div class="resource-title"><a href="https://developer.apple.com/videos/play/wwdc2022/10054/">The SwiftUI cookbook for navigation</a></div>
+          <div class="resource-meta">WWDC 2022 · 32 minutes</div>
+          <p class="resource-blurb">Everything about <code>NavigationSplitView</code>, <code>NavigationStack</code>, and programmatic navigation paths. Chapter 5's simple use is the tip of the iceberg.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  kindaVim Tutor · essentials branch · <code>docs/tutorial.html</code>
+</footer>
+
+<aside class="miniplayer" aria-label="Read-aloud player" role="region">
+  <span class="chapter-label"></span>
+  <button class="pp" aria-label="Play or pause"></button>
+  <button class="speed" aria-label="Playback speed">1×</button>
+  <button class="gear" aria-label="Settings">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+  </button>
+  <button class="close" aria-label="Stop reading">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+  </button>
+</aside>
+
+<aside class="settings-panel" aria-label="Read-aloud settings" role="region">
+  <h4>Voice engine</h4>
+  <div class="mode-toggle">
+    <button data-mode="web" type="button">Browser voice</button>
+    <button data-mode="openai" type="button">OpenAI voice</button>
+  </div>
+
+  <div data-mode-panel="openai">
+    <label>
+      <span class="field-label">OpenAI API key</span>
+      <input type="password" data-field="key" placeholder="sk-..." autocomplete="off" spellcheck="false">
+    </label>
+    <p class="note">Stored only in this browser's local storage. Sent directly to <code>api.openai.com</code> — never to any other server.</p>
+    <label>
+      <span class="field-label">Voice</span>
+      <select data-field="openai-voice">
+        <option value="fable">Fable — British storyteller</option>
+        <option value="alloy">Alloy — balanced</option>
+        <option value="echo">Echo — warm male</option>
+        <option value="nova">Nova — warm female</option>
+        <option value="shimmer">Shimmer — energetic</option>
+        <option value="onyx">Onyx — deep male</option>
+        <option value="sage">Sage — calm</option>
+        <option value="ash">Ash — casual</option>
+        <option value="ballad">Ballad — poetic</option>
+        <option value="verse">Verse — theatrical</option>
+        <option value="coral">Coral — warm</option>
+      </select>
+    </label>
+    <label>
+      <span class="field-label">Voice instructions (emotion, pacing)</span>
+      <textarea data-field="instructions" spellcheck="false"></textarea>
+    </label>
+  </div>
+
+  <div data-mode-panel="web">
+    <label>
+      <span class="field-label">System voice</span>
+      <select data-field="web-voice"></select>
+    </label>
+    <p class="note">Uses your browser's built-in TTS. Free, offline, but limited emotion control. On Mac and iOS the defaults are genuinely pleasant.</p>
+  </div>
+
+  <h4 style="margin-top: 20px;">Playback</h4>
+  <label>
+    <span class="field-label">Speed</span>
+    <select data-field="speed">
+      <option value="0.85">0.85× — slower</option>
+      <option value="1" selected>1× — natural</option>
+      <option value="1.15">1.15×</option>
+      <option value="1.3">1.3×</option>
+      <option value="1.5">1.5×</option>
+    </select>
+  </label>
+</aside>
+
+<script>
+  // Highlight code
+  if (window.Prism) { Prism.highlightAll(); }
+
+  // Copy-to-clipboard button on every <pre>
+  document.querySelectorAll('pre').forEach(pre => {
+    const btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', 'Copy code to clipboard');
+    btn.textContent = 'Copy';
+    btn.addEventListener('click', async () => {
+      const code = pre.querySelector('code')?.innerText ?? pre.innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+        btn.textContent = 'Copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 1400);
+      } catch (err) {
+        btn.textContent = 'Press ⌘C';
+      }
+    });
+    pre.appendChild(btn);
+  });
+
+  // Glossary tooltips. Hover a known Swift attribute/protocol in code
+  // to get a one-line definition.
+  const glossary = {
+    '@main': 'Marks the struct that hosts the app\u2019s entry point. Swift synthesizes a main() for you.',
+    '@State': 'This view owns this value. SwiftUI keeps it alive across body re-runs and redraws when it changes.',
+    '@Binding': 'A read-write handle to state owned somewhere else. The owner stays authoritative.',
+    '@Observable': 'Swift 5.9+ macro. Makes a plain class trackable by SwiftUI at property granularity — no @Published needed.',
+    '@MainActor': 'Guarantees the code runs on the main thread. Required for all UI work.',
+    '@ViewBuilder': 'A function attribute that lets different branches return different view types. Replaces AnyView erasure.',
+    '@Previewable': 'Lets you declare @State-ish properties inside a #Preview block.',
+    '@escaping': 'A closure parameter that may outlive the function call. Most async callbacks are @escaping.',
+    'Sendable': 'Safe to pass across threads. Value types with value-type fields get it for free.',
+    'Identifiable': 'Has a stable id. Powers List and ForEach identity across updates.',
+    'Codable': 'Can encode and decode itself — JSON, property lists, anything with an encoder.',
+    'Hashable': 'Usable as a dictionary key, Set element, or NavigationSplitView selection.',
+    'Equatable': 'Has an == operator. Swift will synthesize it for structs with Equatable fields.',
+    'NSViewRepresentable': 'The protocol for wrapping an AppKit NSView and using it from SwiftUI.',
+    'NavigationSplitView': 'The macOS two-pane container: sidebar + detail.',
+    'NSTextView': 'AppKit\u2019s full-featured text editor. What Mail, Notes, Xcode all use.',
+  };
+
+  // Annotate external links with a `.external` class and a friendly
+  // destination label shown on hover. Skip internal/anchor links.
+  (function () {
+    const friendly = {
+      'developer.apple.com': 'Apple Developer',
+      'docs.swift.org': 'Swift Documentation',
+      'swift.org': 'Swift.org',
+      'github.com': 'GitHub',
+      'www.hackingwithswift.com': 'Hacking with Swift',
+      'hackingwithswift.com': 'Hacking with Swift',
+      'www.youtube.com': 'YouTube',
+      'youtube.com': 'YouTube',
+      'youtu.be': 'YouTube',
+      'www.swiftbysundell.com': 'Swift by Sundell',
+      'swiftbysundell.com': 'Swift by Sundell',
+    };
+    document.querySelectorAll('a[href]').forEach((a) => {
+      const href = a.getAttribute('href');
+      if (!href || href.startsWith('#') || href.startsWith('/') || (!href.startsWith('http'))) return;
+      try {
+        const u = new URL(href);
+        const host = u.hostname.replace(/^www\./, '');
+        const name = friendly[u.hostname] || friendly[host] || host;
+        a.classList.add('external');
+        a.setAttribute('data-site', name);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      } catch (e) { /* ignore */ }
+    });
+  })();
+
+  // Sticky chapter-nav header: track which chapter is in view, show
+  // prev/current/next with smooth appearance after the hero.
+  (function () {
+    const nav = document.querySelector('.chapter-nav');
+    const progress = nav?.querySelector('.nav-progress');
+    if (!nav) return;
+
+    const chapters = Array.from(document.querySelectorAll('section.chapter'));
+    if (chapters.length === 0) return;
+
+    // Pull the title from each chapter's h2.
+    const chapterData = chapters.map((el, i) => ({
+      el,
+      id: el.id,
+      title: el.querySelector('h2')?.textContent.trim() || '',
+      index: i,
+    }));
+
+    function updateNav(activeIndex) {
+      const cur = chapterData[activeIndex];
+      const prev = activeIndex > 0 ? chapterData[activeIndex - 1] : null;
+      const next = activeIndex < chapterData.length - 1 ? chapterData[activeIndex + 1] : null;
+
+      nav.querySelector('.nav-current .nav-num').textContent = `Ch ${activeIndex + 1} / ${chapterData.length}`;
+      nav.querySelector('.nav-current .nav-title').textContent = cur.title;
+
+      const prevEl = nav.querySelector('.nav-prev');
+      const nextEl = nav.querySelector('.nav-next');
+      if (prev) {
+        prevEl.setAttribute('href', `#${prev.id}`);
+        prevEl.querySelector('.nav-title').textContent = prev.title;
+        prevEl.style.visibility = 'visible';
+      } else {
+        prevEl.style.visibility = 'hidden';
+      }
+      if (next) {
+        nextEl.setAttribute('href', `#${next.id}`);
+        nextEl.querySelector('.nav-title').textContent = next.title;
+        nextEl.style.visibility = 'visible';
+      } else {
+        nextEl.style.visibility = 'hidden';
+      }
+
+      // Update a thin progress bar at the bottom of the nav.
+      if (progress) {
+        const pct = ((activeIndex + 1) / chapterData.length) * 100;
+        progress.style.width = `${pct}%`;
+      }
+    }
+
+    // Hide the nav while the hero is in view; show after scrolling past it.
+    const hero = document.querySelector('h1.title');
+    const heroSentinel = document.createElement('div');
+    heroSentinel.style.cssText = 'height: 1px; width: 1px; pointer-events: none;';
+    hero?.parentNode?.insertBefore(heroSentinel, hero.nextSibling);
+
+    let navVisible = false;
+    const heroObs = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        // When the sentinel leaves the viewport upward, show the nav.
+        const passed = !e.isIntersecting && e.boundingClientRect.top < 0;
+        navVisible = passed;
+        nav.classList.toggle('visible', navVisible);
+      });
+    }, { rootMargin: '0px' });
+    heroObs.observe(heroSentinel);
+
+    // Track which chapter is "currently reading" — the one whose top is
+    // nearest (but above) the middle of the viewport.
+    let activeIndex = 0;
+    const chapterObs = new IntersectionObserver(() => {
+      const midline = window.innerHeight * 0.3;
+      let best = 0;
+      let bestDist = Infinity;
+      chapterData.forEach((c, i) => {
+        const rect = c.el.getBoundingClientRect();
+        // Prefer chapters whose top is above the midline; the closest wins.
+        if (rect.top <= midline) {
+          const dist = midline - rect.top;
+          if (dist < bestDist) { bestDist = dist; best = i; }
+        }
+      });
+      if (best !== activeIndex) {
+        activeIndex = best;
+        updateNav(activeIndex);
+      }
+    }, {
+      threshold: [0, 0.1, 0.25, 0.5, 0.75, 1],
+    });
+    chapterData.forEach((c) => chapterObs.observe(c.el));
+
+    // Initial state + scroll fallback
+    updateNav(0);
+    window.addEventListener('scroll', () => {
+      // Re-check on every scroll (throttled by rAF) to handle fast scrolls
+      // and page anchor jumps that the observer may miss between thresholds.
+      requestAnimationFrame(() => {
+        const midline = window.innerHeight * 0.3;
+        let best = 0;
+        let bestDist = Infinity;
+        chapterData.forEach((c, i) => {
+          const rect = c.el.getBoundingClientRect();
+          if (rect.top <= midline) {
+            const dist = midline - rect.top;
+            if (dist < bestDist) { bestDist = dist; best = i; }
+          }
+        });
+        if (best !== activeIndex) {
+          activeIndex = best;
+          updateNav(activeIndex);
+        }
+      });
+    }, { passive: true });
+  })();
+
+  // ==========================================================
+  // Read-aloud: sentence wrapping + Web Speech / OpenAI engines
+  // + floating mini-player + settings panel.
+  // ==========================================================
+  (function () {
+    const DEFAULT_INSTRUCTIONS =
+      "Warm, friendly, and audibly excited about the material — the tone " +
+      "of a knowledgeable friend walking a beginner through their first " +
+      "macOS app. Clear articulation, brisk but unhurried. A slight playful " +
+      "lilt on dry jokes (don't oversell them — let the line breathe). " +
+      "Emphasize new technical terms when they first appear. Small pauses " +
+      "mark transitions between ideas. Confident but never condescending.";
+
+    const LS = {
+      get(k, d) { try { const v = localStorage.getItem('ra.' + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+      set(k, v) { try { localStorage.setItem('ra.' + k, JSON.stringify(v)); } catch {} },
+    };
+
+    const config = {
+      mode: LS.get('mode', 'web'),
+      key: LS.get('key', ''),
+      openaiVoice: LS.get('openaiVoice', 'fable'),
+      webVoice: LS.get('webVoice', ''),
+      instructions: LS.get('instructions', DEFAULT_INSTRUCTIONS),
+      speed: LS.get('speed', 1),
+    };
+
+    const SPEAK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9v6h3.5L14 19V5L9.5 9H6z" fill="currentColor" stroke="none"/><path d="M17 9c1.2 1 1.2 5 0 6"/><path d="M19.5 7c2.2 1.8 2.2 8.2 0 10"/></svg>';
+    const PLAY_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>';
+    const PAUSE_ICON = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>';
+
+    // ---- Sentence wrapping ----
+    const SKIP_SELECTORS = ['pre', 'figure.screenshot', 'figure.diagram', 'hr.section-rule', '.code-caption', '.chapter-nav', '.miniplayer', '.settings-panel', '.toc', 'nav.toc', '.footer'];
+
+    function collectProse(root) {
+      const out = [];
+      (function walk(n) {
+        if (!n || n.nodeType !== 1) return;
+        if (SKIP_SELECTORS.some(s => n.matches && n.matches(s))) return;
+        if (n.matches && n.matches('p, h2, h3, h4, blockquote, li, figcaption')) {
+          out.push(n);
+          return;
+        }
+        for (const c of n.children) walk(c);
+      })(root);
+      return out;
+    }
+
+    function wrapSentencesIn(el) {
+      const text = el.textContent;
+      if (!text.trim()) return;
+      if (el.querySelector && el.querySelector(':scope > .s')) return;
+      let segments;
+      try {
+        const seg = new Intl.Segmenter('en', { granularity: 'sentence' });
+        segments = [...seg.segment(text)].filter(s => s.segment.trim().length > 0);
+      } catch { return; }
+      if (segments.length === 0) return;
+
+      // Build a node→offset map.
+      const positions = [];
+      const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      let node, off = 0;
+      while ((node = walker.nextNode())) {
+        positions.push({ node, start: off, end: off + node.nodeValue.length });
+        off += node.nodeValue.length;
+      }
+      const find = (g) => {
+        for (const p of positions) {
+          if (g >= p.start && g <= p.end) return { node: p.node, offset: g - p.start };
+        }
+        return null;
+      };
+
+      // Wrap in reverse order so offsets stay valid.
+      for (let i = segments.length - 1; i >= 0; i--) {
+        const s = segments[i];
+        const start = s.index;
+        const end = s.index + s.segment.length;
+        const sp = find(start), ep = find(end);
+        if (!sp || !ep) continue;
+        const r = document.createRange();
+        try { r.setStart(sp.node, sp.offset); r.setEnd(ep.node, ep.offset); } catch { continue; }
+        const span = document.createElement('span');
+        span.className = 's';
+        try {
+          r.surroundContents(span);
+        } catch {
+          try {
+            const c = r.extractContents();
+            span.appendChild(c);
+            r.insertNode(span);
+          } catch {}
+        }
+      }
+    }
+
+    // ---- Sentence index ----
+    let sentences = [];
+
+    function buildIndex() {
+      sentences = [];
+      document.querySelectorAll('section.chapter').forEach(chapter => {
+        const chapterId = chapter.id;
+        const title = chapter.querySelector('h2')?.textContent.trim() || '';
+        const proseEls = collectProse(chapter);
+        proseEls.forEach(wrapSentencesIn);
+        // Collect .s descendants in DOM order.
+        chapter.querySelectorAll('.s').forEach(s => {
+          sentences.push({ el: s, text: s.textContent.trim(), chapterId, chapterTitle: title });
+        });
+      });
+    }
+
+    // ---- Playback state ----
+    let queueStart = 0;
+    let queueIdx = 0;
+    let isPlaying = false;
+    let currentUtterance = null;
+    let currentAudio = null;
+    const audioCache = new Map(); // idx → { url }
+
+    const player = document.querySelector('.miniplayer');
+    const panel = document.querySelector('.settings-panel');
+    const ppBtn = player.querySelector('.pp');
+    const speedBtn = player.querySelector('.speed');
+    const gearBtn = player.querySelector('.gear');
+    const closeBtn = player.querySelector('.close');
+    const chapterLabel = player.querySelector('.chapter-label');
+
+    function setPP() { ppBtn.innerHTML = isPlaying ? PAUSE_ICON : PLAY_ICON; }
+    function setSpeed() { speedBtn.textContent = `${config.speed}×`; }
+    function setLabel() {
+      if (queueIdx < sentences.length) chapterLabel.textContent = sentences[queueIdx].chapterTitle;
+    }
+
+    function highlight(idx) {
+      document.querySelectorAll('.s.s-active').forEach(e => e.classList.remove('s-active'));
+      if (idx >= sentences.length) return;
+      const el = sentences[idx].el;
+      el.classList.add('s-active');
+      const navHeight = document.querySelector('.chapter-nav')?.offsetHeight || 0;
+      const rect = el.getBoundingClientRect();
+      const mid = window.innerHeight * 0.4;
+      if (rect.top < navHeight + 40 || rect.bottom > window.innerHeight - 80) {
+        const target = window.scrollY + rect.top - mid;
+        window.scrollTo({ top: target, behavior: 'smooth' });
+      }
+    }
+
+    function clearHighlight() {
+      document.querySelectorAll('.s.s-active').forEach(e => e.classList.remove('s-active'));
+    }
+
+    function markChapterPlaying(chapterId, playing) {
+      document.querySelectorAll('.speak-btn').forEach(b => b.classList.remove('playing'));
+      if (playing) {
+        const btn = document.querySelector(`.speak-btn[data-chapter="${chapterId}"]`);
+        btn?.classList.add('playing');
+      }
+    }
+
+    function startFromChapter(chapterId) {
+      stop();
+      const idx = sentences.findIndex(s => s.chapterId === chapterId);
+      if (idx < 0) return;
+      queueStart = idx;
+      queueIdx = idx;
+      setLabel();
+      play();
+    }
+
+    function play() {
+      if (queueIdx >= sentences.length) { stop(); return; }
+      isPlaying = true;
+      document.body.classList.add('speaking');
+      player.classList.add('visible');
+      setPP();
+      setSpeed();
+      setLabel();
+      highlight(queueIdx);
+      markChapterPlaying(sentences[queueIdx].chapterId, true);
+      if (config.mode === 'openai') playNextOpenAI();
+      else playNextWeb();
+    }
+
+    function stop() {
+      isPlaying = false;
+      document.body.classList.remove('speaking');
+      clearHighlight();
+      player.classList.remove('visible');
+      panel.classList.remove('visible');
+      try { window.speechSynthesis.cancel(); } catch {}
+      currentUtterance = null;
+      if (currentAudio) { try { currentAudio.pause(); } catch {} currentAudio = null; }
+      audioCache.forEach(v => URL.revokeObjectURL(v.url));
+      audioCache.clear();
+      markChapterPlaying(null, false);
+      setPP();
+    }
+
+    function pause() {
+      if (!isPlaying) return;
+      isPlaying = false;
+      if (config.mode === 'web') { try { window.speechSynthesis.pause(); } catch {} }
+      else if (currentAudio) { currentAudio.pause(); }
+      setPP();
+    }
+
+    function resume() {
+      if (isPlaying) return;
+      isPlaying = true;
+      setPP();
+      if (config.mode === 'web') {
+        if (window.speechSynthesis.paused) window.speechSynthesis.resume();
+        else playNextWeb();
+      } else {
+        if (currentAudio) currentAudio.play();
+        else playNextOpenAI();
+      }
+    }
+
+    function advance() {
+      queueIdx++;
+      if (queueIdx >= sentences.length) { stop(); return; }
+      const curCh = sentences[queueIdx].chapterId;
+      const prevCh = sentences[queueIdx - 1]?.chapterId;
+      if (curCh !== prevCh) {
+        // Chapter ended — stop here. The user can press a different chapter's button to continue.
+        stop();
+        return;
+      }
+      highlight(queueIdx);
+      if (config.mode === 'openai') playNextOpenAI();
+      else playNextWeb();
+    }
+
+    // ---- Web Speech ----
+    function pickWebVoice() {
+      const voices = window.speechSynthesis.getVoices();
+      if (config.webVoice) {
+        const m = voices.find(v => v.voiceURI === config.webVoice);
+        if (m) return m;
+      }
+      const prefs = ['Samantha', 'Ava', 'Daniel', 'Serena', 'Oliver', 'Tom', 'Karen'];
+      for (const name of prefs) {
+        const v = voices.find(vv => vv.name.includes(name));
+        if (v) return v;
+      }
+      return voices.find(v => v.lang && v.lang.startsWith('en')) || voices[0];
+    }
+
+    function playNextWeb() {
+      if (!isPlaying) return;
+      if (queueIdx >= sentences.length) { stop(); return; }
+      const s = sentences[queueIdx];
+      const u = new SpeechSynthesisUtterance(s.text);
+      u.rate = config.speed;
+      const v = pickWebVoice();
+      if (v) u.voice = v;
+      u.onend = () => { if (isPlaying && currentUtterance === u) advance(); };
+      u.onerror = () => { if (isPlaying && currentUtterance === u) advance(); };
+      currentUtterance = u;
+      window.speechSynthesis.speak(u);
+    }
+
+    // ---- OpenAI ----
+    const PREFETCH = 2;
+
+    async function fetchAudio(idx) {
+      if (audioCache.has(idx)) return audioCache.get(idx);
+      if (!config.key) throw new Error('Missing API key');
+      const s = sentences[idx];
+      const body = {
+        model: 'gpt-4o-mini-tts',
+        input: s.text,
+        voice: config.openaiVoice,
+        response_format: 'mp3',
+      };
+      if (config.instructions && config.instructions.trim()) body.instructions = config.instructions.trim();
+      const resp = await fetch('https://api.openai.com/v1/audio/speech', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${config.key}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => '');
+        throw new Error(`OpenAI TTS ${resp.status}: ${txt.slice(0,200)}`);
+      }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const entry = { url };
+      audioCache.set(idx, entry);
+      return entry;
+    }
+
+    function prefetchOpenAI() {
+      for (let i = queueIdx + 1; i <= queueIdx + PREFETCH && i < sentences.length; i++) {
+        if (sentences[i].chapterId !== sentences[queueIdx].chapterId) break;
+        fetchAudio(i).catch(() => {});
+      }
+    }
+
+    async function playNextOpenAI() {
+      if (!isPlaying) return;
+      if (queueIdx >= sentences.length) { stop(); return; }
+      try {
+        const { url } = await fetchAudio(queueIdx);
+        if (!isPlaying) return;
+        const audio = new Audio(url);
+        audio.playbackRate = config.speed;
+        audio.addEventListener('ended', () => { if (isPlaying && currentAudio === audio) advance(); });
+        audio.addEventListener('error', () => { if (isPlaying && currentAudio === audio) advance(); });
+        currentAudio = audio;
+        await audio.play();
+        prefetchOpenAI();
+      } catch (e) {
+        console.error('[read-aloud]', e);
+        stop();
+        alert(`Read-aloud failed. ${e.message}\n\nOpen Settings to check your API key, or switch to Browser voice.`);
+      }
+    }
+
+    // ---- Player wiring ----
+    ppBtn.addEventListener('click', () => { isPlaying ? pause() : resume(); });
+
+    const SPEEDS = [1, 1.15, 1.3, 1.5, 0.85];
+    speedBtn.addEventListener('click', () => {
+      const i = SPEEDS.indexOf(config.speed);
+      config.speed = SPEEDS[(i + 1) % SPEEDS.length];
+      LS.set('speed', config.speed);
+      setSpeed();
+      if (config.mode === 'web' && isPlaying) {
+        try { window.speechSynthesis.cancel(); } catch {}
+        playNextWeb();
+      } else if (currentAudio) {
+        currentAudio.playbackRate = config.speed;
+      }
+      // Reflect in the settings select if present
+      const sel = panel?.querySelector('[data-field="speed"]');
+      if (sel) sel.value = String(config.speed);
+    });
+
+    gearBtn.addEventListener('click', () => panel.classList.toggle('visible'));
+    closeBtn.addEventListener('click', () => stop());
+
+    // Click outside panel closes it.
+    document.addEventListener('click', (e) => {
+      if (panel.classList.contains('visible') &&
+          !panel.contains(e.target) &&
+          !player.contains(e.target)) {
+        panel.classList.remove('visible');
+      }
+    });
+
+    // ---- Speak button per chapter ----
+    function installSpeakButtons() {
+      document.querySelectorAll('.chapter-number').forEach(numEl => {
+        const chapter = numEl.closest('.chapter');
+        if (!chapter) return;
+        if (numEl.parentElement?.classList.contains('chapter-header-row')) return;
+        const row = document.createElement('div');
+        row.className = 'chapter-header-row';
+        numEl.parentNode.insertBefore(row, numEl);
+        row.appendChild(numEl);
+        const btn = document.createElement('button');
+        btn.className = 'speak-btn';
+        btn.type = 'button';
+        btn.setAttribute('aria-label', 'Listen to this chapter');
+        btn.setAttribute('data-chapter', chapter.id);
+        btn.innerHTML = SPEAK_ICON;
+        btn.addEventListener('click', () => {
+          if (isPlaying && sentences[queueIdx]?.chapterId === chapter.id) stop();
+          else startFromChapter(chapter.id);
+        });
+        row.appendChild(btn);
+      });
+    }
+
+    // ---- Settings panel wiring ----
+    function initSettings() {
+      const keyInput = panel.querySelector('[data-field="key"]');
+      const voiceSel = panel.querySelector('[data-field="openai-voice"]');
+      const instructions = panel.querySelector('[data-field="instructions"]');
+      const webVoiceSel = panel.querySelector('[data-field="web-voice"]');
+      const speedSel = panel.querySelector('[data-field="speed"]');
+
+      keyInput.value = config.key;
+      keyInput.addEventListener('change', () => { config.key = keyInput.value.trim(); LS.set('key', config.key); audioCache.clear(); });
+
+      voiceSel.value = config.openaiVoice;
+      voiceSel.addEventListener('change', () => { config.openaiVoice = voiceSel.value; LS.set('openaiVoice', config.openaiVoice); audioCache.clear(); });
+
+      instructions.value = config.instructions;
+      instructions.addEventListener('change', () => { config.instructions = instructions.value; LS.set('instructions', config.instructions); audioCache.clear(); });
+
+      speedSel.value = String(config.speed);
+      speedSel.addEventListener('change', () => {
+        config.speed = parseFloat(speedSel.value);
+        LS.set('speed', config.speed);
+        setSpeed();
+        if (currentAudio) currentAudio.playbackRate = config.speed;
+      });
+
+      // Mode toggle
+      panel.querySelectorAll('.mode-toggle button').forEach(b => {
+        if (b.dataset.mode === config.mode) b.classList.add('active');
+        b.addEventListener('click', () => {
+          config.mode = b.dataset.mode;
+          LS.set('mode', config.mode);
+          panel.querySelectorAll('.mode-toggle button').forEach(x => x.classList.toggle('active', x.dataset.mode === config.mode));
+          panel.querySelectorAll('[data-mode-panel]').forEach(x => x.style.display = x.dataset.modePanel === config.mode ? '' : 'none');
+        });
+      });
+      panel.querySelectorAll('[data-mode-panel]').forEach(x => x.style.display = x.dataset.modePanel === config.mode ? '' : 'none');
+
+      // Populate Web Speech voices (they may load async).
+      function fillWebVoices() {
+        const voices = window.speechSynthesis.getVoices().filter(v => v.lang && v.lang.startsWith('en'));
+        webVoiceSel.innerHTML = '';
+        const autoOpt = document.createElement('option');
+        autoOpt.value = '';
+        autoOpt.textContent = 'Auto (best available)';
+        webVoiceSel.appendChild(autoOpt);
+        voices.forEach(v => {
+          const o = document.createElement('option');
+          o.value = v.voiceURI;
+          o.textContent = `${v.name} · ${v.lang}`;
+          webVoiceSel.appendChild(o);
+        });
+        if (config.webVoice) webVoiceSel.value = config.webVoice;
+      }
+      fillWebVoices();
+      window.speechSynthesis?.addEventListener?.('voiceschanged', fillWebVoices);
+      webVoiceSel.addEventListener('change', () => { config.webVoice = webVoiceSel.value; LS.set('webVoice', config.webVoice); });
+    }
+
+    window.addEventListener('beforeunload', () => { try { stop(); } catch {} });
+
+    // Init
+    buildIndex();
+    installSpeakButtons();
+    initSettings();
+    setPP();
+    setSpeed();
+  })();
+
+  // Walk every highlighted token; if its text matches a glossary key, wrap it.
+  function annotateGlossary() {
+    document.querySelectorAll('pre code').forEach(code => {
+      // Walk text nodes and token spans together.
+      const walker = document.createTreeWalker(code, NodeFilter.SHOW_ELEMENT, null);
+      let node;
+      const toWrap = [];
+      while ((node = walker.nextNode())) {
+        const t = node.textContent.trim();
+        if (glossary[t] && !node.classList.contains('tt')) {
+          toWrap.push({ el: node, def: glossary[t] });
+        }
+      }
+      toWrap.forEach(({ el, def }) => {
+        // Don't double-wrap inherited parents; only wrap leaf-ish tokens.
+        if (el.querySelector('.tt')) return;
+        el.classList.add('tt');
+        el.setAttribute('data-tt', def);
+        el.setAttribute('tabindex', '0');
+      });
+    });
+  }
+  annotateGlossary();
+</script>
+
+</body>
+</html>

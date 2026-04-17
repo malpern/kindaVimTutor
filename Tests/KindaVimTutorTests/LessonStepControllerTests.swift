@@ -1,5 +1,5 @@
 import Testing
-@testable import KindaVimTutor
+@testable import KindaVimTutorKit
 
 @Suite("LessonStepController navigation")
 @MainActor
