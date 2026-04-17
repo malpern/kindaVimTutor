@@ -193,7 +193,16 @@
     display: inline;
     margin-left: 0.02em;
     vertical-align: -0.04em;
-    transition: opacity 0.08s;
+    /* Blink via CSS animation with instant steps. Running on the
+       compositor (not the main thread) keeps it immune to layout
+       reflow flicker when the title wraps mid-typing. */
+    animation: title-cursor-blink 1.06s steps(2, end) infinite;
+  }
+  @keyframes title-cursor-blink {
+    0%   { opacity: 1; }
+    50%  { opacity: 1; }
+    50.01% { opacity: 0; }
+    100% { opacity: 0; }
   }
 
   .subtitle {
@@ -3145,12 +3154,8 @@ $ swift run
     const cursorEl = document.querySelector('h1.title .title-cursor');
     if (!textEl || !cursorEl) return;
 
-    // Blinking cursor — matches the SwiftUI 0.53s blink period.
-    let on = true;
-    setInterval(() => {
-      on = !on;
-      cursorEl.style.opacity = on ? '1' : '0';
-    }, 530);
+    // Blinking is handled by a CSS animation on .title-cursor so it
+    // can't conflict with layout reflow during typing/wrap events.
 
     // Typing plan: phases of letters separated by explicit pauses.
     const plan = [
