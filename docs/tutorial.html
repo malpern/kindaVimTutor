@@ -1108,8 +1108,19 @@
   .tt {
     position: relative;
     cursor: help;
-    border-bottom: 1px dotted rgba(154, 47, 20, 0.35);
+    text-decoration: underline dashed;
+    text-decoration-color: rgba(161, 74, 42, 0.55);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 3px;
+    transition: text-decoration-color 0.15s;
   }
+  .tt:hover, .tt:focus, .tt.is-open {
+    text-decoration-color: var(--accent);
+  }
+  /* Inline <code> (prose) gets the same dashed look; tokens inside <pre>
+     keep their token color but pick up the underline. */
+  code.tt { text-decoration-thickness: 1px; }
+
   .tt::after {
     content: attr(data-tt);
     position: absolute;
@@ -1117,16 +1128,17 @@
     left: 50%;
     transform: translateX(-50%) translateY(-4px);
     width: max-content;
-    max-width: 280px;
-    padding: 10px 14px;
+    max-width: 340px;
+    padding: 12px 16px;
     background: #1a1818;
     color: #f5f1e8;
-    font-family: var(--sans);
-    font-size: 12px;
+    font-family: var(--serif);
+    font-size: 14px;
     font-weight: 400;
-    line-height: 1.5;
+    font-style: normal;
+    line-height: 1.55;
     letter-spacing: 0;
-    border-radius: 6px;
+    border-radius: 8px;
     white-space: normal;
     text-align: left;
     font-feature-settings: "liga";
@@ -1134,7 +1146,7 @@
     opacity: 0;
     transition: opacity 0.16s ease-out, transform 0.16s ease-out;
     z-index: 50;
-    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.22);
   }
   .tt::before {
     content: "";
@@ -1148,11 +1160,21 @@
     opacity: 0;
     transition: opacity 0.16s ease-out;
   }
-  .tt:hover::after, .tt:focus::after { opacity: 1; transform: translateX(-50%) translateY(0); }
-  .tt:hover::before, .tt:focus::before { opacity: 1; }
+  .tt:hover::after, .tt:focus::after, .tt.is-open::after {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .tt:hover::before, .tt:focus::before, .tt.is-open::before { opacity: 1; }
   @media (prefers-color-scheme: dark) {
-    .tt::after { background: #ece8e0; color: #1a1a1a; box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5); }
+    .tt::after { background: #ece8e0; color: #1a1a1a; box-shadow: 0 10px 32px rgba(0, 0, 0, 0.55); }
     .tt::before { border-bottom-color: #ece8e0; }
+  }
+  /* Narrow screens: pin tooltip to the left edge of the viewport instead
+     of centering on the term, so it doesn't get clipped. */
+  @media (max-width: 560px) {
+    .tt::after { left: 0; transform: translateX(0) translateY(-4px); max-width: calc(100vw - 32px); }
+    .tt:hover::after, .tt:focus::after, .tt.is-open::after { transform: translateX(0) translateY(0); }
+    .tt::before { left: 20px; }
   }
   pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
 
@@ -1333,6 +1355,8 @@
 <p><strong>kindaVim</strong> is a macOS accessibility tool that gives you Vim motions in any text field — Mail, Slack, Notes, Xcode, anywhere. Transformative if you know Vim. A brick wall if you don't. This tutorial builds the companion: a tutor app that teaches those motions through short, repeatable drills.</p>
 
 <p>The finished app is about a thousand lines of Swift. That smallness is the point. Every decision has visible consequences; every new concept earns its place by solving a problem you just hit. The format follows <a href="https://developer.apple.com/tutorials/swiftui">Apple's Landmarks tutorial</a>: each chapter is a feature, not a concept. Concepts appear in small callouts the moment they're needed.</p>
+
+<p style="font-size: 16px; color: var(--fg-muted); font-style: italic;">A note before we start: any Swift attribute or protocol with a <span style="text-decoration: underline dashed; text-decoration-color: rgba(161,74,42,0.55); text-underline-offset: 3px;">dashed underline</span> (in code <em>or</em> prose) gives a two-sentence definition on hover or tap. The full glossary is in the <a href="#cheatsheet">cheatsheet</a> at the end.</p>
 
 <aside class="concept" style="margin-top: 32px;">
   <span class="label">What you'll take away</span>
@@ -1546,7 +1570,7 @@
 }</code></pre>
   <p class="code-caption">Sources/KindaVimTutorKit/Models/Lesson.swift</p>
 
-  <p>Three conformances earn their place. <code>Identifiable</code> lets SwiftUI's <code>List</code> and <code>ForEach</code> track rows across refreshes. <code>Hashable</code> makes <code>Lesson</code> usable as a <code>NavigationSplitView</code> selection. <a href="https://developer.apple.com/documentation/swift/sendable"><code>Sendable</code></a> is the Swift 6 "safe across threads" stamp — free on value types with value-type properties. Stick to structs and enums and the compiler will shrug and let you work.</p>
+  <p>Three conformances earn their place: <code>Identifiable</code> for list identity, <code>Hashable</code> for navigation selection, <code>Sendable</code> for concurrency safety. Hover each in the code for a definition. Stick to structs and enums and the compiler will shrug and let you work.</p>
 
   <p>The <code>Exercise</code> struct carries the whole validation rule:</p>
 
@@ -2877,7 +2901,7 @@ $ swift run
 
 </section>
 
-<section class="cheatsheet" aria-label="Cheatsheet">
+<section id="cheatsheet" class="cheatsheet" aria-label="Cheatsheet">
   <h2>Cheatsheet</h2>
   <p class="cheatsheet-deck">The shape of this app, at a glance. Come back when you've forgotten which annotation does what.</p>
 
@@ -3087,25 +3111,25 @@ $ swift run
     pre.appendChild(btn);
   });
 
-  // Glossary tooltips. Hover a known Swift attribute/protocol in code
-  // to get a one-line definition.
+  // Glossary tooltips. Hover (or tap) a known Swift attribute/protocol
+  // in code OR in prose to get a two-sentence definition.
   const glossary = {
-    '@main': 'Marks the struct that hosts the app\u2019s entry point. Swift synthesizes a main() for you.',
-    '@State': 'This view owns this value. SwiftUI keeps it alive across body re-runs and redraws when it changes.',
-    '@Binding': 'A read-write handle to state owned somewhere else. The owner stays authoritative.',
-    '@Observable': 'Swift 5.9+ macro. Makes a plain class trackable by SwiftUI at property granularity — no @Published needed.',
-    '@MainActor': 'Guarantees the code runs on the main thread. Required for all UI work.',
-    '@ViewBuilder': 'A function attribute that lets different branches return different view types. Replaces AnyView erasure.',
-    '@Previewable': 'Lets you declare @State-ish properties inside a #Preview block.',
-    '@escaping': 'A closure parameter that may outlive the function call. Most async callbacks are @escaping.',
-    'Sendable': 'Safe to pass across threads. Value types with value-type fields get it for free.',
-    'Identifiable': 'Has a stable id. Powers List and ForEach identity across updates.',
-    'Codable': 'Can encode and decode itself — JSON, property lists, anything with an encoder.',
-    'Hashable': 'Usable as a dictionary key, Set element, or NavigationSplitView selection.',
-    'Equatable': 'Has an == operator. Swift will synthesize it for structs with Equatable fields.',
-    'NSViewRepresentable': 'The protocol for wrapping an AppKit NSView and using it from SwiftUI.',
-    'NavigationSplitView': 'The macOS two-pane container: sidebar + detail.',
-    'NSTextView': 'AppKit\u2019s full-featured text editor. What Mail, Notes, Xcode all use.',
+    '@main': 'Marks the struct that hosts the app\u2019s entry point. Swift synthesizes a main() from it, so you never write one yourself.',
+    '@State': 'Declares that this view owns this value for its lifetime. SwiftUI keeps the storage alive across body re-runs and triggers a redraw when it mutates.',
+    '@Binding': 'A read-write reference to state owned somewhere else, not a copy. The owner stays authoritative; the binding lets a child view read and write without taking possession.',
+    '@Observable': 'A Swift 5.9+ macro that rewrites a plain class so SwiftUI can track property reads and writes automatically. You never declare @Published — SwiftUI subscribes each view only to the properties its body actually reads.',
+    '@MainActor': 'Guarantees the annotated code runs on the main thread — required for any UIKit, AppKit, or SwiftUI work. Applying it to a whole type makes every method main-actor-isolated.',
+    '@ViewBuilder': 'A function attribute that lets a body return different view types across its branches. Without it, each if/switch case would need to erase to AnyView, which is slower and harder to read.',
+    '@Previewable': 'Lets you declare @State-ish properties directly inside a #Preview block. Without it you\u2019d need a wrapper view just to own the preview\u2019s state.',
+    '@escaping': 'Marks a closure parameter that may outlive the function call. Most async callbacks are @escaping; the compiler enforces the annotation at the call site.',
+    'Sendable': 'A compile-time guarantee that a value is safe to pass across concurrency boundaries. Value types with all-value fields conform automatically; reference types have to be marked explicitly and reviewed for shared mutable state.',
+    'Identifiable': 'Provides a stable id across time. SwiftUI\u2019s List and ForEach use it to track which rows correspond to which data across refreshes, without relying on hashing the whole value.',
+    'Codable': 'Can encode and decode itself — JSON, property lists, or anything with an encoder. Swift synthesizes the implementation when all stored properties are themselves Codable.',
+    'Hashable': 'Usable as a dictionary key, Set element, or NavigationSplitView selection. Swift synthesizes the hash for structs whose stored properties are all Hashable.',
+    'Equatable': 'Has an == operator. Swift synthesizes it for structs whose stored properties are Equatable, so most of the time you just declare the conformance.',
+    'NSViewRepresentable': 'The protocol for wrapping an AppKit NSView so SwiftUI can host it. Its three methods — make, update, makeCoordinator — bridge AppKit\u2019s imperative lifecycle into SwiftUI\u2019s declarative one.',
+    'NavigationSplitView': 'The macOS two-pane container — sidebar on the left, detail on the right. Handles the divider, column sizing, and collapse-the-sidebar behavior with no imperative wiring.',
+    'NSTextView': 'AppKit\u2019s full-featured text editor. Mail, Notes, Xcode, and most production Mac text fields use it — and kindaVim\u2019s accessibility interception specifically targets this class.',
   };
 
   // Annotate external links with a `.external` class and a friendly
@@ -3778,29 +3802,59 @@ $ swift run
     setSpeed();
   })();
 
-  // Walk every highlighted token; if its text matches a glossary key, wrap it.
+  function markTooltipElement(el, def) {
+    if (el.classList.contains('tt')) return;
+    el.classList.add('tt');
+    el.setAttribute('data-tt', def);
+    el.setAttribute('tabindex', '0');
+    el.setAttribute('aria-describedby', '');
+  }
+
+  // Annotate inline <code> in prose AND tokens inside highlighted code
+  // blocks. Same glossary, same dashed underline, same tooltip.
   function annotateGlossary() {
+    // Inline prose code — match the whole trimmed text.
+    document.querySelectorAll('code:not(pre code)').forEach(el => {
+      const def = glossary[el.textContent.trim()];
+      if (def) markTooltipElement(el, def);
+    });
+
+    // Tokens inside <pre><code>. Walk every element; match on full text.
     document.querySelectorAll('pre code').forEach(code => {
-      // Walk text nodes and token spans together.
       const walker = document.createTreeWalker(code, NodeFilter.SHOW_ELEMENT, null);
       let node;
-      const toWrap = [];
+      const toAnnotate = [];
       while ((node = walker.nextNode())) {
         const t = node.textContent.trim();
         if (glossary[t] && !node.classList.contains('tt')) {
-          toWrap.push({ el: node, def: glossary[t] });
+          toAnnotate.push({ el: node, def: glossary[t] });
         }
       }
-      toWrap.forEach(({ el, def }) => {
-        // Don't double-wrap inherited parents; only wrap leaf-ish tokens.
+      toAnnotate.forEach(({ el, def }) => {
         if (el.querySelector('.tt')) return;
-        el.classList.add('tt');
-        el.setAttribute('data-tt', def);
-        el.setAttribute('tabindex', '0');
+        markTooltipElement(el, def);
       });
     });
   }
   annotateGlossary();
+
+  // Tap-to-open for touch + keyboard. Clicking a .tt toggles its open state;
+  // clicking elsewhere (or pressing Escape) closes any open tooltip.
+  document.addEventListener('click', (e) => {
+    const tt = e.target.closest('.tt');
+    document.querySelectorAll('.tt.is-open').forEach(n => {
+      if (n !== tt) n.classList.remove('is-open');
+    });
+    if (tt) {
+      e.preventDefault();
+      tt.classList.toggle('is-open');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.tt.is-open').forEach(n => n.classList.remove('is-open'));
+    }
+  });
 </script>
 
 </body>
