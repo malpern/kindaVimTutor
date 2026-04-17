@@ -6,8 +6,14 @@ description: Produce or revise a long-form technical tutorial in the house style
 # tutorial-writer skill
 
 This skill orchestrates the tutorial system documented in
-`docs/tutorial-system/`. Use it whenever the user wants to produce a
-tutorial — from scratch or as a revision of an existing draft.
+`tutorial-writer-plugin/docs/tutorial-system/`. Use it whenever the user
+wants to produce a tutorial — from scratch or as a revision of an existing
+draft.
+
+All paths in this skill are relative to the **host project's root** and
+assume the plugin directory is copied in at `tutorial-writer-plugin/` (the
+default name). If the plugin was copied under a different name or into a
+subdirectory, substitute accordingly.
 
 ## When to use
 
@@ -27,25 +33,26 @@ post). This is for long-form, multi-chapter tutorials.
 
 Before doing anything else, read in order:
 
-1. `docs/tutorial-system/principles.md`
-2. `docs/tutorial-system/style-guide.md`
-3. `docs/tutorial-system/tutorial-blueprint.md`
-4. `docs/tutorial-system/explanation-patterns.md`
-5. `docs/tutorial-system/implementation-patterns.md`
+1. `tutorial-writer-plugin/docs/tutorial-system/principles.md`
+2. `tutorial-writer-plugin/docs/tutorial-system/style-guide.md`
+3. `tutorial-writer-plugin/docs/tutorial-system/tutorial-blueprint.md`
+4. `tutorial-writer-plugin/docs/tutorial-system/explanation-patterns.md`
+5. `tutorial-writer-plugin/docs/tutorial-system/implementation-patterns.md`
 
-If the exemplar tutorial is available at `docs/tutorial.html`, skim it
-once — it's the strongest single reference for what "good" looks like.
+If an exemplar tutorial is available in the host project (e.g., at
+`docs/tutorial.html` from a previous run), skim it once — a working
+reference beats a description.
 
 ### Step 2 — Branch: new vs revision
 
 **If the user is producing a new tutorial:**
-- Open `docs/tutorial-system/generation-prompt.md`
+- Open `tutorial-writer-plugin/docs/tutorial-system/generation-prompt.md`
 - Confirm each input with the user: topic, artifact, audience, chapter
   count, five ingredients, illustration metaphor, demo video URL.
 - Work through the procedure in that file step by step.
 
 **If the user is revising a draft:**
-- Open `docs/tutorial-system/revision-prompt.md`
+- Open `tutorial-writer-plugin/docs/tutorial-system/revision-prompt.md`
 - Run the four-phase audit-and-fix procedure described there.
 
 ### Step 3 — Write the promise first
@@ -81,8 +88,9 @@ code. Max two `aside.concept` callouts per chapter, max one
 If a nano-banana or equivalent image generator is available:
 - Generate one illustration per chapter.
 - Progressive fidelity (abstract → detailed).
-- Rename outputs with stable filenames: `bulls/bull-01-<stage>.png`
-  through `bulls/bull-N-<stage>.png`.
+- Rename outputs with stable filenames: `bulls/bull-01-<stage>.webp`
+  through `bulls/bull-N-<stage>.webp` (after running through cwebp — see
+  section P of `implementation-patterns.md`).
 
 If no image generator available, ship without illustrations — do NOT use
 placeholder images.
@@ -104,9 +112,9 @@ At the end:
 
 ### Step 9 — Assemble the HTML
 
-Emit a single `docs/tutorial.html` following the blueprint exactly. Copy
-CSS + JS sections from the exemplar; adapt class names and colors as
-needed. Include:
+Emit a single `docs/tutorial.html` (in the host project) following the
+blueprint exactly. Copy CSS + JS sections from the exemplar; adapt class
+names and colors as needed. Include:
 - Shiki highlighting with the chalkboard theme
 - Copy buttons, glossary tooltips, external-link annotator
 - Sticky chapter nav
@@ -123,30 +131,22 @@ a draft:
    Twitter Card tags, canonical URL, JSON-LD `TechArticle` structured
    data. Populate with real values.
 2. **Favicon.** A 32×32 PNG linked via `<link rel="icon">` and
-   `<link rel="apple-touch-icon">`. Use the most iconic illustration
-   from the series, or the product's own icon if the tutorial is about
-   an external tool.
-3. **`loading="lazy"`** on every `<img>` below the fold (effectively
-   every illustration and screenshot except anything in the first
-   viewport).
-4. **Optimize illustrations.** If using generated images (nano-banana,
-   etc.), run them through `cwebp -q 82` after `sips -Z 840` resizing
-   before committing. Typical reduction: 40×.
-5. **Remove dev-only `<meta http-equiv="Cache-Control">` tags.** They
-   kill caching for real readers.
-6. **Wrap content in `<main><article class="page">`.** Don't ship a
-   tutorial whose root element is `<div>`.
-7. **Mobile touch polish.** Interactive pill buttons hit 44pt on small
-   screens (`@media (max-width: 720px)` bumping height). Fixed-position
-   UI uses `bottom: calc(Npx + env(safe-area-inset-bottom))` to clear
-   iOS Safari chrome.
+   `<link rel="apple-touch-icon">`.
+3. **`loading="lazy"`** on every `<img>` below the fold.
+4. **Optimize illustrations** — `sips -Z 840` then `cwebp -q 82`. ~40×
+   smaller than raw PNG.
+5. **Remove dev-only `<meta http-equiv="Cache-Control">` tags.**
+6. **Wrap content in `<main><article class="page">`.**
+7. **Mobile touch polish.** 44pt touch targets on `@media (max-width: 720px)`;
+   `bottom: calc(Npx + env(safe-area-inset-bottom))` on fixed UI.
 
-See `docs/tutorial-system/implementation-patterns.md` → sections M
-through S for the exact snippets.
+See `tutorial-writer-plugin/docs/tutorial-system/implementation-patterns.md`
+→ sections M through S for the exact snippets.
 
 ### Step 11 — Content review
 
-Run the draft through `docs/tutorial-system/review-checklist.md`. Fix
+Run the draft through
+`tutorial-writer-plugin/docs/tutorial-system/review-checklist.md`. Fix
 every item that doesn't pass before shipping. Typical writing failures:
 - Mechanical paragraphs after code blocks → rewrite to user-first.
 - Missing checkpoints → add them.
@@ -182,12 +182,3 @@ Report to the user with:
 - Emojis in body prose
 - Inline API dumps without user-grounding
 - Placeholder content ("TODO: fill in later")
-
-## Paths
-
-All references are **relative to the repo root**. This skill is designed
-to be portable — copy `docs/tutorial-system/` and
-`.claude/skills/tutorial-writer/` into any repo and it works.
-
-When the system docs live at a non-standard path, ask the user where
-they are, then adapt.
