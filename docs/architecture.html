@@ -21,8 +21,8 @@
     --rule: #e8e4d8;
     --accent: #a14a2a;
     --accent-soft: #f3e9dd;
-    --code-bg: #b39e62;
-    --code-fg: #141414;
+    --code-bg: #5a4e30;
+    --code-fg: #ece8e0;
     --callout-bg: #fdf7e6;
     --serif: "New York", "Iowan Old Style", "Charter", Georgia, ui-serif, serif;
     --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif;
@@ -268,17 +268,17 @@
   }
   pre code { background: none; padding: 0; font-size: inherit; color: inherit; }
 
-  /* Warm syntax highlighting — tuned for contrast on the darker parchment */
-  .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #4a4336; font-style: italic; }
-  .token.punctuation { color: #1f1f1f; }
-  .token.keyword, .token.atrule, .token.attr-name { color: #7a1905; font-weight: 700; }
-  .token.boolean, .token.number, .token.constant { color: #551f40; }
-  .token.string, .token.char, .token.attr-value { color: #1e3f16; }
-  .token.class-name, .token.builtin { color: #4a2a05; font-weight: 700; }
-  .token.function, .token.deleted { color: #0a2a44; font-weight: 700; }
-  .token.operator, .token.entity, .token.url { color: #2a2a2a; }
-  .token.property, .token.tag, .token.symbol { color: #7a1905; font-weight: 600; }
-  .token.regex, .token.important, .token.variable { color: #551f40; }
+  /* Chalkboard syntax highlighting — bright tokens on the dark code bg */
+  .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #a8a290; font-style: italic; }
+  .token.punctuation { color: #d8d4cc; }
+  .token.keyword, .token.atrule, .token.attr-name { color: #ff9a6c; font-weight: 700; }
+  .token.boolean, .token.number, .token.constant { color: #e095b8; }
+  .token.string, .token.char, .token.attr-value { color: #b8db92; }
+  .token.class-name, .token.builtin { color: #f0c878; font-weight: 700; }
+  .token.function, .token.deleted { color: #7bb8e8; font-weight: 700; }
+  .token.operator, .token.entity, .token.url { color: #c9c5bd; }
+  .token.property, .token.tag, .token.symbol { color: #ff9a6c; font-weight: 600; }
+  .token.regex, .token.important, .token.variable { color: #e095b8; }
   @media (prefers-color-scheme: dark) {
     .token.comment, .token.prolog, .token.doctype, .token.cdata { color: #8a857c; }
     .token.punctuation { color: #c9c5bd; }

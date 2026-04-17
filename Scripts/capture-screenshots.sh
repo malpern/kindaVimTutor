@@ -132,9 +132,10 @@ capture "lesson:ch1.l1" "09-sidebar-completed" \
 # Default window is 900 × 924 pts; adjust if the app resizes.
 # ---------------------------------------------------------------
 
-# Sidebar — full left column, applies to any full-window shot.
-crop "02-title-slide.png"        "06-sidebar-detail.png"          0 0 232 924
-crop "09-sidebar-completed.png"  "09-sidebar-completed-crop.png"  0 0 232 924
+# Sidebar — top half of the left column. The content (chapter header +
+# seven lesson rows) fits in the upper ~460pt; the lower half is empty.
+crop "02-title-slide.png"        "06-sidebar-detail.png"          0 0 232 462
+crop "09-sidebar-completed.png"  "09-sidebar-completed-crop.png"  0 0 232 462
 
 # Lesson header detail — "SURVIVAL KIT / Moving the Cursor / Navigate with …"
 crop "02-title-slide.png"        "08-header-detail.png"          300 370 540 160
