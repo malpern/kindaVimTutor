@@ -188,11 +188,12 @@
   }
   h1.title .title-cursor {
     color: #30d158; /* SwiftUI .green */
-    display: inline-block;
+    /* Pure inline (not inline-block) so the cursor never becomes a
+       line-wrap point and orphans onto its own line after the final word. */
+    display: inline;
     margin-left: 0.02em;
+    vertical-align: -0.04em;
     transition: opacity 0.08s;
-    /* The block-character cursor lines up better when nudged down a hair */
-    transform: translateY(-0.04em);
   }
 
   .subtitle {
