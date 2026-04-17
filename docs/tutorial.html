@@ -1350,7 +1350,7 @@
 
 <p class="eyebrow">A SwiftUI walkthrough</p>
 <h1 class="title">The KindaVim Tutorial&hellip; Tutorial</h1>
-<p class="subtitle">I deleted 3,000 lines of my working macOS app to make it teachable. What's left — about 1,000 lines — is the part worth learning from, and this is how you'd build it.</p>
+<p class="subtitle">Start with an empty file. Nine chapters later, the macOS app on your screen teaches people Vim. Along the way you'll write one of each thing a real macOS app needs — a two-pane layout, shared state, a state machine, an AppKit bridge, and local persistence. The five things almost every Mac app has in common.</p>
 
 <p><strong>kindaVim</strong> is a macOS accessibility tool that gives you Vim motions in any text field — Mail, Slack, Notes, Xcode, anywhere. Transformative if you know Vim. A brick wall if you don't. This tutorial builds the companion: a tutor app that teaches those motions through short, repeatable drills.</p>
 
@@ -1593,7 +1593,7 @@
 
   <p>Variations exist so the user practices the <em>motion</em>, not the specific input — one <code>Exercise</code> ships several starting/expected pairs, and the engine rotates through them across reps.</p>
 
-  <p>Last piece: lesson explanations are a closed set of block kinds, expressed as an enum.</p>
+  <p>The one piece left is how each lesson <em>explains itself</em> to the user. A heading here, a tip there, a keyboard shortcut line, a code example. Rather than storing that as free-form text and parsing it at render time, we express the set of block kinds as an enum — the compiler then guarantees every view that renders explanations handles every block we can produce.</p>
 
 <pre><code class="language-swift">enum ContentBlock: Sendable {
     case heading(String)
@@ -1671,7 +1671,7 @@
     <figcaption>The four lines of the header rendered.</figcaption>
   </figure>
 
-  <p>A vertical stack with four lines. Chapter label, lesson title, subtitle, and a monospaced row of any new motions the lesson introduces.</p>
+  <p>Here's what the user sees when they open a lesson: a quiet chapter label overhead, the lesson's title in confident bold, a supporting subtitle, and — when the lesson introduces new motions — a row of them in monospaced type, so the eye catches which keys are about to be practiced. Four lines, each doing one job, none competing.</p>
 
   <aside class="concept">
     <span class="label">Modifiers return views</span>
@@ -1757,7 +1757,7 @@
     <p>The left-hand sidebar that lists every lesson in every chapter, with completion checkmarks. Think Xcode's file navigator, but simpler.</p>
   </div>
 
-  <p class="chapter-opener">SwiftUI's <code>List</code> with <code>.listStyle(.sidebar)</code> is the native macOS sidebar. Correct padding, background, collapse behavior — all for free.</p>
+  <p class="chapter-opener">Every lesson in the tutor has to be pickable. On macOS the canonical "list of things to pick from" has one shape — the left-hand sidebar you see in Mail, Finder, Xcode. SwiftUI bakes that shape in: <code>List</code> with <code>.listStyle(.sidebar)</code> gives us the padding, the background, the collapse behavior, the hover tinting, and the keyboard focus ring, all for free. We just fill in the rows.</p>
 
 <pre><code class="language-swift">struct SidebarView: View {
     let chapters: [Chapter]
@@ -1866,7 +1866,7 @@
     <p>A two-pane split view wired to a single observable object that owns the app's state.</p>
   </div>
 
-  <p class="chapter-opener">A macOS two-pane app uses <a href="https://developer.apple.com/documentation/swiftui/navigationsplitview"><code>NavigationSplitView</code></a>. Give it a closure for the sidebar and one for the detail pane; macOS handles the divider, column sizing, and the collapse-the-sidebar behavior. A first cut:</p>
+  <p class="chapter-opener">This is where the app stops being a collection of parts and starts behaving like one. Two of the five ingredients from the promise up top arrive in this chapter: the two-pane layout, and a single observable object that owns the app's state. The layout comes for free — <a href="https://developer.apple.com/documentation/swiftui/navigationsplitview"><code>NavigationSplitView</code></a>, a closure for the sidebar, a closure for the detail pane, and macOS handles the divider, column sizing, and the collapse-the-sidebar behavior. A first cut:</p>
 
 <pre><code class="language-swift">@main
 struct KindaVimTutorApp: App {
@@ -2721,7 +2721,7 @@ final class Coordinator: NSObject, NSTextViewDelegate {
     <p><code>ProgressStore</code>: a tiny observable class that reads user progress on startup, writes on every completed drill, and answers aggregate questions for the sidebar.</p>
   </div>
 
-  <p class="chapter-opener">You don't need a database. A stable directory, a <code>Codable</code> type, and an atomic write is the whole recipe.</p>
+  <p class="chapter-opener">At the end of a drill the user has done something real — typed, retyped, earned a rep. If we lose that when they quit, the tutor feels dismissive. So we save. Not to a database, not to a server — to a small JSON file in Application Support, tucked where every Mac app keeps its local state. Three ingredients: a stable directory, a <code>Codable</code> type, and an atomic write.</p>
 
   <p>The directory is <code>~/Library/Application Support/&lt;your-app-name&gt;/</code>, found via <code>FileManager</code> — create it on first launch before writing. <code>Codable</code> is whatever model you're persisting (here, <code>UserProgress</code>). Atomic means the file is written to a temp location and renamed, so a crash mid-write can't corrupt what's already there.</p>
 
@@ -2877,7 +2877,7 @@ $ swift run
 
   <div class="checkpoint">
     <p class="checkpoint-label">Where we are</p>
-    <p>Done. Nine chapters, about a thousand lines of Swift, and an app that does something real — teaches a skill, remembers what you've done, feels at home on the Mac.</p>
+    <p>Done. Nine chapters ago this directory was empty. Now the app on your screen teaches people Vim — and along the way you wrote one of each thing I promised up top: a two-pane layout, shared observable state, a small drill engine (the state machine), an AppKit bridge, and local persistence. About a thousand lines of Swift. Every file earning its place.</p>
   </div>
 
   <h3 style="margin-top: 56px;">What to do next</h3>
