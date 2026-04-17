@@ -1465,7 +1465,75 @@
 
   <p class="chapter-opener">"Modeled the data first" is on every experienced SwiftUI developer's list of things they wish they'd done sooner. The temptation is to start with the screen you can picture. It works for five minutes. Then three views each half-understand the data, and changing anything means changing all three.</p>
 
-  <p>What does the app talk about? A <strong>Chapter</strong> (a theme like "Survival Kit") contains <strong>Lessons</strong>. Each <code>Lesson</code> has explanation and zero or more <strong>Exercises</strong>. An exercise is "transform this starting text into this expected text." Four types, one file each.</p>
+  <p>What does the app talk about? A <strong>Chapter</strong> (a theme like "Survival Kit") contains <strong>Lessons</strong>. Each <code>Lesson</code> has explanation and zero or more <strong>Exercises</strong>. An exercise is "transform this starting text into this expected text." Four types, one file each — composed like this:</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="dm2-title">
+      <title id="dm2-title">Data model composition: Chapter contains Lessons; a Lesson has explanation and exercises.</title>
+      <defs>
+        <marker id="dm2-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
+        </marker>
+      </defs>
+      <style>
+        .dm2-container { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .dm2-anchor { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.3; }
+        .dm2-part { fill: #ecdfbe; stroke: #a69874; stroke-width: 1; }
+        .dm2-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 13px; font-weight: 700; fill: #1a1a1a; }
+        .dm2-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #5d5343; }
+        .dm2-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; fill: #5d5343; font-style: italic; font-weight: 500; }
+        .dm2-line { stroke: #8a8070; stroke-width: 1.5; fill: none; }
+        @media (prefers-color-scheme: dark) {
+          .dm2-sub { fill: #c9c5bd; }
+          .dm2-edge { fill: #d6cfc1; }
+        }
+      </style>
+
+      <!-- Chapter -->
+      <rect class="dm2-container" x="10" y="95" width="130" height="64" rx="10"/>
+      <text class="dm2-label" x="75" y="122" text-anchor="middle">Chapter</text>
+      <text class="dm2-sub" x="75" y="140" text-anchor="middle">id · title · lessons</text>
+
+      <!-- Lesson (anchor) -->
+      <rect class="dm2-anchor" x="200" y="85" width="150" height="84" rx="10"/>
+      <text class="dm2-label" x="275" y="110" text-anchor="middle">Lesson</text>
+      <text class="dm2-sub" x="275" y="128" text-anchor="middle">id · title · subtitle</text>
+      <text class="dm2-sub" x="275" y="144" text-anchor="middle">explanation</text>
+      <text class="dm2-sub" x="275" y="160" text-anchor="middle">exercises</text>
+
+      <!-- ContentBlock (upper branch) -->
+      <rect class="dm2-part" x="420" y="20" width="160" height="74" rx="10"/>
+      <text class="dm2-label" x="500" y="46" text-anchor="middle">ContentBlock</text>
+      <text class="dm2-sub" x="500" y="64" text-anchor="middle">enum — heading, text,</text>
+      <text class="dm2-sub" x="500" y="80" text-anchor="middle">tip, keyCommand, code…</text>
+
+      <!-- Exercise (lower branch) -->
+      <rect class="dm2-part" x="420" y="155" width="160" height="90" rx="10"/>
+      <text class="dm2-label" x="500" y="181" text-anchor="middle">Exercise</text>
+      <text class="dm2-sub" x="500" y="199" text-anchor="middle">initial / expected</text>
+      <text class="dm2-sub" x="500" y="215" text-anchor="middle">text + cursor</text>
+      <text class="dm2-sub" x="500" y="231" text-anchor="middle">drillCount · variations</text>
+
+      <!-- Variation (far right of Exercise) -->
+      <rect class="dm2-part" x="620" y="170" width="88" height="58" rx="10"/>
+      <text class="dm2-label" x="664" y="196" text-anchor="middle" font-size="12">Variation</text>
+      <text class="dm2-sub" x="664" y="212" text-anchor="middle">alt start/end</text>
+
+      <!-- Edges -->
+      <line x1="140" y1="127" x2="200" y2="127" class="dm2-line" marker-end="url(#dm2-arrow)"/>
+      <text class="dm2-edge" x="170" y="118" text-anchor="middle">contains</text>
+
+      <path d="M 350 108 Q 385 60 420 55" class="dm2-line" marker-end="url(#dm2-arrow)"/>
+      <text class="dm2-edge" x="380" y="84" text-anchor="middle">explanation</text>
+
+      <path d="M 350 148 Q 385 195 420 200" class="dm2-line" marker-end="url(#dm2-arrow)"/>
+      <text class="dm2-edge" x="380" y="180" text-anchor="middle">exercises</text>
+
+      <line x1="580" y1="200" x2="620" y2="200" class="dm2-line" marker-end="url(#dm2-arrow)"/>
+      <text class="dm2-edge" x="600" y="192" text-anchor="middle">1..n</text>
+    </svg>
+    <figcaption>Chapter holds lessons; each lesson has an <em>explanation</em> (an array of content blocks) and <em>exercises</em> (each with one or more variations). One arrow per containment.</figcaption>
+  </figure>
 
 <pre><code class="language-swift">struct Lesson: Identifiable, Hashable, Sendable {
     let id: String
@@ -1980,7 +2048,105 @@ struct KindaVimTutorApp: App {
     }
 }</code></pre>
 
-  <p>A small static function expands a <code>Lesson</code> into steps. Headings divide the explanation into groups — one content step per heading-delimited chunk. Drills come at the end:</p>
+  <p>The transformation is easier to see than to describe — each heading opens a new content step; drills come at the end:</p>
+
+  <figure class="diagram">
+    <svg viewBox="0 0 720 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="flat-title">
+      <title id="flat-title">A Lesson's mixed content and exercises flatten into an ordered sequence of LessonSteps.</title>
+      <defs>
+        <marker id="fl-arrow" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#8a8070"/>
+        </marker>
+      </defs>
+      <style>
+        .fl-source { fill: #f5eeda; stroke: #a69874; stroke-width: 1; }
+        .fl-heading { fill: #e7dcc3; stroke: #a69874; stroke-width: 1; }
+        .fl-text { fill: #faf3e1; stroke: #c2b796; stroke-width: 0.8; }
+        .fl-exercise { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1; }
+        .fl-step-title { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.2; }
+        .fl-step-content { fill: #f5eeda; stroke: #a69874; stroke-width: 1.2; }
+        .fl-step-drill { fill: #fbe8c6; stroke: #c4a159; stroke-width: 1.2; }
+        .fl-col-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; fill: #5d5343; }
+        .fl-label { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; font-weight: 600; fill: #1a1a1a; }
+        .fl-sub { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; fill: #5d5343; }
+        .fl-index { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 10px; font-weight: 700; fill: #a14a2a; font-variant-numeric: tabular-nums; }
+        .fl-edge { font-family: -apple-system, "SF Pro Text", sans-serif; font-size: 11px; fill: #5d5343; font-style: italic; }
+        .fl-line { stroke: #8a8070; stroke-width: 1.3; fill: none; }
+        @media (prefers-color-scheme: dark) {
+          .fl-col-label { fill: #d6cfc1; }
+          .fl-sub { fill: #c9c5bd; }
+          .fl-edge { fill: #d6cfc1; }
+          .fl-index { fill: #e88c5e; }
+        }
+      </style>
+
+      <!-- Source column label -->
+      <text class="fl-col-label" x="20" y="18">LESSON (UNORDERED)</text>
+      <!-- Output column label -->
+      <text class="fl-col-label" x="440" y="18">LESSONSTEPS (ORDERED)</text>
+
+      <!-- Source: outer container -->
+      <rect class="fl-source" x="10" y="30" width="280" height="285" rx="10"/>
+      <text class="fl-sub" x="26" y="50">lesson.explanation</text>
+      <rect class="fl-heading" x="26" y="58" width="248" height="24" rx="5"/>
+      <text class="fl-label" x="150" y="74" text-anchor="middle">.heading  "Home row"</text>
+      <rect class="fl-text" x="26" y="86" width="248" height="22" rx="5"/>
+      <text class="fl-label" x="150" y="101" text-anchor="middle">.text  "Navigate with…"</text>
+      <rect class="fl-text" x="26" y="112" width="248" height="22" rx="5"/>
+      <text class="fl-label" x="150" y="127" text-anchor="middle">.keyCommand  h/j/k/l</text>
+      <rect class="fl-heading" x="26" y="138" width="248" height="24" rx="5"/>
+      <text class="fl-label" x="150" y="154" text-anchor="middle">.heading  "Practice"</text>
+      <rect class="fl-text" x="26" y="166" width="248" height="22" rx="5"/>
+      <text class="fl-label" x="150" y="181" text-anchor="middle">.tip  "Stay on home row"</text>
+
+      <text class="fl-sub" x="26" y="212">lesson.exercises</text>
+      <rect class="fl-exercise" x="26" y="220" width="248" height="24" rx="5"/>
+      <text class="fl-label" x="150" y="236" text-anchor="middle">Exercise 1</text>
+      <rect class="fl-exercise" x="26" y="248" width="248" height="24" rx="5"/>
+      <text class="fl-label" x="150" y="264" text-anchor="middle">Exercise 2</text>
+      <rect class="fl-exercise" x="26" y="276" width="248" height="24" rx="5"/>
+      <text class="fl-label" x="150" y="292" text-anchor="middle">Exercise 3</text>
+
+      <!-- Middle arrow -->
+      <path d="M 300 170 L 430 170" class="fl-line" marker-end="url(#fl-arrow)"/>
+      <text class="fl-edge" x="365" y="162" text-anchor="middle">steps(from:chapterTitle:)</text>
+      <text class="fl-edge" x="365" y="182" text-anchor="middle">flatMap</text>
+
+      <!-- Output: step sequence -->
+      <rect class="fl-step-title" x="440" y="30" width="270" height="34" rx="8"/>
+      <text class="fl-index" x="456" y="52">01</text>
+      <text class="fl-label" x="478" y="52">.title</text>
+      <text class="fl-sub" x="520" y="52">lesson title + chapter</text>
+
+      <rect class="fl-step-content" x="440" y="72" width="270" height="34" rx="8"/>
+      <text class="fl-index" x="456" y="94">02</text>
+      <text class="fl-label" x="478" y="94">.content</text>
+      <text class="fl-sub" x="528" y="94">Home row + h/j/k/l</text>
+
+      <rect class="fl-step-content" x="440" y="114" width="270" height="34" rx="8"/>
+      <text class="fl-index" x="456" y="136">03</text>
+      <text class="fl-label" x="478" y="136">.content</text>
+      <text class="fl-sub" x="528" y="136">Practice + tip</text>
+
+      <rect class="fl-step-drill" x="440" y="156" width="270" height="34" rx="8"/>
+      <text class="fl-index" x="456" y="178">04</text>
+      <text class="fl-label" x="478" y="178">.drill</text>
+      <text class="fl-sub" x="520" y="178">Exercise 1</text>
+
+      <rect class="fl-step-drill" x="440" y="198" width="270" height="34" rx="8"/>
+      <text class="fl-index" x="456" y="220">05</text>
+      <text class="fl-label" x="478" y="220">.drill</text>
+      <text class="fl-sub" x="520" y="220">Exercise 2</text>
+
+      <rect class="fl-step-drill" x="440" y="240" width="270" height="34" rx="8"/>
+      <text class="fl-index" x="456" y="262">06</text>
+      <text class="fl-label" x="478" y="262">.drill</text>
+      <text class="fl-sub" x="520" y="262">Exercise 3</text>
+    </svg>
+    <figcaption>The <code>steps(from:)</code> function is pure data-in, data-out. Headings break the explanation into groups (one content step each); each exercise becomes a drill step, at the end.</figcaption>
+  </figure>
+
+  <p>The function itself:</p>
 
 <pre><code class="language-swift">extension LessonStep {
     static func steps(from lesson: Lesson, chapterTitle: String) -&gt; [LessonStep] {
