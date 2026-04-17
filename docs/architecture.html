@@ -7,9 +7,7 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>kindaVim Tutor — Architecture</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
+<!-- Shiki loaded as ES module near the end of body. -->
 <style>
   :root {
     --bg: #faf8f3;
@@ -947,8 +945,48 @@ final class ExerciseEngine {
   kindaVim Tutor · essentials branch · <code>docs/architecture.html</code>
 </footer>
 
-<script>
-  if (window.Prism) { Prism.highlightAll(); }
+<script type="module">
+  // ----- Shiki syntax highlighting (KVT chalkboard theme) -----
+  const chalkboardTheme = {
+    name: 'kvt-chalkboard',
+    type: 'dark',
+    colors: { 'editor.background': '#5a4e30', 'editor.foreground': '#ece8e0' },
+    tokenColors: [
+      { scope: ['comment', 'comment.line', 'comment.block', 'punctuation.definition.comment'], settings: { foreground: '#a8a290', fontStyle: 'italic' } },
+      { scope: ['keyword', 'keyword.control', 'keyword.operator.new', 'storage.type', 'storage.modifier', 'keyword.other'], settings: { foreground: '#ff9a6c', fontStyle: 'bold' } },
+      { scope: ['meta.attribute', 'support.type.attribute.swift', 'keyword.other.attribute'], settings: { foreground: '#ff9a6c', fontStyle: 'bold' } },
+      { scope: ['variable.language.self', 'variable.language.super'], settings: { foreground: '#ff9a6c' } },
+      { scope: ['constant.language', 'constant.language.boolean', 'constant.language.null'], settings: { foreground: '#e095b8' } },
+      { scope: ['constant.numeric'], settings: { foreground: '#e095b8' } },
+      { scope: ['string', 'string.quoted', 'string.quoted.double'], settings: { foreground: '#b8db92' } },
+      { scope: ['punctuation.definition.string'], settings: { foreground: '#b8db92' } },
+      { scope: ['entity.name.type', 'entity.name.class', 'support.type', 'support.class'], settings: { foreground: '#f0c878', fontStyle: 'bold' } },
+      { scope: ['entity.name.function', 'meta.function-call entity.name.function', 'support.function'], settings: { foreground: '#7bb8e8', fontStyle: 'bold' } },
+      { scope: ['meta.function-call.swift'], settings: { foreground: '#ece8e0' } },
+      { scope: ['variable.parameter', 'variable.parameter.function-call'], settings: { foreground: '#ece8e0' } },
+      { scope: ['variable.other.enummember', 'constant.other.caseLabel'], settings: { foreground: '#e095b8' } },
+      { scope: ['punctuation', 'punctuation.separator', 'punctuation.section', 'meta.brace'], settings: { foreground: '#d8d4cc' } },
+    ],
+  };
+  (async () => {
+    try {
+      const { createHighlighter } = await import('https://esm.sh/shiki@1.22.2');
+      const h = await createHighlighter({ themes: [chalkboardTheme], langs: ['swift', 'bash', 'shell'] });
+      document.querySelectorAll('pre code[class*="language-"]').forEach((el) => {
+        const m = el.className.match(/language-(\w+)/);
+        const lang = m ? m[1] : 'text';
+        if (!['swift', 'bash', 'shell'].includes(lang)) return;
+        try {
+          const html = h.codeToHtml(el.textContent, { lang, theme: 'kvt-chalkboard' });
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const inner = tmp.querySelector('code');
+          if (inner) el.innerHTML = inner.innerHTML;
+        } catch (e) { console.warn('[shiki]', e); }
+      });
+    } catch (e) { console.warn('[shiki] could not load', e); }
+  })();
+
   // Annotate external links with a friendly domain hint on hover.
   (function () {
     const friendly = {

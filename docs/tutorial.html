@@ -7,10 +7,10 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <title>The KindaVim Tutorial… Tutorial</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css">
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-swift.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<!-- Shiki (VSCode-grade) syntax highlighting, loaded as an ES module
+     at the end of the body. No Prism — Shiki uses TextMate grammars
+     which handle Swift's enum shorthand, argument labels, macros etc.
+     more accurately than Prism's regex-based grammar. -->
 <style>
   :root {
     --bg: #faf8f3;
@@ -3052,9 +3052,64 @@ $ swift run
   </label>
 </aside>
 
-<script>
-  // Highlight code
-  if (window.Prism) { Prism.highlightAll(); }
+<script type="module">
+  // ----- Shiki syntax highlighting -----
+  // Custom "KVT chalkboard" theme so Swift tokens render with our exact
+  // warm palette. Shiki's TextMate grammar handles enum-case shorthand,
+  // argument labels, macros, and attributes correctly out of the box.
+  const chalkboardTheme = {
+    name: 'kvt-chalkboard',
+    type: 'dark',
+    colors: {
+      'editor.background': '#5a4e30',
+      'editor.foreground': '#ece8e0',
+    },
+    tokenColors: [
+      { scope: ['comment', 'comment.line', 'comment.block', 'punctuation.definition.comment'], settings: { foreground: '#a8a290', fontStyle: 'italic' } },
+      { scope: ['keyword', 'keyword.control', 'keyword.operator.new', 'storage.type', 'storage.modifier', 'keyword.other'], settings: { foreground: '#ff9a6c', fontStyle: 'bold' } },
+      { scope: ['meta.attribute', 'support.type.attribute.swift', 'keyword.other.attribute'], settings: { foreground: '#ff9a6c', fontStyle: 'bold' } },
+      { scope: ['variable.language.self', 'variable.language.super'], settings: { foreground: '#ff9a6c' } },
+      { scope: ['constant.language', 'constant.language.boolean', 'constant.language.null'], settings: { foreground: '#e095b8' } },
+      { scope: ['constant.numeric'], settings: { foreground: '#e095b8' } },
+      { scope: ['string', 'string.quoted', 'string.quoted.double'], settings: { foreground: '#b8db92' } },
+      { scope: ['punctuation.definition.string'], settings: { foreground: '#b8db92' } },
+      { scope: ['entity.name.type', 'entity.name.class', 'support.type', 'support.class'], settings: { foreground: '#f0c878', fontStyle: 'bold' } },
+      { scope: ['entity.name.function', 'meta.function-call entity.name.function', 'support.function'], settings: { foreground: '#7bb8e8', fontStyle: 'bold' } },
+      { scope: ['meta.function-call.swift'], settings: { foreground: '#ece8e0' } },
+      { scope: ['variable.parameter', 'variable.parameter.function-call'], settings: { foreground: '#ece8e0' } },
+      { scope: ['variable.other.enummember', 'constant.other.caseLabel'], settings: { foreground: '#e095b8' } },
+      { scope: ['punctuation', 'punctuation.separator', 'punctuation.section', 'meta.brace'], settings: { foreground: '#d8d4cc' } },
+    ],
+  };
+
+  async function highlightAllCode() {
+    try {
+      const { createHighlighter } = await import('https://esm.sh/shiki@1.22.2');
+      const highlighter = await createHighlighter({
+        themes: [chalkboardTheme],
+        langs: ['swift', 'bash', 'shell'],
+      });
+      document.querySelectorAll('pre code[class*="language-"]').forEach((codeEl) => {
+        const match = codeEl.className.match(/language-(\w+)/);
+        const lang = match ? match[1] : 'text';
+        if (!['swift', 'bash', 'shell'].includes(lang)) return;
+        const source = codeEl.textContent;
+        try {
+          const html = highlighter.codeToHtml(source, { lang, theme: 'kvt-chalkboard' });
+          const tmp = document.createElement('div');
+          tmp.innerHTML = html;
+          const inner = tmp.querySelector('code');
+          if (inner) codeEl.innerHTML = inner.innerHTML;
+        } catch (e) {
+          console.warn('[shiki] highlight failed for', lang, e);
+        }
+      });
+    } catch (e) {
+      console.warn('[shiki] could not load, leaving code unhighlighted', e);
+    }
+    // Glossary must annotate AFTER highlighting so it can find the token spans.
+    annotateGlossary();
+  }
 
   // Copy-to-clipboard button on every <pre>
   document.querySelectorAll('pre').forEach(pre => {
@@ -3805,7 +3860,11 @@ $ swift run
       });
     });
   }
-  annotateGlossary();
+
+  // Kick off Shiki highlighting; glossary annotation runs inside when done.
+  // (Non-code annotations — inline <code> in prose — are handled by the
+  // same annotateGlossary() call, so they appear regardless.)
+  highlightAllCode();
 
   // Tap-to-open for touch + keyboard. Clicking a .tt toggles its open state;
   // clicking elsewhere (or pressing Escape) closes any open tooltip.
