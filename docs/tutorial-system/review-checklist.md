@@ -3,6 +3,16 @@
 Walk through these after a draft is complete. Any "no" answer needs a
 fix before shipping.
 
+## Essentials
+
+- [ ] The tutorial was written against a codebase on a dedicated branch
+  (typically `Tutorial`), not main. Main was never destructively modified.
+- [ ] Every source file in the stripped artifact appears in at least one
+  chapter. No orphan files that the tutorial never mentions.
+- [ ] No unused code paths, stale feature flags, dead tests, or single-
+  implementation abstractions remain as noise.
+- [ ] The stripped artifact still builds and runs end-to-end.
+
 ## Promise
 
 - [ ] Subtitle names the starting point, the artifact, and exactly N

@@ -5,6 +5,17 @@ expansion of these.
 
 ## Pedagogical
 
+### 0. Essentials first, on a branch
+
+Before writing a single sentence, strip the codebase down to what the
+tutorial will actually teach — on a new `Tutorial` branch, never on main.
+Every file in the final artifact should be a file the reader encounters in
+a chapter. Incidental complexity (unused code paths, stale feature flags,
+shims, abstractions that earn nothing) is noise the reader has to edit out
+in their head; do the editing for them first. The branch is the non-
+destructive container — if the tutorial is abandoned, nothing real was
+lost. See `essentials-branch.md`.
+
 ### 1. Features, not concepts
 
 Chapters are named for what the reader *builds* ("A sidebar to pick from,"

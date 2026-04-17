@@ -15,6 +15,25 @@ Gather before you start:
   recommended) — see `implementation-patterns.md` → "Progressive
   illustration."
 
+## 0.5. Essentials branch (if a codebase exists)
+
+If you're writing a tutorial *about* an existing codebase, strip it to
+essentials first — on a branch.
+
+**Before touching anything:** `git checkout -b Tutorial`. This must be
+non-destructive. Main stays untouched; every simplification lives on the
+branch.
+
+Then walk the repo file by file and delete anything the tutorial won't
+teach: unused code paths, stale feature flags, dead tests, "clever"
+abstractions with a single implementation, commented-out blocks. Get it
+compiling. Run the app end-to-end to confirm the stripped artifact still
+works. Commit as a single `Strip to essentials for tutorial` commit.
+
+Now every file in the repo is a file the tutorial will teach. See
+`essentials-branch.md` for the full procedure and the rare cases where you
+should skip this step.
+
 ## 1. Write the promise
 
 Before any chapter content, write the hero subtitle. This is a ≤60 word

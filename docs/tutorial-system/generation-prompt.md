@@ -16,6 +16,8 @@ kindaVim Tutor walkthrough (which you can read at
 - `explanation-patterns.md` for how to introduce concepts
 - `implementation-patterns.md` for product features
 - `workflow.md` for end-to-end steps
+- `essentials-branch.md` for the pre-step of stripping the codebase on a
+  branch before writing (do this first if a codebase exists)
 
 Do not improvise outside this system. If something is ambiguous, pick the
 option that best matches the exemplar.
@@ -29,8 +31,20 @@ option that best matches the exemplar.
 - **Five ingredients the reader will write**: [e.g., "a menu bar extra, a timer state machine, keyboard shortcut registration, AppleScript-via-NSAppleScript, and a small JSON preferences store"]
 - **Illustration metaphor**: [e.g., "blueprint sketches of clocks, from a sundial to a chronometer"]
 - **Demo video URL (if any)**: [e.g., `https://example.com/demo.mp4`]
+- **Essentials pass?**: Does the existing codebase need to be stripped to
+  essentials first? (Default yes if a non-trivial codebase exists.) If
+  yes, the agent will create a `Tutorial` branch, delete anything the
+  tutorial won't teach, and commit that strip before writing prose. See
+  `essentials-branch.md`.
 
 ## Procedure
+
+0. **Essentials pass (if a codebase exists and the user opted in).** Before
+   anything else, `git checkout -b Tutorial`. Walk the repo file by file,
+   propose deletions for anything the tutorial won't teach, get sign-off,
+   delete, confirm the artifact still builds and runs, commit as a single
+   `Strip to essentials for tutorial` commit. Only then proceed. Main is
+   never touched. See `essentials-branch.md`.
 
 1. Produce the hero subtitle — the promise. Iterate until it's ≤60 words,
    names the starting point + artifact + five ingredients + meta-claim.

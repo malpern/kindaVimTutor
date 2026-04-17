@@ -38,6 +38,7 @@ Before doing anything else, read in order:
 3. `tutorial-writer-plugin/docs/tutorial-system/tutorial-blueprint.md`
 4. `tutorial-writer-plugin/docs/tutorial-system/explanation-patterns.md`
 5. `tutorial-writer-plugin/docs/tutorial-system/implementation-patterns.md`
+6. `tutorial-writer-plugin/docs/tutorial-system/essentials-branch.md`
 
 If an exemplar tutorial is available in the host project (e.g., at
 `docs/tutorial.html` from a previous run), skim it once — a working
@@ -49,7 +50,16 @@ reference beats a description.
 - Open `tutorial-writer-plugin/docs/tutorial-system/generation-prompt.md`
 - Confirm each input with the user: topic, artifact, audience, chapter
   count, five ingredients, illustration metaphor, demo video URL.
-- Work through the procedure in that file step by step.
+- **Ask up front: does the existing codebase need an essentials pass
+  first?** If a non-trivial codebase exists, recommend yes. The
+  essentials pass is non-destructive — it happens on a new `Tutorial`
+  branch. Main is never touched. See
+  `tutorial-writer-plugin/docs/tutorial-system/essentials-branch.md`.
+- If the user opts in: `git checkout -b Tutorial`, walk the repo,
+  propose deletions, get sign-off, delete, confirm the artifact builds
+  and runs, commit as `Strip to essentials for tutorial`. Only then
+  start writing.
+- Work through the procedure in `generation-prompt.md` step by step.
 
 **If the user is revising a draft:**
 - Open `tutorial-writer-plugin/docs/tutorial-system/revision-prompt.md`
