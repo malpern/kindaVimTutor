@@ -221,6 +221,62 @@
   }
   a:hover { opacity: 0.7; }
 
+  /* kindaVim hover-video popover. Lazy-mounted on first hover, keeps the
+     animation snappy while avoiding any eager video fetch. */
+  .kindavim-hover {
+    position: absolute;
+    width: 360px;
+    max-width: calc(100vw - 32px);
+    background: #1a1818;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 0.5px rgba(255,255,255,0.06);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+    transform-origin: top center;
+    transition: opacity 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+                transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1);
+    z-index: 80;
+  }
+  .kindavim-hover.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+  }
+  .kindavim-hover video {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #000;
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+  }
+  .kindavim-hover video.loaded { opacity: 1; }
+  .kindavim-hover-caption {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px 12px;
+    font-family: var(--sans);
+    font-size: 12px;
+    color: rgba(255,255,255,0.85);
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+  .kindavim-hover-caption img {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .kindavim-hover-caption .kv-name { font-weight: 600; letter-spacing: -0.005em; }
+  .kindavim-hover-caption .kv-sub {
+    color: rgba(255,255,255,0.5);
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+
   /* App link — a small rounded icon sitting inline with the linked word.
      Using plain inline (not flex) so the baseline of the word stays
      aligned with the surrounding prose. */
@@ -3183,6 +3239,91 @@ $ swift run
     'NavigationSplitView': 'The macOS two-pane container — sidebar on the left, detail on the right. Handles the divider, column sizing, and collapse-the-sidebar behavior with no imperative wiring.',
     'NSTextView': 'AppKit\u2019s full-featured text editor. Mail, Notes, Xcode, and most production Mac text fields use it — and kindaVim\u2019s accessibility interception specifically targets this class.',
   };
+
+  // kindaVim hover-video popover.
+  // Lazy-mounts a small card with the input.mp4 demo when the reader
+  // hovers (or focuses) the kindaVim app-link. Pauses + fades out on
+  // leave. Skip entirely on touch/no-hover devices.
+  (function () {
+    if (!window.matchMedia || !window.matchMedia('(hover: hover)').matches) return;
+    const links = document.querySelectorAll('a.app-link[href*="kindavim"]');
+    if (links.length === 0) return;
+    const VIDEO_URL = 'https://kindavim.app/img/input.mp4';
+    let hover = null;
+    let hoverVideo = null;
+    let showTimer = null;
+    let hideTimer = null;
+
+    function mountHover() {
+      if (hover) return hover;
+      hover = document.createElement('div');
+      hover.className = 'kindavim-hover';
+      hover.innerHTML = [
+        '<video muted loop playsinline preload="metadata"></video>',
+        '<div class="kindavim-hover-caption">',
+        '  <img src="assets/kindavim-icon.png" alt="" width="18" height="18">',
+        '  <span class="kv-name">kindaVim</span>',
+        '  <span class="kv-sub">Vim motions on macOS →</span>',
+        '</div>'
+      ].join('');
+      document.body.appendChild(hover);
+      hoverVideo = hover.querySelector('video');
+      hoverVideo.addEventListener('loadeddata', () => hoverVideo.classList.add('loaded'));
+      hoverVideo.addEventListener('error', () => console.warn('[kindavim] video failed'));
+      hover.addEventListener('mouseenter', () => { clearTimeout(hideTimer); });
+      hover.addEventListener('mouseleave', hide);
+      return hover;
+    }
+
+    function position(link) {
+      const rect = link.getBoundingClientRect();
+      const popWidth = Math.min(360, window.innerWidth - 32);
+      const margin = 16;
+      const estimatedHeight = 260;
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const placeAbove = spaceBelow < estimatedHeight + 24;
+      let top = placeAbove
+        ? rect.top + window.scrollY - estimatedHeight - 10
+        : rect.bottom + window.scrollY + 10;
+      let left = rect.left + window.scrollX + (rect.width / 2) - (popWidth / 2);
+      left = Math.max(margin, Math.min(left, window.innerWidth - popWidth - margin));
+      hover.style.width = popWidth + 'px';
+      hover.style.top = top + 'px';
+      hover.style.left = left + 'px';
+      hover.style.transformOrigin = placeAbove ? 'bottom center' : 'top center';
+    }
+
+    function show(link) {
+      clearTimeout(hideTimer);
+      clearTimeout(showTimer);
+      showTimer = setTimeout(() => {
+        mountHover();
+        // Lazy-start fetching the video on first show.
+        if (!hoverVideo.src) hoverVideo.src = VIDEO_URL;
+        position(link);
+        requestAnimationFrame(() => hover.classList.add('visible'));
+        const playPromise = hoverVideo.play();
+        if (playPromise) playPromise.catch(() => {});
+      }, 180); // hover intent: ignore quick mouse passes
+    }
+
+    function hide() {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => {
+        if (!hover) return;
+        hover.classList.remove('visible');
+        if (hoverVideo) hoverVideo.pause();
+      }, 120);
+    }
+
+    links.forEach(link => {
+      link.addEventListener('mouseenter', () => show(link));
+      link.addEventListener('mouseleave', hide);
+      link.addEventListener('focus', () => show(link));
+      link.addEventListener('blur', hide);
+    });
+  })();
 
   // Annotate external links with a `.external` class and a friendly
   // destination label shown on hover. Skip internal/anchor links.
