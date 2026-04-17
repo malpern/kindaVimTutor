@@ -186,6 +186,14 @@
     margin: 0 0 24px;
     text-wrap: balance;
   }
+  h1.title .title-cursor {
+    color: #30d158; /* SwiftUI .green */
+    display: inline-block;
+    margin-left: 0.02em;
+    transition: opacity 0.08s;
+    /* The block-character cursor lines up better when nudged down a hair */
+    transform: translateY(-0.04em);
+  }
 
   .subtitle {
     font-family: var(--serif);
@@ -1392,7 +1400,7 @@
 <div class="page">
 
 <p class="eyebrow">A SwiftUI walkthrough</p>
-<h1 class="title">The KindaVim Tutorial&hellip; Tutorial</h1>
+<h1 class="title" aria-label="The KindaVim Tutorial... Tutorial"><span class="title-text"></span><span class="title-cursor" aria-hidden="true">&#9614;</span></h1>
 <p class="subtitle">Start from an empty file. Nine chapters later, your Mac app teaches people Vim motions — and you'll have written one of each thing a real macOS app needs: a two-pane layout, shared state, a state machine, an AppKit bridge, and local persistence. The five patterns nearly every Mac app reuses.</p>
 
 <p><a class="app-link" href="https://kindavim.app"><img src="assets/kindavim-icon.png" alt="kindaVim app icon" width="24" height="24"><strong>kindaVim</strong></a> is a macOS accessibility tool that gives you Vim motions in any text field — Mail, Slack, Notes, Xcode, anywhere. Transformative if you know Vim. A brick wall if you don't. This tutorial builds the companion: a tutor app that teaches those motions through short, repeatable drills.</p>
@@ -3127,6 +3135,66 @@ $ swift run
 </aside>
 
 <script type="module">
+  // ----- Typewriter header -----
+  // Types the page title with organic jitter. Three phases: the name,
+  // a pregnant "..." pause, then the comedic second "Tutorial". Same
+  // green block-cursor and timing jitter as the app's TypewriterText.
+  (function () {
+    const textEl = document.querySelector('h1.title .title-text');
+    const cursorEl = document.querySelector('h1.title .title-cursor');
+    if (!textEl || !cursorEl) return;
+
+    // Blinking cursor — matches the SwiftUI 0.53s blink period.
+    let on = true;
+    setInterval(() => {
+      on = !on;
+      cursorEl.style.opacity = on ? '1' : '0';
+    }, 530);
+
+    // Typing plan: phases of letters separated by explicit pauses.
+    const plan = [
+      ...Array.from('The KindaVim Tutorial').map((c) => ({ type: c })),
+      { pause: 900 },
+      { type: '.' }, { pause: 200 },
+      { type: '.' }, { pause: 200 },
+      { type: '.' },
+      { pause: 700 },
+      ...Array.from(' Tutorial').map((c) => ({ type: c })),
+    ];
+
+    function delayFor(ch) {
+      // Mirrors TypewriterText.swift timing, in ms instead of seconds.
+      if ('.!?'.includes(ch)) return 176 + Math.random() * 128;
+      if (',;:'.includes(ch)) return 96 + Math.random() * 80;
+      if (ch === ' ') return 48 + Math.random() * 48;
+      let d = 32 + Math.random() * 40;
+      if (/[A-Z]/.test(ch)) d += 16 + Math.random() * 24;
+      // Occasional hesitation — 7.5% chance, three styles.
+      if (Math.random() < 0.075) {
+        const style = Math.floor(Math.random() * 3);
+        if (style === 0) d += 150 + Math.random() * 200;
+        else if (style === 1) d += 300 + Math.random() * 300;
+        else d += 100 + Math.random() * 100;
+      }
+      return d;
+    }
+
+    let idx = 0;
+    function step() {
+      if (idx >= plan.length) return;
+      const node = plan[idx++];
+      if (node.pause) {
+        setTimeout(step, node.pause);
+      } else {
+        textEl.textContent += node.type;
+        setTimeout(step, delayFor(node.type));
+      }
+    }
+
+    // Give the page a beat to settle before we start typing.
+    setTimeout(step, 350);
+  })();
+
   // ----- Shiki syntax highlighting -----
   // Custom "KVT chalkboard" theme so Swift tokens render with our exact
   // warm palette. Shiki's TextMate grammar handles enum-case shorthand,
