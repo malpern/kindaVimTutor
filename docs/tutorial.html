@@ -221,6 +221,36 @@
   }
   a:hover { opacity: 0.7; }
 
+  /* App link — a small rounded icon sitting inline with the linked word.
+     Using plain inline (not flex) so the baseline of the word stays
+     aligned with the surrounding prose. */
+  a.app-link {
+    border-bottom: none !important;
+    text-decoration: none !important;
+    padding-bottom: 0;
+    color: var(--fg);
+    transition: opacity 0.15s;
+  }
+  a.app-link img {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    vertical-align: -5px;
+    margin-right: 5px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.12), 0 0 0 0.5px rgba(0,0,0,0.06);
+  }
+  a.app-link strong {
+    border-bottom: 1px solid rgba(161, 74, 42, 0.35);
+    padding-bottom: 1px;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  a.app-link:hover strong { color: var(--accent); border-bottom-color: var(--accent); }
+  a.app-link:hover { opacity: 1; }
+  /* Suppress the external-link decoration on app-link. */
+  a.app-link.external { text-decoration: none !important; }
+  a.app-link.external::before,
+  a.app-link.external::after { content: none !important; }
+
   /* External links — dashed underline + hover tooltip showing destination. */
   a.external {
     position: relative;
@@ -1317,9 +1347,9 @@
 
 <p class="eyebrow">A SwiftUI walkthrough</p>
 <h1 class="title">The KindaVim Tutorial&hellip; Tutorial</h1>
-<p class="subtitle">Start from an empty file. Nine chapters later, your Mac app teaches people <a href="https://kindavim.app">Vim motions</a> — and you'll have written one of each thing a real macOS app needs: a two-pane layout, shared state, a state machine, an AppKit bridge, and local persistence. The five patterns nearly every Mac app reuses.</p>
+<p class="subtitle">Start from an empty file. Nine chapters later, your Mac app teaches people Vim motions — and you'll have written one of each thing a real macOS app needs: a two-pane layout, shared state, a state machine, an AppKit bridge, and local persistence. The five patterns nearly every Mac app reuses.</p>
 
-<p><strong>kindaVim</strong> is a macOS accessibility tool that gives you Vim motions in any text field — Mail, Slack, Notes, Xcode, anywhere. Transformative if you know Vim. A brick wall if you don't. This tutorial builds the companion: a tutor app that teaches those motions through short, repeatable drills.</p>
+<p><a class="app-link" href="https://kindavim.app"><img src="assets/kindavim-icon.png" alt="kindaVim app icon" width="24" height="24"><strong>kindaVim</strong></a> is a macOS accessibility tool that gives you Vim motions in any text field — Mail, Slack, Notes, Xcode, anywhere. Transformative if you know Vim. A brick wall if you don't. This tutorial builds the companion: a tutor app that teaches those motions through short, repeatable drills.</p>
 
 <p>The finished app is about a thousand lines of Swift. That smallness is the point. Every decision has visible consequences; every new concept earns its place by solving a problem you just hit. The format follows <a href="https://developer.apple.com/tutorials/swiftui">Apple's Landmarks tutorial</a>: each chapter is a feature, not a concept. Concepts appear in small callouts the moment they're needed.</p>
 
@@ -3173,6 +3203,12 @@ $ swift run
     document.querySelectorAll('a[href]').forEach((a) => {
       const href = a.getAttribute('href');
       if (!href || href.startsWith('#') || href.startsWith('/') || (!href.startsWith('http'))) return;
+      // Skip links that manage their own styling (e.g. app-link with icon).
+      if (a.classList.contains('app-link')) {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        return;
+      }
       try {
         const u = new URL(href);
         const host = u.hostname.replace(/^www\./, '');
