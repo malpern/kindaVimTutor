@@ -1,0 +1,40 @@
+{
+  "name": "tutorial-writer",
+  "version": "1.0.0",
+  "description": "Produce long-form technical tutorials in the house style — feature-named chapters, user-first prose, single-file HTML with chalkboard code, progressive illustrations, ambient microinteractions. Reverse-engineered from the kindaVim Tutor walkthrough.",
+  "author": "Tutorial system extracted from the kindaVim Tutor project",
+  "skills": [
+    "skills/tutorial-writer"
+  ],
+  "agents": [
+    "agents/tutorial-architect.md"
+  ],
+  "docs": "docs/tutorial-system/README.md",
+  "entry": {
+    "skill": "tutorial-writer",
+    "invoke_when": [
+      "user asks to write a tutorial",
+      "user asks to produce a walkthrough",
+      "user asks to revise a tutorial draft",
+      "user asks for a kindaVim-style tutorial for another project"
+    ]
+  },
+  "requires": {
+    "optional_tools": [
+      "nano-banana (for chapter illustrations)",
+      "peekaboo (for deterministic screenshot capture)",
+      "shiki CDN (for syntax highlighting in the output HTML)"
+    ]
+  },
+  "portability": {
+    "self_contained": true,
+    "repo_assumptions": "none — copy the whole plugin directory into any repo and it works. Paths inside the plugin are relative.",
+    "output_location": "By default emits docs/tutorial.html + assets in docs/. Ask the user if they want a different output path."
+  },
+  "changelog": [
+    {
+      "version": "1.0.0",
+      "notes": "Initial extraction from the kindaVim Tutor walkthrough."
+    }
+  ]
+}
