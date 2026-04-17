@@ -224,12 +224,152 @@ Lessons from the exemplar's implementation:
 
 The penultimate section. Non-negotiable. See `tutorial-blueprint.md`.
 
+## M. SEO + social share metadata — REQUIRED
+
+Every tutorial ships with the following in `<head>`, populated with the
+tutorial's real title, description, and canonical URL:
+
+```html
+<meta name="description" content="[one sentence, ≤160 chars, echoes the hero subtitle]">
+<meta name="author" content="[your name]">
+<link rel="canonical" href="https://[domain]/[path]/tutorial.html">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/favicon.png">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="[title]">
+<meta property="og:description" content="[same as meta description]">
+<meta property="og:image" content="https://[domain]/[path]/[preview.png]">
+<meta property="og:url" content="https://[domain]/[path]/tutorial.html">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="[title]">
+<meta name="twitter:description" content="[description]">
+<meta name="twitter:image" content="[same as og:image]">
+
+<!-- Structured data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "[title]",
+  "description": "[description]",
+  "author": {"@type": "Person", "name": "[author]"},
+  "image": "[og image URL]",
+  "inLanguage": "en"
+}
+</script>
+```
+
+The `og:image` should be a real visual — usually the welcome screenshot
+or a hero bull illustration. Social previews without images get poor
+click-through.
+
+## N. Favicon — REQUIRED
+
+A 32×32 (or any square) PNG at `assets/favicon.png`, linked from `<head>`
+with both `rel="icon"` and `rel="apple-touch-icon"`. Either:
+- The most iconic illustration from the series (e.g., the simplest bull
+  glyph makes a strong favicon).
+- A square crop of the product this tutorial is *about* (if there's an
+  external product involved, like kindaVim's icon).
+
+## O. Lazy image loading — REQUIRED
+
+Every `<img>` below the fold gets `loading="lazy"`. Chapter illustrations,
+screenshots, diagrams — all lazy. The *only* images that shouldn't lazy
+load are ones literally in the first viewport (the kindaVim app-link icon
+in the hero's first paragraph, for example).
+
+```html
+<img class="bull" src="..." loading="lazy" alt="...">
+```
+
+## P. Optimized illustrations (WebP, resized) — REQUIRED
+
+Raw images from generators (nano-banana, etc.) are typically 1–2 MB each.
+Convert to WebP and resize before committing:
+
+```bash
+for f in bulls/*.png; do
+  webp_out="${f%.png}.webp"
+  sips -Z 840 "$f" --out "/tmp/resized-$(basename $f)" >/dev/null
+  cwebp -q 82 -mt "/tmp/resized-$(basename $f)" -o "$webp_out" >/dev/null
+done
+rm bulls/*.png  # keep only the optimized webps
+```
+
+Typical reduction: 1.5 MB PNG → 35 KB WebP (~40× smaller). On a 10-image
+illustration series that's 15 MB → 400 KB saved across the whole tutorial.
+
+## Q. No dev-only cache-busting meta tags in production — REQUIRED
+
+During development it's tempting to add:
+
+```html
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+```
+
+These *must* be removed before shipping. They defeat browser caching for
+real readers (slow repeat loads, higher bandwidth) and confuse search
+engine crawlers. Cache-bust via a URL query param
+(`tutorial.html?v=20260416`) when developing.
+
+## R. Semantic HTML structure — REQUIRED
+
+Wrap the document's content in `<main>` + `<article>`:
+
+```html
+<body>
+  <nav class="chapter-nav">…</nav>  <!-- sticky nav outside main -->
+  <main>
+    <article class="page">
+      [hero, TOC, chapters, cheatsheet, resources]
+    </article>
+  </main>
+  <footer>…</footer>
+  [modals, popovers, mini-player outside main]
+</body>
+```
+
+Assistive tech and search crawlers key on these tags.
+
+## S. Mobile touch polish — RECOMMENDED
+
+- Interactive pill buttons (speak, copy, crosslinks) meet Apple HIG's 44pt
+  touch target on small screens. Wrap styles in `@media (max-width: 720px)`
+  and bump `height`/`padding`.
+- Fixed-position UI (mini-player, settings panel, modals) uses
+  `bottom: calc(Npx + env(safe-area-inset-bottom))` so it doesn't overlap
+  iOS Safari's bottom chrome.
+- Horizontally-scrollable code blocks get `-webkit-overflow-scrolling: touch`
+  for momentum scrolling on iOS.
+
+```css
+@media (max-width: 720px) {
+  .speak-btn { height: 40px; padding: 0 18px 0 14px; }
+}
+.miniplayer {
+  bottom: calc(24px + env(safe-area-inset-bottom));
+}
+```
+
 ## Priority summary
 
 | Feature | Priority | Cost | Benefit |
 |---|---|---|---|
 | Single-file, zero-build | Required | — | Portability |
 | Cheatsheet | Required | Low | Recall aid |
+| SEO + social metadata | Required | Low | Discoverability / sharing |
+| Favicon | Required | Low | Professionalism |
+| Lazy image loading | Required | Low | Perf |
+| Optimized illustrations (WebP) | Required | Low | Perf |
+| Semantic `<main>` / `<article>` | Required | Low | A11y + SEO |
+| No dev-only cache meta tags | Required | — | Don't shoot yourself |
 | Shiki syntax highlighting | Recommended | Low | Accurate code |
 | Progressive illustrations | Recommended | Medium | Rhythm + atmosphere |
 | Screenshot harness | Recommended (for UI topics) | Medium | Fidelity |
@@ -238,6 +378,7 @@ The penultimate section. Non-negotiable. See `tutorial-blueprint.md`.
 | Copy buttons | Recommended | Low | Practical |
 | Sticky chapter nav | Recommended | Low | Orientation |
 | External links annotated | Recommended | Low | Trust |
+| Mobile touch polish (HIG targets, safe-area) | Recommended | Low | Mobile UX |
 | Hover-video on external refs | Optional | Low | Delight |
 | Read-aloud | Optional | High | Accessibility + modality |
 | Animated typewriter title | Optional | Low | Personality |

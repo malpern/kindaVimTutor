@@ -112,16 +112,48 @@ needed. Include:
 - Sticky chapter nav
 - Drop caps, small caps, hanging punctuation, text-wrap, orphans/widows
 
-### Step 10 — Review
+### Step 10 — Ship-blocking technical fixes
+
+Before reviewing the writing, make sure these are in place. Each is small
+but cumulatively they're the difference between a shippable tutorial and
+a draft:
+
+1. **SEO + social metadata.** `<meta name="description">`, Open Graph
+   tags (`og:title`, `og:description`, `og:image`, `og:url`, `og:type`),
+   Twitter Card tags, canonical URL, JSON-LD `TechArticle` structured
+   data. Populate with real values.
+2. **Favicon.** A 32×32 PNG linked via `<link rel="icon">` and
+   `<link rel="apple-touch-icon">`. Use the most iconic illustration
+   from the series, or the product's own icon if the tutorial is about
+   an external tool.
+3. **`loading="lazy"`** on every `<img>` below the fold (effectively
+   every illustration and screenshot except anything in the first
+   viewport).
+4. **Optimize illustrations.** If using generated images (nano-banana,
+   etc.), run them through `cwebp -q 82` after `sips -Z 840` resizing
+   before committing. Typical reduction: 40×.
+5. **Remove dev-only `<meta http-equiv="Cache-Control">` tags.** They
+   kill caching for real readers.
+6. **Wrap content in `<main><article class="page">`.** Don't ship a
+   tutorial whose root element is `<div>`.
+7. **Mobile touch polish.** Interactive pill buttons hit 44pt on small
+   screens (`@media (max-width: 720px)` bumping height). Fixed-position
+   UI uses `bottom: calc(Npx + env(safe-area-inset-bottom))` to clear
+   iOS Safari chrome.
+
+See `docs/tutorial-system/implementation-patterns.md` → sections M
+through S for the exact snippets.
+
+### Step 11 — Content review
 
 Run the draft through `docs/tutorial-system/review-checklist.md`. Fix
-every item that doesn't pass before shipping. Typical failures:
+every item that doesn't pass before shipping. Typical writing failures:
 - Mechanical paragraphs after code blocks → rewrite to user-first.
 - Missing checkpoints → add them.
-- Missing favicon / meta description / OG tags → add them.
-- Cache-control meta tags leftover from dev → remove.
+- Concept-named chapters → rename to feature-named.
+- Too many `aside.concept` callouts in one chapter → trim to 2 max.
 
-### Step 11 — Hand off
+### Step 12 — Hand off
 
 Report to the user with:
 - Word count, reading time estimate, chapter count.

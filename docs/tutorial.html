@@ -3,10 +3,41 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
 <title>The KindaVim Tutorial… Tutorial</title>
+<meta name="description" content="A nine-chapter SwiftUI walkthrough: start from an empty file, end with a macOS app that teaches Vim motions. Write the five patterns every Mac app reuses.">
+<meta name="author" content="Micah Alpern">
+<link rel="canonical" href="https://malpern.github.io/kindaVimTutor/tutorial.html">
+<link rel="icon" type="image/png" href="assets/kindavim-icon.png">
+<link rel="apple-touch-icon" href="assets/kindavim-icon.png">
+
+<!-- Open Graph -->
+<meta property="og:type" content="article">
+<meta property="og:title" content="The KindaVim Tutorial… Tutorial">
+<meta property="og:description" content="A nine-chapter SwiftUI walkthrough: start from an empty file, end with a macOS app that teaches Vim motions. Write the five patterns every Mac app reuses.">
+<meta property="og:image" content="https://malpern.github.io/kindaVimTutor/screenshots/01-welcome.png">
+<meta property="og:url" content="https://malpern.github.io/kindaVimTutor/tutorial.html">
+<meta property="og:site_name" content="kindaVim Tutor">
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The KindaVim Tutorial… Tutorial">
+<meta name="twitter:description" content="A nine-chapter SwiftUI walkthrough: start from an empty file, end with a macOS app that teaches Vim motions.">
+<meta name="twitter:image" content="https://malpern.github.io/kindaVimTutor/screenshots/01-welcome.png">
+
+<!-- Structured data for Google -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "TechArticle",
+  "headline": "The KindaVim Tutorial… Tutorial",
+  "description": "A nine-chapter SwiftUI walkthrough: start from an empty file, end with a macOS app that teaches Vim motions. Write the five patterns every Mac app reuses.",
+  "author": {"@type": "Person", "name": "Micah Alpern"},
+  "image": "https://malpern.github.io/kindaVimTutor/screenshots/01-welcome.png",
+  "inLanguage": "en",
+  "proficiencyLevel": "Intermediate",
+  "keywords": "SwiftUI, macOS, tutorial, Vim, @Observable, NavigationSplitView, NSViewRepresentable"
+}
+</script>
 <!-- Shiki (VSCode-grade) syntax highlighting, loaded as an ES module
      at the end of the body. No Prism — Shiki uses TextMate grammars
      which handle Swift's enum shorthand, argument labels, macros etc.
@@ -530,8 +561,8 @@
     align-items: center;
     justify-content: center;
     gap: 6px;
-    height: 28px;
-    padding: 0 12px 0 10px;
+    height: 32px;
+    padding: 0 14px 0 12px;
     border: 1px solid rgba(161, 74, 42, 0.4);
     border-radius: 999px;
     background: rgba(161, 74, 42, 0.06);
@@ -566,6 +597,11 @@
     .speak-btn.playing { color: #1a1818; background: var(--accent); border-color: var(--accent); }
   }
   .speak-btn svg { width: 12px; height: 12px; }
+  /* Bigger touch target on narrow / touch screens (Apple HIG: 44pt). */
+  @media (max-width: 720px) {
+    .speak-btn { height: 40px; padding: 0 18px 0 14px; font-size: 12px; }
+    .speak-btn svg { width: 14px; height: 14px; }
+  }
 
   /* First-run modal — asks how to read. */
   .firstrun {
@@ -719,7 +755,7 @@
   /* Mini-player */
   .miniplayer {
     position: fixed;
-    bottom: 24px;
+    bottom: calc(24px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%) translateY(12px);
     background: #1a1818;
@@ -778,7 +814,7 @@
   /* Settings panel */
   .settings-panel {
     position: fixed;
-    bottom: 84px;
+    bottom: calc(84px + env(safe-area-inset-bottom));
     left: 50%;
     transform: translateX(-50%) translateY(16px);
     width: 400px;
@@ -1415,7 +1451,8 @@
   <div class="nav-progress"></div>
 </nav>
 
-<div class="page">
+<main>
+<article class="page">
 
 <p class="eyebrow">A SwiftUI walkthrough</p>
 <h1 class="title" aria-label="The KindaVim Tutorial... Tutorial"><span class="title-text"></span><span class="title-cursor" aria-hidden="true">&#9614;</span></h1>
@@ -1514,7 +1551,7 @@
 <!-- ====================================================================== -->
 
 <section id="ch1" class="chapter">
-  <img class="bull" src="bulls/bull-01-glyph.png" alt="A single-gesture charcoal bull — the most abstract plate.">
+  <img loading="lazy" class="bull" src="bulls/bull-01-glyph.webp" alt="A single-gesture charcoal bull — the most abstract plate.">
   <p class="chapter-number">Chapter one</p>
   <h2>What you're building</h2>
 
@@ -1524,7 +1561,7 @@
   </div>
 
   <figure class="screenshot">
-    <img src="screenshots/01-welcome.png" alt="The kindaVim Tutor welcome screen: sidebar on the left, 'Press L to begin' hint on the right.">
+    <img loading="lazy" src="screenshots/01-welcome.png" alt="The kindaVim Tutor welcome screen: sidebar on the left, 'Press L to begin' hint on the right.">
     <figcaption>The app on first launch. A chapter on the left, a welcome on the right, and a gentle nudge to press L.</figcaption>
   </figure>
 
@@ -1547,7 +1584,7 @@
 <!-- ====================================================================== -->
 
 <section id="ch2" class="chapter">
-  <img class="bull" src="bulls/bull-02-gesture.png" alt="A bull in six essential strokes.">
+  <img loading="lazy" class="bull" src="bulls/bull-02-gesture.webp" alt="A bull in six essential strokes.">
   <p class="chapter-number">Chapter two</p>
   <h2>Modeling the curriculum</h2>
 
@@ -1693,7 +1730,7 @@
 <!-- ====================================================================== -->
 
 <section id="ch3" class="chapter">
-  <img class="bull" src="bulls/bull-03-contour.png" alt="The bull as pure contour line.">
+  <img loading="lazy" class="bull" src="bulls/bull-03-contour.webp" alt="The bull as pure contour line.">
   <p class="chapter-number">Chapter three</p>
   <h2>One lesson on screen</h2>
 
@@ -1736,7 +1773,7 @@
   <p class="code-caption">Sources/KindaVimTutorKit/Views/Lesson/LessonHeaderView.swift</p>
 
   <figure class="screenshot">
-    <img src="screenshots/08-header-detail.png" alt="A close-up of the header: blue eyebrow reading SURVIVAL KIT, large bold lesson title 'Moving the Cursor', grey subtitle 'Navigate with h, j, k, l'.">
+    <img loading="lazy" src="screenshots/08-header-detail.png" alt="A close-up of the header: blue eyebrow reading SURVIVAL KIT, large bold lesson title 'Moving the Cursor', grey subtitle 'Navigate with h, j, k, l'.">
     <figcaption>The four lines of the header rendered.</figcaption>
   </figure>
 
@@ -1817,7 +1854,7 @@
 <!-- ====================================================================== -->
 
 <section id="ch4" class="chapter">
-  <img class="bull" src="bulls/bull-04-details.png" alt="An outlined bull with a few details starting to appear.">
+  <img loading="lazy" class="bull" src="bulls/bull-04-details.webp" alt="An outlined bull with a few details starting to appear.">
   <p class="chapter-number">Chapter four</p>
   <h2>A sidebar to pick from</h2>
 
@@ -1874,7 +1911,7 @@
   <p class="code-caption">Sources/KindaVimTutorKit/Views/Navigation/SidebarView.swift</p>
 
   <figure class="screenshot">
-    <img src="screenshots/06-sidebar-detail.png" alt="A close-up of just the sidebar: chapter 'Survival Kit' expanded, showing seven lesson rows with 'Moving the Cursor' selected and highlighted.">
+    <img loading="lazy" src="screenshots/06-sidebar-detail.png" alt="A close-up of just the sidebar: chapter 'Survival Kit' expanded, showing seven lesson rows with 'Moving the Cursor' selected and highlighted.">
     <figcaption>The rendered sidebar, expanded. Chapter header plus tagged lesson rows feeding <code>List(selection:)</code>.</figcaption>
   </figure>
 
@@ -1926,7 +1963,7 @@
 <!-- ====================================================================== -->
 
 <section id="ch5" class="chapter">
-  <img class="bull" src="bulls/bull-05-form.png" alt="Interior structural lines suggest form.">
+  <img loading="lazy" class="bull" src="bulls/bull-05-form.webp" alt="Interior structural lines suggest form.">
   <p class="chapter-number">Chapter five</p>
   <h2>Two panes, one source of truth</h2>
 
@@ -2119,7 +2156,7 @@ struct KindaVimTutorApp: App {
 <!-- ====================================================================== -->
 
 <section id="ch6" class="chapter">
-  <img class="bull" src="bulls/bull-06-shading.png" alt="Musculature defined; the anatomy emerges.">
+  <img loading="lazy" class="bull" src="bulls/bull-06-shading.webp" alt="Musculature defined; the anatomy emerges.">
   <p class="chapter-number">Chapter six</p>
   <h2>Slides instead of scrolling</h2>
 
@@ -2131,7 +2168,7 @@ struct KindaVimTutorApp: App {
   <p class="chapter-opener">The first prototype had a scrolling page: read the text, scroll down, do the drill. It worked, and it didn't feel like Vim. Vim is modal and step-at-a-time, so the tutor should be too. Slides, advanced with the motion keys the user is learning.</p>
 
   <figure class="screenshot">
-    <img src="screenshots/02-title-slide.png" alt="Title slide: SURVIVAL KIT / Moving the Cursor / Navigate with h, j, k, l / L press to begin">
+    <img loading="lazy" src="screenshots/02-title-slide.png" alt="Title slide: SURVIVAL KIT / Moving the Cursor / Navigate with h, j, k, l / L press to begin">
     <figcaption>The title slide you land on when a lesson is selected. The sidebar lists the lessons in the chapter; the detail pane shows a single slide.</figcaption>
   </figure>
 
@@ -2365,7 +2402,7 @@ final class LessonStepController {
   <p>A thoughtful touch inside <code>handleKey</code>: when the user is focused inside the drill editor, <code>l</code> and <code>h</code> are motions they're trying to perform, not nav commands. The canvas only consumes those keys when the editor <em>isn't</em> focused. Details like this are the difference between a tutor that feels right and one you fight.</p>
 
   <figure class="screenshot" style="max-width: 240px; margin-left: auto; margin-right: auto;">
-    <img src="screenshots/10-step-indicator.png" alt="Six small dots in a row, one highlighted, rendered at the bottom of the detail pane.">
+    <img loading="lazy" src="screenshots/10-step-indicator.png" alt="Six small dots in a row, one highlighted, rendered at the bottom of the detail pane.">
     <figcaption>The step indicator at the bottom — one dot per step, the active one slightly larger and darker.</figcaption>
   </figure>
 
@@ -2382,7 +2419,7 @@ final class LessonStepController {
 <!-- ====================================================================== -->
 
 <section id="ch7" class="chapter">
-  <img class="bull" src="bulls/bull-07-muscle.png" alt="Hide texture and dramatic chiaroscuro.">
+  <img loading="lazy" class="bull" src="bulls/bull-07-muscle.webp" alt="Hide texture and dramatic chiaroscuro.">
   <p class="chapter-number">Chapter seven</p>
   <h2>The drill engine</h2>
 
@@ -2573,7 +2610,7 @@ final class ExerciseEngine {
   <h3>Wiring the engine into the drill view</h3>
 
   <figure class="screenshot">
-    <img src="screenshots/05-drill.png" alt="A drill slide. Label reads EXERCISE 2. Instruction: 'Move up to the * using k, then delete it with x'. An editor below contains the starter text.">
+    <img loading="lazy" src="screenshots/05-drill.png" alt="A drill slide. Label reads EXERCISE 2. Instruction: 'Move up to the * using k, then delete it with x'. An editor below contains the starter text.">
     <figcaption>A drill in its starting state — instruction on top, editor below. The engine validates on every keystroke, and when the text + cursor match the expected state, the rep completes.</figcaption>
   </figure>
 
@@ -2644,12 +2681,12 @@ final class ExerciseEngine {
 <!-- ====================================================================== -->
 
 <section id="ch8" class="chapter">
-  <img class="bull" src="bulls/bull-08-texture.png" alt="An expressive bull, rendered in fine detail.">
+  <img loading="lazy" class="bull" src="bulls/bull-08-texture.webp" alt="An expressive bull, rendered in fine detail.">
   <p class="chapter-number">Chapter eight</p>
   <h2>A real editor</h2>
 
   <figure class="screenshot">
-    <img src="screenshots/07-editor-detail.png" alt="A close-up of a drill: label EXERCISE 2, instruction 'Move up to the * using k, then delete it with x', and an editor below showing '* &lt;— move here with k, delete with x'.">
+    <img loading="lazy" src="screenshots/07-editor-detail.png" alt="A close-up of a drill: label EXERCISE 2, instruction 'Move up to the * using k, then delete it with x', and an editor below showing '* &lt;— move here with k, delete with x'.">
     <figcaption>The real <code>NSTextView</code> in its unfocused state. The rounded rect is a SwiftUI overlay; everything inside is AppKit.</figcaption>
   </figure>
 
@@ -2781,7 +2818,7 @@ final class Coordinator: NSObject, NSTextViewDelegate {
 <!-- ====================================================================== -->
 
 <section id="ch9" class="chapter">
-  <img class="bull" src="bulls/bull-09-expression.png" alt="The finished academic study — fully realized in charcoal.">
+  <img loading="lazy" class="bull" src="bulls/bull-09-expression.webp" alt="The finished academic study — fully realized in charcoal.">
   <p class="chapter-number">Chapter nine</p>
   <h2>Remembering the user</h2>
 
@@ -2940,7 +2977,7 @@ $ swift run
 # Close the app. Open it again. The checkmark is still there.</code></pre>
 
   <figure class="screenshot" style="max-width: 260px; margin-left: auto; margin-right: auto;">
-    <img src="screenshots/09-sidebar-completed-crop.png" alt="The sidebar on second launch: 'Moving the Cursor' now has a checkmark to the right of its label.">
+    <img loading="lazy" src="screenshots/09-sidebar-completed-crop.png" alt="The sidebar on second launch: 'Moving the Cursor' now has a checkmark to the right of its label.">
     <figcaption>The sidebar after restart. The checkmark is the observable store telling the row's <code>body</code> that the lesson is done.</figcaption>
   </figure>
 
@@ -3054,7 +3091,8 @@ $ swift run
   </div>
 </section>
 
-</div>
+</article>
+</main>
 
 <footer>
   kindaVim Tutor · essentials branch · <code>docs/tutorial.html</code>
