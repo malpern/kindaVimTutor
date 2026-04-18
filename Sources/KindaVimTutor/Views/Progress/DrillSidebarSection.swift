@@ -111,7 +111,6 @@ struct DrillSidebarSection: View {
                         .font(.system(size: 11))
                         .foregroundStyle(.secondary)
                         .lineSpacing(2)
-                        .fixedSize(horizontal: false, vertical: true)
                         .transition(.opacity)
                 }
             }

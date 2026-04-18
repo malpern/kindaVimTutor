@@ -3,6 +3,7 @@ import SwiftUI
 struct WelcomeView: View {
     var onStartLearning: (() -> Void)?
 
+    @State private var showLogo = false
     @State private var showTitle = false
     @State private var showSubtitle = false
     @State private var showHint = false
@@ -11,7 +12,13 @@ struct WelcomeView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 20) {
+            VStack(spacing: 24) {
+                logo
+                    .frame(width: 140, height: 140)
+                    .opacity(showLogo ? 1 : 0)
+                    .scaleEffect(showLogo ? 1 : 0.9)
+                    .animation(.spring(duration: 0.55, bounce: 0.22), value: showLogo)
+
                 Text("kindaVim Tutor")
                     .font(.system(size: 44, weight: .bold))
                     .tracking(-1.2)
@@ -32,15 +39,7 @@ struct WelcomeView: View {
             Spacer()
 
             VStack(spacing: 16) {
-                HStack(spacing: 10) {
-                    KeyCapView(label: "]", size: .regular)
-                        .scaleEffect(0.92)
-                        .shadow(color: .white.opacity(0.06), radius: 10, y: 1)
-                    Text("press to begin")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundStyle(.secondary.opacity(0.82))
-                }
-                .opacity(0.92)
+                AdvanceHintView("press to begin")
 
                 kindaVimStatus
             }
@@ -61,12 +60,28 @@ struct WelcomeView: View {
             return .ignored
         }
         .task {
-            try? await Task.sleep(for: .milliseconds(100))
+            try? await Task.sleep(for: .milliseconds(60))
+            showLogo = true
+            try? await Task.sleep(for: .milliseconds(180))
             showTitle = true
-            try? await Task.sleep(for: .milliseconds(250))
+            try? await Task.sleep(for: .milliseconds(200))
             showSubtitle = true
-            try? await Task.sleep(for: .milliseconds(400))
+            try? await Task.sleep(for: .milliseconds(300))
             showHint = true
+        }
+    }
+
+    @ViewBuilder
+    private var logo: some View {
+        if let url = Bundle.module.url(forResource: "kindaVimLogo", withExtension: "png"),
+           let ns = NSImage(contentsOf: url) {
+            Image(nsImage: ns)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .shadow(color: .black.opacity(0.35), radius: 18, y: 5)
+        } else {
+            Image(systemName: "photo")
         }
     }
 

@@ -2,6 +2,7 @@ import Foundation
 
 enum Curriculum {
     static let chapters: [Chapter] = [
+        chapter0,
         chapter1,
         chapter2,
         chapter3,

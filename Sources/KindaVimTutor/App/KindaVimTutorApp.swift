@@ -14,28 +14,7 @@ struct KindaVimTutorApp: App {
 
     var body: some Scene {
         Window("kindaVim Tutor", id: "main") {
-            NavigationSplitView {
-                SidebarView(
-                    chapters: appState.chapters,
-                    selectedLessonId: $appState.selectedLessonId,
-                    progressStore: appState.progressStore,
-                    inspectorState: appState.inspectorState
-                )
-            } detail: {
-                if let lesson = appState.selectedLesson,
-                   let chapter = appState.selectedChapter {
-                    StepCanvasView(
-                        lesson: lesson,
-                        chapterTitle: chapter.title,
-                        progressStore: appState.progressStore,
-                        inspectorState: appState.inspectorState,
-                        onNextLesson: { appState.goToNextLesson() }
-                    )
-                    .id(lesson.id)
-                } else {
-                    WelcomeView(onStartLearning: { appState.goToFirstLesson() })
-                }
-            }
+            mainUI
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     ModeIndicatorView(
@@ -74,6 +53,32 @@ struct KindaVimTutorApp: App {
                     showStats.toggle()
                 }
                 .keyboardShortcut("p", modifiers: [.command, .shift])
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var mainUI: some View {
+        NavigationSplitView {
+            SidebarView(
+                chapters: appState.chapters,
+                selectedLessonId: $appState.selectedLessonId,
+                progressStore: appState.progressStore,
+                inspectorState: appState.inspectorState
+            )
+        } detail: {
+            if let lesson = appState.selectedLesson,
+               let chapter = appState.selectedChapter {
+                StepCanvasView(
+                    lesson: lesson,
+                    chapterTitle: chapter.title,
+                    progressStore: appState.progressStore,
+                    inspectorState: appState.inspectorState,
+                    onNextLesson: { appState.goToNextLesson() }
+                )
+                .id(lesson.id)
+            } else {
+                WelcomeView(onStartLearning: { appState.goToFirstLesson() })
             }
         }
     }

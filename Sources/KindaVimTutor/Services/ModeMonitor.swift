@@ -23,8 +23,13 @@ final class ModeMonitor {
                 forName: Notification.Name(name),
                 object: nil,
                 queue: .main
-            ) { [weak self] _ in
+            ) { [weak self] notification in
+                let notifName = notification.name.rawValue
                 MainActor.assumeIsolated {
+                    AppLogger.shared.info("modeMonitor", "enterMode", fields: [
+                        "name": notifName,
+                        "mode": String(describing: mode)
+                    ])
                     self?.currentMode = mode
                     self?.isKindaVimRunning = true
                 }
@@ -52,6 +57,26 @@ final class ModeMonitor {
             }
             observers.append(observer)
         }
+
+        // Catch-all diagnostic: log every distributed notification whose
+        // name contains "kindaVim" (case-insensitive) so we can see what the
+        // actual broadcast names are if the ones above are wrong.
+        let catchAll = center.addObserver(
+            forName: nil,
+            object: nil,
+            queue: .main
+        ) { notification in
+            let n = notification.name.rawValue
+            guard n.range(of: "kindavim", options: .caseInsensitive) != nil else { return }
+            let objDesc = String(describing: notification.object)
+            let userDesc = String(describing: notification.userInfo ?? [:])
+            AppLogger.shared.info("modeMonitor", "distNotifSeen", fields: [
+                "name": n,
+                "object": objDesc,
+                "userInfo": userDesc
+            ])
+        }
+        observers.append(catchAll)
 
         checkKindaVimRunning()
     }

@@ -3,13 +3,16 @@ import SwiftUI
 struct ContentStepView: View {
     let blocks: [ContentBlock]
     var onAutoAdvance: (() -> Void)?
+    /// Called once the heading has finished typing and all body blocks have
+    /// faded in. The canvas uses this to time the appearance of its shared
+    /// "press to continue" CTA — we only show the chip once reading material
+    /// has settled.
+    var onContentReady: (() -> Void)?
 
     @State private var headingDone = false
     @State private var visibleBlockCount = 0
-    @State private var autoAdvanceTask: Task<Void, Never>?
-    @State private var dwellProgress: Double = 0
+    @State private var didNotifyReady = false
 
-    // Separate heading from body blocks
     private var headingText: String? {
         if case .heading(let text) = blocks.first { return text }
         return nil
@@ -21,11 +24,10 @@ struct ContentStepView: View {
     }
 
     var body: some View {
-        VStack {
-            Spacer()
+        VStack(spacing: 0) {
+            Spacer(minLength: 20)
 
             VStack(alignment: .leading, spacing: 20) {
-                // Heading types in
                 if let heading = headingText {
                     TypewriterText(
                         heading,
@@ -37,12 +39,10 @@ struct ContentStepView: View {
                     }
                     .tracking(-0.6)
                 } else {
-                    // No heading — start revealing blocks immediately
                     EmptyView()
                         .onAppear { revealBodyBlocks() }
                 }
 
-                // Body blocks fade in sequentially
                 ForEach(Array(bodyBlocks.enumerated()), id: \.offset) { index, block in
                     if index < visibleBlockCount {
                         contentBlockView(block)
@@ -51,98 +51,85 @@ struct ContentStepView: View {
                 }
             }
             .frame(maxWidth: 640, alignment: .leading)
+            .animation(.spring(duration: 0.4, bounce: 0.0), value: visibleBlockCount)
 
-            Spacer()
-
-            advanceHint
-                .padding(.bottom, 40)
+            Spacer(minLength: 20)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity)
         .padding(.horizontal, 56)
-        .onAppear {
-            scheduleAutoAdvance()
-        }
         .onDisappear {
-            autoAdvanceTask?.cancel()
-            autoAdvanceTask = nil
             headingDone = false
             visibleBlockCount = 0
-            dwellProgress = 0
         }
     }
 
-    private var advanceHint: some View {
-        HStack(spacing: 12) {
-            Text("Next")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.primary.opacity(0.92))
-            KeyCapView(label: "]", size: .regular)
-            Text("or wait")
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary.opacity(0.7))
-            ZStack {
-                Circle()
-                    .stroke(Color.secondary.opacity(0.15), lineWidth: 2)
-                Circle()
-                    .trim(from: 0, to: dwellProgress)
-                    .stroke(Color.accentColor.opacity(0.8), style: .init(lineWidth: 2, lineCap: .round))
-                    .rotationEffect(.degrees(-90))
+    /// Renders a link inside the same visual shell as `.tip` — lightbulb
+    /// icon, secondary text, same padding and background — so it reads as a
+    /// supplementary resource rather than an alternative CTA.
+    @ViewBuilder
+    private func linkTipView(symbol: String, accent: LinkAccent, label: String, url: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "lightbulb")
+                .foregroundStyle(.secondary)
+                .font(.system(size: 14))
+                .frame(width: 18, alignment: .topLeading)
+                .padding(.top, 2)
+            if let dest = URL(string: url) {
+                Link(destination: dest) {
+                    HStack(spacing: 6) {
+                        Text(label)
+                            .font(.system(size: 15))
+                            .foregroundStyle(.secondary)
+                            .lineSpacing(4)
+                            .multilineTextAlignment(.leading)
+                        Image(systemName: "arrow.up.right")
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
+            } else {
+                Text(label)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
             }
-            .frame(width: 16, height: 16)
+            Spacer()
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 10)
-        .background(
-            Capsule(style: .continuous)
-                .fill(Color.primary.opacity(0.05))
-        )
-        .overlay(
-            Capsule(style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
-        )
-        .opacity(shouldShowHint ? 1 : 0)
-        .animation(.easeIn(duration: 0.3), value: shouldShowHint)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
-    private var shouldShowHint: Bool {
-        if headingDone { return true }
-        if case .heading = blocks.first { return false }
-        return true
-    }
-
-    private var autoAdvanceSeconds: Double {
-        let words = blocks.reduce(0) { sum, block -> Int in
-            switch block {
-            case .text(let t), .heading(let t), .tip(let t), .important(let t):
-                return sum + t.split(separator: " ").count
-            case .keyCommand(_, let d):
-                return sum + d.split(separator: " ").count
-            default:
-                return sum
-            }
+    /// Loads a loose PNG from the SwiftPM resource bundle. SwiftUI's
+    /// `Image(_:bundle:)` only looks in asset catalogs, so raw PNGs
+    /// need the NSImage(contentsOf:) path.
+    private func bundleImage(named name: String) -> Image {
+        if let url = Bundle.module.url(forResource: name, withExtension: "png"),
+           let ns = NSImage(contentsOf: url) {
+            return Image(nsImage: ns)
         }
-        // ~2 words per second reading + 2.5s buffer, clamped to [5, 18].
-        return max(5.0, min(18.0, Double(words) / 2.0 + 2.5))
-    }
-
-    private func scheduleAutoAdvance() {
-        autoAdvanceTask?.cancel()
-        let total = autoAdvanceSeconds
-        autoAdvanceTask = Task { @MainActor in
-            withAnimation(.linear(duration: total)) {
-                dwellProgress = 1
-            }
-            try? await Task.sleep(for: .seconds(total))
-            guard !Task.isCancelled else { return }
-            onAutoAdvance?()
-        }
+        return Image(systemName: "photo")
     }
 
     private func revealBodyBlocks() {
+        // Scope the animation to a single transaction driven by an
+        // animation() modifier on the child, so layout animation cannot
+        // cascade to sibling views outside the ContentStepView.
         for i in 0..<bodyBlocks.count {
-            withAnimation(.spring(duration: 0.4, bounce: 0.0).delay(Double(i) * 0.08)) {
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(Double(i) * 0.08))
                 visibleBlockCount = i + 1
             }
+        }
+
+        // Fire onContentReady after the last block has had a moment to settle.
+        // 0.4s animation + (count-1)*0.08s stagger + small buffer.
+        let settleDelay = 0.4 + Double(max(bodyBlocks.count - 1, 0)) * 0.08 + 0.15
+        Task { @MainActor in
+            try? await Task.sleep(for: .seconds(settleDelay))
+            guard !didNotifyReady else { return }
+            didNotifyReady = true
+            onContentReady?()
         }
     }
 
@@ -153,52 +140,48 @@ struct ContentStepView: View {
             Text(text)
                 .font(.system(size: 28, weight: .bold))
                 .tracking(-0.6)
-                .fixedSize(horizontal: false, vertical: true)
 
         case .text(let text):
             Text(text)
                 .font(.system(size: 16, weight: .regular))
                 .lineSpacing(6)
                 .foregroundStyle(.primary.opacity(0.85))
-                .fixedSize(horizontal: false, vertical: true)
 
         case .tip(let text):
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "lightbulb")
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 14))
-                    .frame(width: 18, alignment: .topLeading)
-                    .padding(.top, 2)
-                Text(text)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(4)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
+            // Inline SF-Symbol + text concatenation so wrapping works natively.
+            // Wrapping Text in .padding(16)+.background() currently breaks the
+            // wrap (SwiftUI quirk with this view tree), so we keep the tip
+            // visually lighter with a subtle leading border only.
+            (
+                Text(Image(systemName: "lightbulb")).foregroundColor(.secondary)
+                + Text("  ")
+                + Text(text).foregroundColor(.secondary)
+            )
+            .font(.system(size: 15))
+            .lineSpacing(4)
+            .multilineTextAlignment(.leading)
+            .padding(.leading, 14)
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.35))
+                    .frame(width: 2)
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .important(let text):
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "exclamationmark.triangle")
-                    .foregroundStyle(.secondary)
-                    .font(.system(size: 14))
-                    .frame(width: 18, alignment: .topLeading)
-                    .padding(.top, 2)
-                Text(text)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(4)
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
+            (
+                Text(Image(systemName: "exclamationmark.triangle")).foregroundColor(.orange)
+                + Text("  ")
+                + Text(text).foregroundColor(.secondary)
+            )
+            .font(.system(size: 15))
+            .lineSpacing(4)
+            .multilineTextAlignment(.leading)
+            .padding(.leading, 14)
+            .overlay(alignment: .leading) {
+                Rectangle()
+                    .fill(Color.orange.opacity(0.55))
+                    .frame(width: 2)
             }
-            .padding(16)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .keyCommand(let keys, let description):
             HStack(alignment: .top, spacing: 16) {
@@ -209,10 +192,28 @@ struct ContentStepView: View {
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
+                    .lineLimit(nil)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
+
+        case .kindaVimInstallStatus:
+            KindaVimInstallStatusBlock()
+
+        case .modeFlowNarrative:
+            ModeFlowNarrativeView()
+
+        case .linkTip(let symbol, let accent, let label, let url):
+            linkTipView(symbol: symbol, accent: accent, label: label, url: url)
+
+        case .image(let name, let size):
+            bundleImage(named: name)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .shadow(color: .black.opacity(0.25), radius: 14, y: 3)
+                .padding(.vertical, 4)
 
         case .modePreview(let mode, let caption):
             HStack(spacing: 14) {
@@ -221,7 +222,6 @@ struct ContentStepView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
 
@@ -252,7 +252,6 @@ struct ContentStepView: View {
                 .font(.system(size: 14, design: .monospaced))
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
                 .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }

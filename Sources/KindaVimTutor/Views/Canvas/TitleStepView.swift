@@ -56,17 +56,9 @@ struct TitleStepView: View {
 
             // Navigation hint
             if showHint {
-                HStack(spacing: 10) {
-                    KeyCapView(label: "]", size: .regular)
-                        .scaleEffect(0.92)
-                        .shadow(color: .white.opacity(0.06), radius: 10, y: 1)
-                    Text("press to begin")
-                        .font(.system(size: 12, weight: .regular))
-                        .foregroundStyle(.secondary.opacity(0.82))
-                }
-                .opacity(0.92)
-                .padding(.bottom, 40)
-                .transition(.opacity)
+                AdvanceHintView("press to begin")
+                    .padding(.bottom, 44)
+                    .transition(.opacity)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

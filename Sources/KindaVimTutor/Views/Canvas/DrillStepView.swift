@@ -100,35 +100,11 @@ struct DrillStepView: View {
             .frame(maxWidth: 640, alignment: .leading)
 
             Spacer()
+                .frame(minHeight: 80)
 
-            if engine.isDrillComplete {
-                HStack(spacing: 10) {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.green)
-                    Text("Drill complete")
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(.primary)
-                    Text("— press")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                    KeyCapView(label: "]")
-                    Text("to continue")
-                        .font(.system(size: 13))
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal, 14)
-                .padding(.vertical, 10)
-                .background(
-                    Capsule(style: .continuous)
-                        .fill(Color.green.opacity(0.12))
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .strokeBorder(Color.green.opacity(0.35), lineWidth: 1)
-                )
-                .padding(.bottom, 40)
-                .transition(.opacity.combined(with: .move(edge: .bottom)))
+            if false {
+                // Advance CTA is rendered at the canvas level on drill complete.
+                EmptyView()
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

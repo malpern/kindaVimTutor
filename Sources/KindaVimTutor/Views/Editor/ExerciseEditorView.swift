@@ -46,6 +46,7 @@ struct ExerciseEditorView: NSViewRepresentable {
 
         // Set initial content
         textView.string = initialText
+        Self.styleCommentLines(textView)
         let safePosition = min(initialCursorPosition, textView.string.count)
         textView.setSelectedRange(NSRange(location: safePosition, length: 0))
 
@@ -83,6 +84,7 @@ struct ExerciseEditorView: NSViewRepresentable {
             context.coordinator.lastResetToken = resetToken
             context.coordinator.isResetting = true
             textView.string = initialText
+            Self.styleCommentLines(textView)
             let safePosition = min(initialCursorPosition, textView.string.count)
             textView.setSelectedRange(NSRange(location: safePosition, length: 0))
             context.coordinator.isResetting = false
@@ -128,6 +130,7 @@ struct ExerciseEditorView: NSViewRepresentable {
         func textDidChange(_ notification: Notification) {
             guard !isResetting, let textView = notification.object as? NSTextView else { return }
             let cursorPosition = textView.selectedRange().location
+            ExerciseEditorView.styleCommentLines(textView)
             onTextChange(textView.string, cursorPosition)
         }
 
@@ -166,6 +169,32 @@ struct ExerciseEditorView: NSViewRepresentable {
             textView.string = currentInitialText
             textView.setSelectedRange(NSRange(location: 0, length: 0))
             isResetting = false
+        }
+    }
+
+    /// Dim lines that start with `//` so in-canvas instructions visually
+    /// recede from the target material the learner is manipulating.
+    @MainActor
+    static func styleCommentLines(_ textView: NSTextView) {
+        guard let storage = textView.textStorage else { return }
+        let fullRange = NSRange(location: 0, length: storage.length)
+        let baseAttrs: [NSAttributedString.Key: Any] = [
+            .font: Typography.editorFont,
+            .foregroundColor: NSColor.labelColor,
+        ]
+        storage.setAttributes(baseAttrs, range: fullRange)
+
+        let dimAttrs: [NSAttributedString.Key: Any] = [
+            .foregroundColor: NSColor.secondaryLabelColor.withAlphaComponent(0.55),
+            .obliqueness: NSNumber(value: 0.08),
+        ]
+        let nsText = storage.string as NSString
+        nsText.enumerateSubstrings(in: fullRange, options: .byLines) { line, lineRange, _, _ in
+            guard let line else { return }
+            let trimmed = line.trimmingCharacters(in: .whitespaces)
+            if trimmed.hasPrefix("//") {
+                storage.addAttributes(dimAttrs, range: lineRange)
+            }
         }
     }
 }

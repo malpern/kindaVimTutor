@@ -18,14 +18,12 @@ struct ExplanationView: View {
             Text(text)
                 .font(Typography.body)
                 .lineSpacing(4)
-                .fixedSize(horizontal: false, vertical: true)
 
         case .heading(let text):
             Text(text)
                 .font(Typography.sectionHeading)
                 .tracking(Typography.titleTracking)
                 .padding(.top, 16)
-                .fixedSize(horizontal: false, vertical: true)
 
         case .tip(let text):
             HStack(alignment: .top, spacing: 12) {
@@ -40,7 +38,6 @@ struct ExplanationView: View {
                     .lineSpacing(3)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -59,7 +56,6 @@ struct ExplanationView: View {
                     .lineSpacing(3)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -75,9 +71,49 @@ struct ExplanationView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 3)
+
+        case .kindaVimInstallStatus:
+            KindaVimInstallStatusBlock()
+
+        case .modeFlowNarrative:
+            ModeFlowNarrativeView()
+
+        case .linkTip(_, _, let label, let url):
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "lightbulb")
+                    .foregroundStyle(.secondary)
+                    .font(.system(size: 14))
+                    .frame(width: 18, alignment: .topLeading)
+                    .padding(.top, 2)
+                if let dest = URL(string: url) {
+                    Link(destination: dest) {
+                        HStack(spacing: 6) {
+                            Text(label)
+                                .font(.system(size: 15))
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.leading)
+                            Image(systemName: "arrow.up.right")
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+                Spacer()
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(AppColors.tipBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+        case .image(let name, let size):
+            bundleImage(named: name)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .padding(.vertical, 6)
 
         case .modePreview(let mode, let caption):
             HStack(spacing: 14) {
@@ -86,7 +122,6 @@ struct ExplanationView: View {
                     .font(.system(size: 14))
                     .foregroundStyle(.secondary)
                     .lineSpacing(3)
-                    .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 3)
 
@@ -108,6 +143,14 @@ struct ExplanationView: View {
         }
     }
 
+    private func bundleImage(named name: String) -> Image {
+        if let url = Bundle.module.url(forResource: name, withExtension: "png"),
+           let ns = NSImage(contentsOf: url) {
+            return Image(nsImage: ns)
+        }
+        return Image(systemName: "photo")
+    }
+
     private func codeBlock(label: String, code: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(label.uppercased())
@@ -117,7 +160,6 @@ struct ExplanationView: View {
                 .font(Typography.code)
                 .padding(10)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .fixedSize(horizontal: false, vertical: true)
                 .background(AppColors.codeBackground, in: RoundedRectangle(cornerRadius: 6, style: .continuous))
         }
     }

@@ -10,7 +10,10 @@ let package = Package(
         .executableTarget(
             name: "KindaVimTutor",
             path: "Sources/KindaVimTutor",
-            exclude: ["Resources/.gitkeep"]
+            exclude: ["Resources/.gitkeep"],
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
             name: "KindaVimTutorTests",

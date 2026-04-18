@@ -19,6 +19,7 @@ struct ModeIndicatorView: View {
                 .frame(width: 7, height: 7)
             Text(mode.displayName)
                 .font(.system(.caption, design: .monospaced, weight: .bold))
+                .foregroundStyle(.white)
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 5)
