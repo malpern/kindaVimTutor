@@ -9,4 +9,10 @@ enum Curriculum {
         chapter5,
         chapter6,
     ]
+
+    static func lesson(containing exerciseId: String) -> Lesson? {
+        chapters.flatMap(\.lessons).first { lesson in
+            lesson.exercises.contains { $0.id == exerciseId }
+        }
+    }
 }

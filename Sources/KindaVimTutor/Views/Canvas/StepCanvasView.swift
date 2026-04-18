@@ -9,6 +9,7 @@ struct StepCanvasView: View {
 
     @State private var controller = LessonStepController()
     @State private var isEditorFocused = false
+    @FocusState private var canvasFocused: Bool
 
     var body: some View {
         ZStack {
@@ -20,7 +21,7 @@ struct StepCanvasView: View {
                         TitleStepView(lesson: lesson, chapterTitle: chapterTitle)
 
                     case .content(_, let blocks):
-                        ContentStepView(blocks: blocks)
+                        ContentStepView(blocks: blocks, onAutoAdvance: advanceForward)
 
                     case .drill(let exercise, let exerciseNumber):
                         DrillStepView(
@@ -49,19 +50,34 @@ struct StepCanvasView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(nsColor: .windowBackgroundColor))
         .focusable()
+        .focused($canvasFocused)
         .accessibilityIdentifier("StepCanvas")
         .accessibilityLabel(accessibilityStatus)
         .onAppear {
             controller.loadLesson(lesson, chapterTitle: chapterTitle)
             AppCommandChannel.shared.registerController(controller)
+            canvasFocused = true
         }
         .onChange(of: lesson) {
             controller.loadLesson(lesson, chapterTitle: chapterTitle)
             isEditorFocused = false
             AppCommandChannel.shared.registerController(controller)
+            canvasFocused = true
         }
         .onChange(of: controller.currentStepIndex) {
             AppCommandChannel.shared.notifyStateChanged()
+            // On non-drill steps (content/title), canvas needs focus so l/h work.
+            // On drill steps, editor grabs focus itself via isActive.
+            if !controller.isOnDrillStep {
+                canvasFocused = true
+            }
+        }
+        .onChange(of: isEditorFocused) { _, focused in
+            // When the editor resigns (e.g., drill complete), pull keyboard focus
+            // back so `l` advances without a manual click.
+            if !focused {
+                canvasFocused = true
+            }
         }
         .onDisappear {
             AppCommandChannel.shared.registerController(nil)
@@ -76,16 +92,17 @@ struct StepCanvasView: View {
     private func handleKeyPress(_ keyPress: KeyPress) -> KeyPress.Result {
         let char = keyPress.characters.first
 
-        // Vim navigation: l = forward, h = back, Space = forward
+        // Page navigation: ] = forward, [ = back, Space = forward.
+        // (Using [ and ] so they don't collide with hjkl exercise keys.)
         switch char {
-        case "l", " ":
+        case "]", " ":
             if canNavigateForward {
-                controller.nextStep()
+                advanceForward()
                 return .handled
             }
             return .ignored
 
-        case "h":
+        case "[":
             if canNavigateBackward {
                 controller.previousStep()
                 return .handled
@@ -97,7 +114,17 @@ struct StepCanvasView: View {
         }
     }
 
-    /// Can navigate forward? Not when editor is focused (keys go to kindaVim)
+    /// Advances within the lesson, or jumps to the next lesson when on the last step.
+    private func advanceForward() {
+        if controller.isLastStep {
+            onNextLesson?()
+        } else {
+            controller.nextStep()
+        }
+    }
+
+    /// Can navigate forward? Not when editor is focused with an incomplete drill.
+    /// On the last step, we advance to the next lesson instead (if one exists).
     private var canNavigateForward: Bool {
         if controller.isOnDrillStep && isEditorFocused {
             if case .drill(let exercise, _) = controller.currentStep {
@@ -105,7 +132,10 @@ struct StepCanvasView: View {
             }
             return false
         }
-        return !controller.isLastStep
+        if controller.isLastStep {
+            return onNextLesson != nil
+        }
+        return true
     }
 
     /// Can navigate backward? Not when editor is focused

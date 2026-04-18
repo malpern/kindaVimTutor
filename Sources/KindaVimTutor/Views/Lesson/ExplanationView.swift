@@ -79,6 +79,17 @@ struct ExplanationView: View {
             }
             .padding(.vertical, 3)
 
+        case .modePreview(let mode, let caption):
+            HStack(spacing: 14) {
+                ModeIndicatorView(mode: mode, isKindaVimRunning: true)
+                Text(caption)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .lineSpacing(3)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 3)
+
         case .codeExample(let before, let after, let motion):
             VStack(alignment: .leading, spacing: 10) {
                 Text("Using  ") + Text(motion).font(.system(.body, design: .monospaced)).fontWeight(.medium)

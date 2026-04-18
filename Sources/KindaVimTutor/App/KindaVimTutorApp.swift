@@ -18,7 +18,8 @@ struct KindaVimTutorApp: App {
                 SidebarView(
                     chapters: appState.chapters,
                     selectedLessonId: $appState.selectedLessonId,
-                    progressStore: appState.progressStore
+                    progressStore: appState.progressStore,
+                    inspectorState: appState.inspectorState
                 )
             } detail: {
                 if let lesson = appState.selectedLesson,
@@ -34,12 +35,6 @@ struct KindaVimTutorApp: App {
                 } else {
                     WelcomeView(onStartLearning: { appState.goToFirstLesson() })
                 }
-            }
-            .inspector(isPresented: .init(
-                get: { appState.inspectorState.isVisible },
-                set: { if !$0 { appState.inspectorState.hide() } }
-            )) {
-                ExerciseInspectorView(state: appState.inspectorState)
             }
             .toolbar {
                 ToolbarItem(placement: .automatic) {
@@ -65,6 +60,7 @@ struct KindaVimTutorApp: App {
                 }
             }
             .frame(minWidth: 900, minHeight: 600)
+            .environment(appState.modeMonitor)
             .onAppear {
                 appState.modeMonitor.startMonitoring()
                 if ProcessInfo.processInfo.environment["KINDAVIMTUTOR_ENABLE_CHANNEL"] == "1" {

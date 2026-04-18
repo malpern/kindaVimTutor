@@ -29,6 +29,10 @@ final class ExerciseEngine {
     // Session recording
     private(set) var currentSession: DrillSession?
 
+    // Bumps whenever a reset should force the editor to redraw its content,
+    // even if the target initialText string is identical to what was last set.
+    private(set) var resetNonce: Int = 0
+
     private var startTime: Date?
     private var drillStartTime: Date?
     private var timer: Timer?
@@ -63,11 +67,13 @@ final class ExerciseEngine {
 
     func resetDrill() {
         guard let exercise else { return }
+        resetNonce &+= 1
         start(exercise)
     }
 
     func resetRep() {
         guard let exercise else { return }
+        resetNonce &+= 1
         recordEvent(.repReset, text: currentVariation?.initialText ?? "", cursorPosition: 0)
         startRep(exercise.variation(for: completedReps))
     }

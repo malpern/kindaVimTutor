@@ -33,7 +33,7 @@ struct WelcomeView: View {
 
             VStack(spacing: 16) {
                 HStack(spacing: 10) {
-                    KeyCapView(label: "L", size: .regular)
+                    KeyCapView(label: "]", size: .regular)
                         .scaleEffect(0.92)
                         .shadow(color: .white.opacity(0.06), radius: 10, y: 1)
                     Text("press to begin")
@@ -54,7 +54,7 @@ struct WelcomeView: View {
         .accessibilityIdentifier("WelcomeScreen")
         .accessibilityLabel("welcome lesson=none")
         .onKeyPress { keyPress in
-            if keyPress.characters.first == "l" || keyPress.characters.first == " " {
+            if keyPress.characters.first == "]" || keyPress.characters.first == " " {
                 onStartLearning?()
                 return .handled
             }

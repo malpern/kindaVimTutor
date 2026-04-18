@@ -4,6 +4,8 @@ import AppKit
 struct ExerciseEditorView: NSViewRepresentable {
     let initialText: String
     let initialCursorPosition: Int
+    var resetToken: Int = 0
+    var isActive: Bool = true
     var onTextChange: (String, Int) -> Void
     var onSelectionChange: (String, Int) -> Void
     var onFocusChange: ((Bool) -> Void)?
@@ -57,9 +59,14 @@ struct ExerciseEditorView: NSViewRepresentable {
         scrollView.drawsBackground = false
         scrollView.borderType = .noBorder
 
-        // Auto-focus the editor after a brief delay (lets the view settle)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            textView.window?.makeFirstResponder(textView)
+        // Seed the coordinator's reset token so the first updateNSView doesn't
+        // re-reset the content we just set above.
+        context.coordinator.lastResetToken = resetToken
+
+        if isActive {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                textView.window?.makeFirstResponder(textView)
+            }
         }
 
         return scrollView
@@ -68,13 +75,29 @@ struct ExerciseEditorView: NSViewRepresentable {
     func updateNSView(_ scrollView: NSScrollView, context: Context) {
         guard let textView = scrollView.documentView as? NSTextView else { return }
         context.coordinator.onFocusChange = onFocusChange
-        if context.coordinator.currentInitialText != initialText {
+
+        let initialTextChanged = context.coordinator.currentInitialText != initialText
+        let resetRequested = context.coordinator.lastResetToken != resetToken
+        if initialTextChanged || resetRequested {
             context.coordinator.currentInitialText = initialText
+            context.coordinator.lastResetToken = resetToken
             context.coordinator.isResetting = true
             textView.string = initialText
             let safePosition = min(initialCursorPosition, textView.string.count)
             textView.setSelectedRange(NSRange(location: safePosition, length: 0))
             context.coordinator.isResetting = false
+        }
+
+        if context.coordinator.lastIsActive != isActive {
+            context.coordinator.lastIsActive = isActive
+            DispatchQueue.main.async {
+                guard let window = textView.window else { return }
+                if isActive {
+                    window.makeFirstResponder(textView)
+                } else if window.firstResponder === textView {
+                    window.makeFirstResponder(nil)
+                }
+            }
         }
     }
 
@@ -89,6 +112,8 @@ struct ExerciseEditorView: NSViewRepresentable {
         var onFocusChange: ((Bool) -> Void)?
         var currentInitialText: String
         var isResetting = false
+        var lastResetToken: Int = 0
+        var lastIsActive: Bool?
         weak var textView: NSTextView?
         private var lastFocusState: Bool?
 

@@ -5,9 +5,13 @@ struct ExerciseContainerView: View {
     let exerciseNumber: Int
     let progressStore: ProgressStore
     let inspectorState: ExerciseInspectorState
+    @Environment(ModeMonitor.self) private var modeMonitor
     @State private var engine = ExerciseEngine()
     @State private var isEditorFocused = false
     @State private var isEditorHovered = false
+    @State private var lastEditorText: String = ""
+    @State private var showWrongModeHint = false
+    @State private var wrongModeHideTask: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -42,7 +46,10 @@ struct ExerciseContainerView: View {
                 ExerciseEditorView(
                     initialText: variation.initialText,
                     initialCursorPosition: variation.initialCursorPosition,
+                    resetToken: engine.resetNonce,
+                    isActive: !engine.isDrillComplete,
                     onTextChange: { text, cursor in
+                        detectWrongMode(newText: text)
                         engine.textDidChange(currentText: text, cursorPosition: cursor)
                     },
                     onSelectionChange: { text, cursor in
@@ -74,10 +81,18 @@ struct ExerciseContainerView: View {
                     editorShape
                         .strokeBorder(editorBorderColor, lineWidth: editorBorderWidth)
                 }
+                .overlay(alignment: .top) {
+                    WrongModeHintView(isVisible: showWrongModeHint)
+                        .offset(y: -48)
+                }
                 .onHover { hovering in
                     withAnimation(.easeInOut(duration: 0.12)) {
                         isEditorHovered = hovering
                     }
+                }
+                .onChange(of: variation.initialText) { _, newValue in
+                    lastEditorText = newValue
+                    showWrongModeHint = false
                 }
                 .animation(.easeInOut(duration: 0.15), value: variation.initialText)
             }
@@ -116,7 +131,28 @@ struct ExerciseContainerView: View {
                 if let session = engine.currentSession {
                     progressStore.saveDrillSession(session)
                 }
+                celebrateCompletion()
             }
+        }
+    }
+
+    private func celebrateCompletion() {
+        if let lesson = Curriculum.lesson(containing: exercise.id),
+           progressStore.isLessonCompleted(lesson) {
+            Confetti.fireBurst(times: 2, interval: 0.35)
+        }
+    }
+
+    private func detectWrongMode(newText: String) {
+        defer { lastEditorText = newText }
+        guard modeMonitor.currentMode == .insert else { return }
+        guard WrongModeDetector.didUserTypeMotion(old: lastEditorText, new: newText) else { return }
+        showWrongModeHint = true
+        wrongModeHideTask?.cancel()
+        wrongModeHideTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            guard !Task.isCancelled else { return }
+            showWrongModeHint = false
         }
     }
 

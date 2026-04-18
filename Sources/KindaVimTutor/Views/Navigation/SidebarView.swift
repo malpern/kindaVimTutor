@@ -4,6 +4,7 @@ struct SidebarView: View {
     let chapters: [Chapter]
     @Binding var selectedLessonId: String?
     let progressStore: ProgressStore
+    let inspectorState: ExerciseInspectorState
 
     @State private var expandedChapterId: String?
 
@@ -17,8 +18,17 @@ struct SidebarView: View {
 
     var body: some View {
         List(selection: $selectedLessonId) {
+            if inspectorState.isVisible {
+                Section {
+                    DrillSidebarSection(state: inspectorState)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 14, trailing: 8))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
+            }
+
             ForEach(chapters) { chapter in
-                let isExpanded = expandedChapterId == chapter.id || selectedChapterId == chapter.id
+                let isExpanded = expandedChapterId == chapter.id
 
                 // Chapter header — tappable to expand/collapse
                 Button {

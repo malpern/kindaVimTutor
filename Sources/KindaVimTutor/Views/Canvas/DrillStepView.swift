@@ -6,8 +6,12 @@ struct DrillStepView: View {
     let progressStore: ProgressStore
     let inspectorState: ExerciseInspectorState
     @Binding var isEditorFocused: Bool
+    @Environment(ModeMonitor.self) private var modeMonitor
     @State private var engine = ExerciseEngine()
     @State private var isEditorHovered = false
+    @State private var lastEditorText: String = ""
+    @State private var showWrongModeHint = false
+    @State private var wrongModeHideTask: Task<Void, Never>?
 
     var isDrillComplete: Bool { engine.isDrillComplete }
 
@@ -43,7 +47,10 @@ struct DrillStepView: View {
                     ExerciseEditorView(
                         initialText: variation.initialText,
                         initialCursorPosition: variation.initialCursorPosition,
+                        resetToken: engine.resetNonce,
+                        isActive: !engine.isDrillComplete,
                         onTextChange: { text, cursor in
+                            detectWrongMode(newText: text)
                             engine.textDidChange(currentText: text, cursorPosition: cursor)
                         },
                         onSelectionChange: { text, cursor in
@@ -75,10 +82,18 @@ struct DrillStepView: View {
                         editorShape
                             .strokeBorder(editorBorderColor, lineWidth: editorBorderWidth)
                     }
+                    .overlay(alignment: .top) {
+                        WrongModeHintView(isVisible: showWrongModeHint)
+                            .offset(y: -48)
+                    }
                     .onHover { hovering in
                         withAnimation(.easeInOut(duration: 0.12)) {
                             isEditorHovered = hovering
                         }
+                    }
+                    .onChange(of: variation.initialText) { _, newValue in
+                        lastEditorText = newValue
+                        showWrongModeHint = false
                     }
                 }
             }
@@ -87,14 +102,38 @@ struct DrillStepView: View {
             Spacer()
 
             if engine.isDrillComplete {
-                Text("Press l to continue")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.quaternary)
-                    .padding(.bottom, 40)
+                HStack(spacing: 10) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.green)
+                    Text("Drill complete")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.primary)
+                    Text("— press")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                    KeyCapView(label: "]")
+                    Text("to continue")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.secondary)
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                .background(
+                    Capsule(style: .continuous)
+                        .fill(Color.green.opacity(0.12))
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .strokeBorder(Color.green.opacity(0.35), lineWidth: 1)
+                )
+                .padding(.bottom, 40)
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 56)
+        .animation(.easeOut(duration: 0.28), value: engine.isDrillComplete)
         .accessibilityIdentifier("DrillStep")
         .accessibilityLabel("drill exercise=\(exercise.id) rep=\(engine.completedReps)/\(engine.drillCount) state=\(drillStateLabel)")
         .onAppear {
@@ -122,7 +161,28 @@ struct DrillStepView: View {
                 if let session = engine.currentSession {
                     progressStore.saveDrillSession(session)
                 }
+                celebrateCompletion()
             }
+        }
+    }
+
+    private func celebrateCompletion() {
+        if let lesson = Curriculum.lesson(containing: exercise.id),
+           progressStore.isLessonCompleted(lesson) {
+            Confetti.fireBurst(times: 2, interval: 0.35)
+        }
+    }
+
+    private func detectWrongMode(newText: String) {
+        defer { lastEditorText = newText }
+        guard modeMonitor.currentMode == .insert else { return }
+        guard WrongModeDetector.didUserTypeMotion(old: lastEditorText, new: newText) else { return }
+        showWrongModeHint = true
+        wrongModeHideTask?.cancel()
+        wrongModeHideTask = Task { @MainActor in
+            try? await Task.sleep(for: .seconds(2.5))
+            guard !Task.isCancelled else { return }
+            showWrongModeHint = false
         }
     }
 

@@ -2,9 +2,12 @@ import SwiftUI
 
 struct ContentStepView: View {
     let blocks: [ContentBlock]
+    var onAutoAdvance: (() -> Void)?
 
     @State private var headingDone = false
     @State private var visibleBlockCount = 0
+    @State private var autoAdvanceTask: Task<Void, Never>?
+    @State private var dwellProgress: Double = 0
 
     // Separate heading from body blocks
     private var headingText: String? {
@@ -50,12 +53,88 @@ struct ContentStepView: View {
             .frame(maxWidth: 640, alignment: .leading)
 
             Spacer()
+
+            advanceHint
+                .padding(.bottom, 40)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 56)
+        .onAppear {
+            scheduleAutoAdvance()
+        }
         .onDisappear {
+            autoAdvanceTask?.cancel()
+            autoAdvanceTask = nil
             headingDone = false
             visibleBlockCount = 0
+            dwellProgress = 0
+        }
+    }
+
+    private var advanceHint: some View {
+        HStack(spacing: 12) {
+            Text("Next")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.primary.opacity(0.92))
+            KeyCapView(label: "]", size: .regular)
+            Text("or wait")
+                .font(.system(size: 12))
+                .foregroundStyle(.secondary.opacity(0.7))
+            ZStack {
+                Circle()
+                    .stroke(Color.secondary.opacity(0.15), lineWidth: 2)
+                Circle()
+                    .trim(from: 0, to: dwellProgress)
+                    .stroke(Color.accentColor.opacity(0.8), style: .init(lineWidth: 2, lineCap: .round))
+                    .rotationEffect(.degrees(-90))
+            }
+            .frame(width: 16, height: 16)
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(
+            Capsule(style: .continuous)
+                .fill(Color.primary.opacity(0.05))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 1)
+        )
+        .opacity(shouldShowHint ? 1 : 0)
+        .animation(.easeIn(duration: 0.3), value: shouldShowHint)
+    }
+
+    private var shouldShowHint: Bool {
+        if headingDone { return true }
+        if case .heading = blocks.first { return false }
+        return true
+    }
+
+    private var autoAdvanceSeconds: Double {
+        let words = blocks.reduce(0) { sum, block -> Int in
+            switch block {
+            case .text(let t), .heading(let t), .tip(let t), .important(let t):
+                return sum + t.split(separator: " ").count
+            case .keyCommand(_, let d):
+                return sum + d.split(separator: " ").count
+            default:
+                return sum
+            }
+        }
+        // ~2 words per second reading + 2.5s buffer, clamped to [5, 18].
+        return max(5.0, min(18.0, Double(words) / 2.0 + 2.5))
+    }
+
+    private func scheduleAutoAdvance() {
+        autoAdvanceTask?.cancel()
+        let total = autoAdvanceSeconds
+        autoAdvanceTask = Task { @MainActor in
+            withAnimation(.linear(duration: total)) {
+                dwellProgress = 1
+            }
+            try? await Task.sleep(for: .seconds(total))
+            guard !Task.isCancelled else { return }
+            onAutoAdvance?()
         }
     }
 
@@ -131,6 +210,17 @@ struct ContentStepView: View {
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.leading)
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.vertical, 4)
+
+        case .modePreview(let mode, let caption):
+            HStack(spacing: 14) {
+                ModeIndicatorView(mode: mode, isKindaVimRunning: true)
+                Text(caption)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
+                    .lineSpacing(3)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .padding(.vertical, 4)
