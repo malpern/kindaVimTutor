@@ -112,6 +112,7 @@ struct DrillStepView: View {
                         lastKeystrokes: engine.lastRepKeystrokes,
                         lastTime: engine.lastRepTime,
                         personalBest: progressStore.bestResult(for: exercise.id),
+                        chapterTarget: engine.lastRepTarget,
                         futureLessonUnlocked: isFutureLessonUnlocked(),
                         onContinue: { onAdvance?() },
                         onRetry: { engine.resetDrill() },

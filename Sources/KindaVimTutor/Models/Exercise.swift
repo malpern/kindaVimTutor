@@ -32,6 +32,22 @@ struct Exercise: Identifiable, Equatable, Sendable {
         let initialCursorPosition: Int
         let expectedText: String
         let expectedCursorPosition: Int?
+        /// Per-variation keystroke target. Overrides the exercise-level
+        /// `optimalKeystrokes` when set. Lets authors give each
+        /// variation its own honest target since cursor starts (and
+        /// therefore minimum keystrokes) differ per variation in the
+        /// vimified drill format.
+        let optimalKeystrokes: Int?
+
+        init(initialText: String, initialCursorPosition: Int,
+             expectedText: String, expectedCursorPosition: Int?,
+             optimalKeystrokes: Int? = nil) {
+            self.initialText = initialText
+            self.initialCursorPosition = initialCursorPosition
+            self.expectedText = expectedText
+            self.expectedCursorPosition = expectedCursorPosition
+            self.optimalKeystrokes = optimalKeystrokes
+        }
     }
 
     enum Difficulty: String, Sendable, Codable {
@@ -62,14 +78,31 @@ struct Exercise: Identifiable, Equatable, Sendable {
     /// Returns the variation for a given rep index (0-based). Rep 0 uses the base exercise.
     func variation(for rep: Int) -> Variation {
         if rep == 0 || variations.isEmpty {
+            // The "main" variation inherits the exercise-level
+            // optimalKeystrokes so it has a target even when authors
+            // haven't tagged anything per-variation.
             return Variation(
                 initialText: initialText,
                 initialCursorPosition: initialCursorPosition,
                 expectedText: expectedText,
-                expectedCursorPosition: expectedCursorPosition
+                expectedCursorPosition: expectedCursorPosition,
+                optimalKeystrokes: optimalKeystrokes
             )
         }
         let index = (rep - 1) % variations.count
-        return variations[index]
+        let v = variations[index]
+        // Per-variation target wins; fall back to the exercise-level
+        // target so a single tag on the exercise still applies to
+        // untagged variations.
+        if v.optimalKeystrokes == nil, let exerciseTarget = optimalKeystrokes {
+            return Variation(
+                initialText: v.initialText,
+                initialCursorPosition: v.initialCursorPosition,
+                expectedText: v.expectedText,
+                expectedCursorPosition: v.expectedCursorPosition,
+                optimalKeystrokes: exerciseTarget
+            )
+        }
+        return v
     }
 }

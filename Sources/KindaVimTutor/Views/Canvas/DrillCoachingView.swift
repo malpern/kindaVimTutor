@@ -17,6 +17,10 @@ struct DrillCoachingView: View {
     let lastKeystrokes: Int
     let lastTime: TimeInterval
     let personalBest: ExerciseResult?
+    /// Target for the LAST rep's variation, not the exercise as a
+    /// whole. Vimified drills have different cursor starts per
+    /// variation, so the target varies too.
+    let chapterTarget: Int?
     let futureLessonUnlocked: Bool
     let onContinue: () -> Void
     let onRetry: () -> Void
@@ -44,7 +48,7 @@ struct DrillCoachingView: View {
 
         if personalBest == nil { return .first }
         if beatPB { return .newBest }
-        if let target = exercise.optimalKeystrokes {
+        if let target = chapterTarget {
             if lastKeystrokes < target { return .beatTarget }
             if lastKeystrokes == target { return .hitTarget }
         }
@@ -129,7 +133,7 @@ struct DrillCoachingView: View {
                 )
             }
 
-            if let target = exercise.optimalKeystrokes {
+            if let target = chapterTarget {
                 tierRow(
                     label: "Chapter target",
                     value: "\(target) keystrokes",

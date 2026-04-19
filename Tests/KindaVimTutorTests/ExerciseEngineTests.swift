@@ -88,14 +88,16 @@ struct ExerciseEngineTests {
     func keystrokeAccounting() {
         let e = ExerciseEngine()
         e.start(deleteWordExercise(drillCount: 1))
-        e.textDidChange(currentText: "wor", cursorPosition: 0)
+        e.recordKeystroke()  // simulated key press (in production,
+        e.recordKeystroke()  // driven by NSEvent monitor)
         e.textDidChange(currentText: "word", cursorPosition: 0) // completes
         #expect(e.completedReps == 1)
         #expect(e.totalKeystrokes > 0)
 
-        // After completion, further text changes should be ignored.
+        // After completion the drill is inactive; keystroke simulation
+        // should be ignored.
         let after = e.totalKeystrokes
-        e.textDidChange(currentText: "anything", cursorPosition: 0)
+        e.recordKeystroke()
         #expect(e.totalKeystrokes == after)
     }
 

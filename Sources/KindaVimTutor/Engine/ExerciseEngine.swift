@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 @Observable
 @MainActor
@@ -44,6 +45,7 @@ final class ExerciseEngine {
     private var startTime: Date?
     private var drillStartTime: Date?
     private var timer: Timer?
+    private var keyMonitor: Any?
 
     var isDrillComplete: Bool { state == .drillCompleted }
     var isRepCompleted: Bool { state == .repCompleted }
@@ -70,6 +72,7 @@ final class ExerciseEngine {
             "reps": String(exercise.drillCount)
         ])
 
+        installKeyMonitor()
         startRep(exercise.variation(for: 0))
     }
 
@@ -88,26 +91,65 @@ final class ExerciseEngine {
 
     func textDidChange(currentText: String, cursorPosition: Int) {
         guard state == .active else { return }
-        keystrokeCount += 1
         recordEvent(.textChanged, text: currentText, cursorPosition: cursorPosition)
         validate(currentText: currentText, cursorPosition: cursorPosition)
     }
 
     func selectionDidChange(currentText: String, cursorPosition: Int) {
-        guard state == .active, let variation = currentVariation else { return }
-        if variation.initialText == variation.expectedText {
-            keystrokeCount += 1
-        }
+        guard state == .active, currentVariation != nil else { return }
         recordEvent(.cursorMoved, text: currentText, cursorPosition: cursorPosition)
         validate(currentText: currentText, cursorPosition: cursorPosition)
     }
 
+    /// Increment the keystroke counter for the current rep. Called
+    /// from the NSEvent monitor on real key presses, and from tests
+    /// to simulate them. No-op unless a rep is active.
+    func recordKeystroke() {
+        guard state == .active else { return }
+        keystrokeCount += 1
+    }
+
     func stop() {
+        removeKeyMonitor()
         timer?.invalidate()
         timer = nil
         state = .idle
         exercise = nil
         currentVariation = nil
+    }
+
+    // MARK: - Key monitor
+
+    private func installKeyMonitor() {
+        removeKeyMonitor()
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Ignore command / option-modified keys — Cmd+Q, Cmd+],
+            // etc. aren't the student's drill keystrokes.
+            if event.modifierFlags.contains(.command)
+                || event.modifierFlags.contains(.option) {
+                return event
+            }
+            Task { @MainActor in
+                self?.recordKeystroke()
+            }
+            return event
+        }
+    }
+
+    private func removeKeyMonitor() {
+        if let m = keyMonitor {
+            NSEvent.removeMonitor(m)
+            keyMonitor = nil
+        }
+    }
+
+    // MARK: - Last-rep target (for coaching panel)
+
+    /// The chapter target for the variation the student most recently
+    /// played. Variation-level target wins; falls back to the
+    /// exercise-level default. nil when neither is tagged.
+    var lastRepTarget: Int? {
+        currentVariation?.optimalKeystrokes
     }
 
     // MARK: - Recording
