@@ -54,6 +54,17 @@ struct SidebarView: View {
 
         Section {
             if isExpanded {
+                // Subtle chapter marker so prose references like "see
+                // Chapter 5" have a corresponding label in the rail.
+                Text("Chapter \(chapter.number)")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.tertiary)
+                    .tracking(0.3)
+                    .padding(.leading, 8)
+                    .padding(.top, 2)
+                    .padding(.bottom, 4)
+                    .listRowSeparator(.hidden)
+                    .selectionDisabled()
                 ForEach(chapter.lessons) { lesson in
                     LessonRowView(
                         lesson: lesson,
@@ -91,11 +102,6 @@ private struct ChapterHeader: View {
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(isComplete ? Color.green.opacity(0.75) : Color.secondary.opacity(0.6))
                     .frame(width: 14)
-                Text("CH\(chapter.number)")
-                    .font(.system(size: 10, weight: .bold, design: .rounded))
-                    .foregroundStyle(.tertiary)
-                    .tracking(0.4)
-                    .monospacedDigit()
                 Text(chapter.title)
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundStyle(.secondary)

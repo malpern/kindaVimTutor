@@ -13,8 +13,12 @@ struct TitleStepView: View {
         VStack(spacing: 16) {
             Spacer()
 
-            // Chapter label — fades in first, no movement
-            Text(chapterTitle.uppercased())
+            // Chapter label — fades in first, no movement.
+            // Prefix with "CHAPTER N ·" when we can derive a number from
+            // the lesson id (e.g. "ch1.l0" → 1), so prose references in
+            // earlier chapters like "see Chapter 5" land on a visible
+            // marker when the reader arrives.
+            Text(chapterHeader)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.tint)
                 .tracking(2)
@@ -73,5 +77,20 @@ struct TitleStepView: View {
             showSubtitle = false
             showHint = false
         }
+    }
+
+    private var chapterHeader: String {
+        let base = chapterTitle.uppercased()
+        guard let num = chapterNumber(from: lesson.id) else { return base }
+        return "CHAPTER \(num) · \(base)"
+    }
+
+    /// Extract the chapter number from a lesson id like "ch1.l0" or
+    /// "ch10.l2". Returns nil if the id doesn't follow that convention.
+    private func chapterNumber(from lessonId: String) -> Int? {
+        guard lessonId.hasPrefix("ch") else { return nil }
+        let afterCh = lessonId.dropFirst(2)
+        guard let dot = afterCh.firstIndex(of: ".") else { return nil }
+        return Int(afterCh[..<dot])
     }
 }
