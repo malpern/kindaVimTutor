@@ -2,10 +2,10 @@ import SwiftUI
 
 /// A one-beat page: an animated arrow sweeps from the lower-left of
 /// the content area up and out the upper-right, aimed at the live
-/// mode chip in the toolbar. The arrow endpoint is intentionally
-/// placed ABOVE the view's own top edge — SwiftUI doesn't clip
-/// stroked shapes by default, so the line extends into the toolbar
-/// area and lands visually on the real chip.
+/// mode chip in the toolbar. The bezier curve and the arrowhead
+/// chevrons share a single Path; `Path.trim` reveals the whole
+/// stroke as one drawing gesture, so the head rides the tip rather
+/// than popping in separately.
 ///
 /// Obeys `AnimationReplayTracker` — on return visits within a
 /// session the final state appears instantly, no redraw.
@@ -14,36 +14,30 @@ struct ModeIndicatorSpotlightView: View {
 
     @State private var drawProgress: CGFloat = 0
     @State private var pulse: Bool = false
-    @State private var showHead: Bool = false
     @State private var captionVisible: Bool = false
 
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .topLeading) {
-                // Arrow body — sketches in over ~0.7s. The shape is
-                // drawn outside the view's top edge; parent doesn't
-                // clip, so the stroke continues into the toolbar.
+                // Single stroked path — bezier + arrowhead chevrons
+                // live in the same Path, so trim animates them together
+                // as one pointing gesture.
                 SpotlightArrow(size: geo.size)
                     .trim(from: 0, to: drawProgress)
                     .stroke(
-                        Color.accentColor.opacity(0.85),
+                        Color.accentColor.opacity(pulse ? 1.0 : 0.85),
                         style: StrokeStyle(
-                            lineWidth: 2.5,
+                            lineWidth: 2.6,
                             lineCap: .round,
                             lineJoin: .round
                         )
                     )
-
-                if showHead {
-                    ArrowHead()
-                        .fill(Color.accentColor)
-                        .frame(width: 22, height: 22)
-                        .position(SpotlightArrow.endPoint(in: geo.size))
-                        .scaleEffect(pulse ? 1.18 : 1.0)
-                        .shadow(color: .accentColor.opacity(pulse ? 0.55 : 0.25),
-                                radius: pulse ? 12 : 6)
-                        .transition(.scale(scale: 0.4).combined(with: .opacity))
-                }
+                    .shadow(
+                        color: .accentColor.opacity(pulse ? 0.45 : 0.12),
+                        radius: pulse ? 10 : 4
+                    )
+                    .animation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true),
+                               value: pulse)
 
                 // Caption — lower-left, out of the arrow's way.
                 if captionVisible {
@@ -70,11 +64,7 @@ struct ModeIndicatorSpotlightView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear(perform: handleAppear)
         .onDisappear {
-            // Keep the "played" flag — session-scoped so we respect
-            // back-nav — but reset local state so the next fresh
-            // animation (if any) starts clean.
             drawProgress = 0
-            showHead = false
             pulse = false
             captionVisible = false
         }
@@ -83,12 +73,9 @@ struct ModeIndicatorSpotlightView: View {
     private func handleAppear() {
         let tracker = AnimationReplayTracker.shared
         if tracker.hasPlayed(Self.animationID) {
-            // Already seen — jump to final state with no motion.
             drawProgress = 1
-            showHead = true
-            pulse = true
             captionVisible = true
-            startPulseLoop()
+            pulse = true
             return
         }
         tracker.markPlayed(Self.animationID)
@@ -96,24 +83,15 @@ struct ModeIndicatorSpotlightView: View {
     }
 
     private func runSequence() {
-        withAnimation(.easeOut(duration: 0.75).delay(0.1)) {
+        // Draws the whole curve + arrowhead as one continuous stroke.
+        withAnimation(.easeOut(duration: 0.95).delay(0.1)) {
             drawProgress = 1
         }
-        withAnimation(.easeOut(duration: 0.4).delay(0.25)) {
+        withAnimation(.easeOut(duration: 0.4).delay(0.35)) {
             captionVisible = true
         }
         Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 950_000_000)
-            withAnimation(.spring(duration: 0.35, bounce: 0.35)) {
-                showHead = true
-            }
-            try? await Task.sleep(nanoseconds: 200_000_000)
-            startPulseLoop()
-        }
-    }
-
-    private func startPulseLoop() {
-        withAnimation(.easeInOut(duration: 1.4).repeatForever(autoreverses: true)) {
+            try? await Task.sleep(nanoseconds: 1_100_000_000)
             pulse = true
         }
     }
@@ -121,50 +99,69 @@ struct ModeIndicatorSpotlightView: View {
 
 // MARK: - Arrow geometry
 
-/// Bezier from the lower-left-ish of the view up and out the
-/// upper-right. Endpoint is deliberately ABOVE the view's top edge
-/// so it lands on or near the toolbar chip — SwiftUI shapes render
-/// outside their frame when the parent doesn't clip.
+/// Bezier from the lower-left of the view up toward the upper-right,
+/// landing just above the view's own top edge (the real mode chip in
+/// the toolbar sits just past that edge). The arrowhead chevrons are
+/// appended to the same path so trim reveals them alongside the curve.
 private struct SpotlightArrow: Shape {
     let size: CGSize
 
+    /// Length of each arrowhead chevron leg, in points.
+    private static let headLen: CGFloat = 14
+
     static func startPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.42, y: size.height * 0.62)
+        CGPoint(x: size.width * 0.38, y: size.height * 0.62)
     }
 
     static func controlPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.75, y: size.height * 0.20)
+        CGPoint(x: size.width * 0.70, y: size.height * 0.22)
     }
 
-    /// Lands ABOVE the spotlight's own top (negative y) so the arrow
-    /// extends into the toolbar region, ending at approximately the
-    /// chip's horizontal position.
+    /// The tip lands slightly above the spotlight's own top edge so
+    /// the stroke extends into the toolbar strip and reads as
+    /// pointing AT the chip — not overshooting above it.
     static func endPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.96, y: -52)
+        CGPoint(x: size.width * 0.92, y: -18)
     }
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
-        p.move(to: Self.startPoint(in: size))
-        p.addQuadCurve(
-            to: Self.endPoint(in: size),
-            control: Self.controlPoint(in: size)
-        )
-        return p
-    }
-}
+        let start = Self.startPoint(in: size)
+        let control = Self.controlPoint(in: size)
+        let end = Self.endPoint(in: size)
 
-private struct ArrowHead: Shape {
-    func path(in rect: CGRect) -> Path {
-        // Kite pointing up-and-right, roughly tangent to the bezier's
-        // end direction.
-        var p = Path()
-        let w = rect.width, h = rect.height
-        p.move(to: CGPoint(x: w * 0.95, y: h * 0.05))   // tip
-        p.addLine(to: CGPoint(x: w * 0.10, y: h * 0.35))
-        p.addLine(to: CGPoint(x: w * 0.50, y: h * 0.55))
-        p.addLine(to: CGPoint(x: w * 0.35, y: h * 0.95))
-        p.closeSubpath()
+        p.move(to: start)
+        p.addQuadCurve(to: end, control: control)
+
+        // Arrowhead chevrons — two short legs from the tip angled
+        // back along the curve's end tangent. Tangent of a quadratic
+        // bezier at t=1 is (end - control), which points along the
+        // direction of travel at the tip.
+        let dx = end.x - control.x
+        let dy = end.y - control.y
+        let len = max(sqrt(dx * dx + dy * dy), 0.001)
+        let ux = dx / len, uy = dy / len   // unit tangent at tip
+
+        // Rotate tangent by ±140° to get the chevron leg directions,
+        // then walk back from the tip by `headLen`.
+        let angle: CGFloat = .pi * (140.0 / 180.0)
+        let cosA = cos(angle), sinA = sin(angle)
+        let leftDX  = ux * cosA - uy * sinA
+        let leftDY  = ux * sinA + uy * cosA
+        let rightDX = ux * cosA + uy * sinA
+        let rightDY = -ux * sinA + uy * cosA
+
+        let leftLeg  = CGPoint(x: end.x + leftDX  * Self.headLen,
+                               y: end.y + leftDY  * Self.headLen)
+        let rightLeg = CGPoint(x: end.x + rightDX * Self.headLen,
+                               y: end.y + rightDY * Self.headLen)
+
+        // Draw the chevrons as part of the same path so trim animates
+        // through them in order: curve -> left leg (pen back to tip)
+        // -> right leg. The small retracing produces the V shape.
+        p.addLine(to: leftLeg)
+        p.move(to: end)
+        p.addLine(to: rightLeg)
         return p
     }
 }

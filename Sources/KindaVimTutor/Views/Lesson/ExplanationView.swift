@@ -68,7 +68,7 @@ struct ExplanationView: View {
                         KeyCapView(label: key, size: .small)
                     }
                 }
-                .frame(minWidth: 72, alignment: .leading)
+                .frame(minWidth: 40, alignment: .leading)
                 Text(description)
                     .font(Typography.body)
                     .foregroundStyle(.secondary)

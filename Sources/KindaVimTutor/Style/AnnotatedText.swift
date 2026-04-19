@@ -27,7 +27,7 @@ struct AnnotatedText: View {
                 case .text(let s):
                     Text(s)
                         .font(font)
-                        .lineSpacing(4)
+                        .lineSpacing(6)
                         .foregroundStyle(foregroundStyle ?? .primary)
                 case .key(let k):
                     KeyCapView(label: k, size: capSize)
