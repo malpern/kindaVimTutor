@@ -6,12 +6,15 @@ struct StepCanvasView: View {
     let chapterTitle: String
     let progressStore: ProgressStore
     let inspectorState: ExerciseInspectorState
+    let modeMonitor: ModeMonitor
     var onNextLesson: (() -> Void)?
+    var onJumpToLesson: ((String) -> Void)?
 
     @State private var controller = LessonStepController()
     @State private var isEditorFocused = false
     @State private var keyMonitor: Any?
     @State private var contentReady = false
+    @State private var modeStepComplete = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -42,6 +45,22 @@ struct StepCanvasView: View {
                                 inspectorState: inspectorState,
                                 isEditorFocused: $isEditorFocused
                             )
+
+                        case .modeSequence(_, let interactive):
+                            if case .modeSequence(let expected, let instruction, let previewId) = interactive {
+                                ModeSequenceStepView(
+                                    expected: expected,
+                                    instruction: instruction,
+                                    visualPreviewLessonId: previewId,
+                                    monitor: modeMonitor,
+                                    onComplete: {
+                                        withAnimation(.easeInOut(duration: 0.25)) {
+                                            modeStepComplete = true
+                                        }
+                                    },
+                                    onJumpToLesson: { id in onJumpToLesson?(id) }
+                                )
+                            }
                         }
                     }
                     .id(step.id)
@@ -84,6 +103,7 @@ struct StepCanvasView: View {
         .onChange(of: controller.currentStepIndex) {
             AppCommandChannel.shared.notifyStateChanged()
             contentReady = false
+            modeStepComplete = false
         }
         .onDisappear {
             AppCommandChannel.shared.registerController(nil)
@@ -149,6 +169,8 @@ struct StepCanvasView: View {
             return contentReady
         case .drill:
             return inspectorState.isDrillComplete
+        case .modeSequence:
+            return modeStepComplete
         }
     }
 
@@ -195,6 +217,8 @@ struct StepCanvasView: View {
             stepKind = "content"; stepId = id
         case .drill(let exercise, _):
             stepKind = "drill"; stepId = exercise.id
+        case .modeSequence(let id, _):
+            stepKind = "modeseq"; stepId = id
         case .none:
             stepKind = "none"; stepId = ""
         }

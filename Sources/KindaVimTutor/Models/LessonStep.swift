@@ -4,12 +4,14 @@ enum LessonStep: Identifiable {
     case title(lesson: Lesson, chapterTitle: String)
     case content(id: String, blocks: [ContentBlock])
     case drill(exercise: Exercise, exerciseNumber: Int)
+    case modeSequence(id: String, step: InteractiveStep)
 
     var id: String {
         switch self {
         case .title(let lesson, _): "title-\(lesson.id)"
         case .content(let id, _): "content-\(id)"
         case .drill(let exercise, _): "drill-\(exercise.id)"
+        case .modeSequence(let id, _): "modeseq-\(id)"
         }
     }
 
@@ -38,7 +40,12 @@ enum LessonStep: Identifiable {
             result.append(.content(id: "\(lesson.id).c\(groupIndex)", blocks: currentGroup))
         }
 
-        // 3. Drill steps
+        // 3. Interactive step (e.g. mode sequence), placed before drills
+        if let interactive = lesson.interactive {
+            result.append(.modeSequence(id: lesson.id, step: interactive))
+        }
+
+        // 4. Drill steps
         for (index, exercise) in lesson.exercises.enumerated() {
             result.append(.drill(exercise: exercise, exerciseNumber: index + 1))
         }

@@ -75,7 +75,9 @@ struct KindaVimTutorApp: App {
                     chapterTitle: chapter.title,
                     progressStore: appState.progressStore,
                     inspectorState: appState.inspectorState,
-                    onNextLesson: { appState.goToNextLesson() }
+                    modeMonitor: appState.modeMonitor,
+                    onNextLesson: { appState.goToNextLesson() },
+                    onJumpToLesson: { id in appState.goToLesson(id) }
                 )
                 .id(lesson.id)
             } else {

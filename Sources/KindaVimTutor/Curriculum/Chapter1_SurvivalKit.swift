@@ -8,6 +8,7 @@ extension Curriculum {
         subtitle: "The essential motions to start moving",
         systemImage: "figure.walk",
         lessons: [
+            lesson1_modes,
             lesson1_1,
             lesson1_2,
             lesson1_3,
@@ -18,11 +19,38 @@ extension Curriculum {
         ]
     )
 
+    // MARK: - Lesson 1.0: Meet the Modes
+
+    private static let lesson1_modes = Lesson(
+        id: "ch1.l0",
+        number: 1,
+        title: "Meet the Modes",
+        subtitle: "Normal and Insert — the two keys that matter today",
+        explanation: [
+            .heading("Two Modes for Two Jobs"),
+            .text("In kindaVim, keys do different things depending on which **mode** you're in. There are two to learn today:"),
+            .spacer,
+            .keyCommand(keys: ["Esc"], description: "Switch to Normal mode — keys become commands"),
+            .keyCommand(keys: ["i"], description: "Switch to Insert mode — keys type text"),
+            .spacer,
+            .text("The chip in the top-right of this window shows your live mode. Blue is Insert, green is Normal. Watch it while you practice."),
+            .spacer,
+            .tip("There's a third mode — Visual — for selecting text. You don't need it yet; it shows up properly in Chapter 5. A muted chip below lets you peek if you want."),
+        ],
+        exercises: [],
+        motionsIntroduced: ["Esc", "i"],
+        interactive: .modeSequence(
+            expected: [.normal, .insert, .normal, .insert],
+            instruction: "Press `Esc` — watch the chip turn green. Then `i` — blue again. Then `Esc` and `i` one more time to lock in the rhythm.",
+            visualPreviewLessonId: "ch5.l1"
+        )
+    )
+
     // MARK: - Lesson 1.1: Moving the Cursor
 
     private static let lesson1_1 = Lesson(
         id: "ch1.l1",
-        number: 1,
+        number: 2,
         title: "Moving the Cursor",
         subtitle: "Navigate with h, j, k, l",
         explanation: [
@@ -121,7 +149,7 @@ extension Curriculum {
 
     private static let lesson1_2 = Lesson(
         id: "ch1.l2",
-        number: 2,
+        number: 3,
         title: "Deleting Characters",
         subtitle: "Fix mistakes with x",
         explanation: [
@@ -159,7 +187,7 @@ extension Curriculum {
 
     private static let lesson1_3 = Lesson(
         id: "ch1.l3",
-        number: 3,
+        number: 4,
         title: "Inserting Text",
         subtitle: "Enter Insert mode with i",
         explanation: [
@@ -217,7 +245,7 @@ extension Curriculum {
 
     private static let lesson1_4 = Lesson(
         id: "ch1.l4",
-        number: 4,
+        number: 5,
         title: "Appending Text",
         subtitle: "Add text at the end with A",
         explanation: [
@@ -266,7 +294,7 @@ extension Curriculum {
 
     private static let lesson1_5 = Lesson(
         id: "ch1.l5",
-        number: 5,
+        number: 6,
         title: "Undoing Mistakes",
         subtitle: "Everyone makes them",
         explanation: [
@@ -297,7 +325,7 @@ extension Curriculum {
 
     private static let lesson1_6 = Lesson(
         id: "ch1.l6",
-        number: 6,
+        number: 7,
         title: "Word Hopping",
         subtitle: "Move faster with w, b, e",
         explanation: [
@@ -374,7 +402,7 @@ extension Curriculum {
 
     private static let lesson1_7 = Lesson(
         id: "ch1.l7",
-        number: 7,
+        number: 8,
         title: "Line Jumps",
         subtitle: "Get to the start and end fast",
         explanation: [

@@ -46,4 +46,12 @@ final class AppState {
             selectedLessonId = first.id
         }
     }
+
+    func goToLesson(_ id: String) {
+        guard allLessons.contains(where: { $0.id == id }) else { return }
+        AppLogger.shared.info("lesson", "jump", fields: ["to": id])
+        withAnimation(.easeInOut(duration: 0.25)) {
+            selectedLessonId = id
+        }
+    }
 }
