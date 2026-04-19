@@ -49,7 +49,8 @@ struct StepCanvasView: View {
                                 exerciseNumber: exerciseNumber,
                                 progressStore: progressStore,
                                 inspectorState: inspectorState,
-                                isEditorFocused: $isEditorFocused
+                                isEditorFocused: $isEditorFocused,
+                                onAdvance: { advanceForward() }
                             )
 
                         case .modeSequence(_, let interactive):

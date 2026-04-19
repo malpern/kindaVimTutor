@@ -6,12 +6,14 @@ struct DrillStepView: View {
     let progressStore: ProgressStore
     let inspectorState: ExerciseInspectorState
     @Binding var isEditorFocused: Bool
+    var onAdvance: (() -> Void)? = nil
     @Environment(ModeMonitor.self) private var modeMonitor
     @State private var engine = ExerciseEngine()
     @State private var isEditorHovered = false
     @State private var lastEditorText: String = ""
     @State private var showWrongModeHint = false
     @State private var wrongModeHideTask: Task<Void, Never>?
+    @State private var coachingPrefs = DrillCoachingPreferences.shared
 
     var isDrillComplete: Bool { engine.isDrillComplete }
 
@@ -100,6 +102,26 @@ struct DrillStepView: View {
                         showWrongModeHint = false
                     }
                 }
+
+                // Post-drill coaching panel. Replaces the blank space
+                // after the last rep with a visible reward + retry/
+                // continue actions + progressively-disclosed details.
+                if engine.isDrillComplete {
+                    DrillCoachingView(
+                        exercise: exercise,
+                        lastKeystrokes: engine.lastRepKeystrokes,
+                        lastTime: engine.lastRepTime,
+                        personalBest: progressStore.bestResult(for: exercise.id),
+                        futureLessonUnlocked: isFutureLessonUnlocked(),
+                        onContinue: { onAdvance?() },
+                        onRetry: { engine.resetDrill() },
+                        autoExpandDetails: Binding(
+                            get: { coachingPrefs.autoExpandDetails },
+                            set: { coachingPrefs.autoExpandDetails = $0 }
+                        )
+                    )
+                    .transition(.opacity.combined(with: .move(edge: .bottom)))
+                }
             }
             .frame(maxWidth: 640, alignment: .leading)
 
@@ -139,6 +161,12 @@ struct DrillStepView: View {
                 celebrateCompletion()
             }
         }
+    }
+
+    private func isFutureLessonUnlocked() -> Bool {
+        guard let opt = exercise.futureOptimization else { return false }
+        guard let lesson = Curriculum.lesson(withId: opt.lessonId) else { return false }
+        return progressStore.isLessonCompleted(lesson)
     }
 
     private func celebrateCompletion() {

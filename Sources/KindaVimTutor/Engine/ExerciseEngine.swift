@@ -23,6 +23,14 @@ final class ExerciseEngine {
     private(set) var totalTime: TimeInterval = 0
     private(set) var totalKeystrokes: Int = 0
 
+    /// Keystrokes + time from the MOST RECENTLY completed rep. These
+    /// persist after drill completion so the coaching panel has
+    /// something meaningful to show even though `keystrokeCount` +
+    /// `elapsedTime` above refer to the "current" rep which is
+    /// semantically nonexistent once the drill is done.
+    private(set) var lastRepKeystrokes: Int = 0
+    private(set) var lastRepTime: TimeInterval = 0
+
     // Current variation
     private(set) var currentVariation: Exercise.Variation?
 
@@ -172,6 +180,12 @@ final class ExerciseEngine {
         let repTime = startTime.map { Date().timeIntervalSince($0) } ?? 0
         totalTime += repTime
         totalKeystrokes += keystrokeCount
+
+        // Snapshot for the coaching panel — these survive past
+        // drill completion when the per-rep counters get zeroed or
+        // become meaningless.
+        lastRepKeystrokes = keystrokeCount
+        lastRepTime = repTime
 
         // Update rep record
         let repTimestamp = drillStartTime.map { Date().timeIntervalSince($0) } ?? 0

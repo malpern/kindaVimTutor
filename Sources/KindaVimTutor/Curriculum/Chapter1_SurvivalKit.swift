@@ -88,7 +88,12 @@ extension Curriculum {
                     .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n*\n\n\n\n", initialCursorPosition: 58, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n*\n\n", initialCursorPosition: 59, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n*\n", initialCursorPosition: 59, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                ]
+                ],
+                optimalKeystrokes: 5,
+                futureOptimization: .init(
+                    lessonId: "ch2.l5",
+                    summary: "prefix counts (e.g. `5j`)"
+                )
             ),
             // Exercise 2: Move up with k — navigate to the * and delete it
             Exercise(
