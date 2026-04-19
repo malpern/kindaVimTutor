@@ -226,7 +226,7 @@ struct ModesDemoView: View {
         // ── 2. Switch to Normal ──────────────────────────────────
         Beat(text: "hi there", caret: 8, mode: .normal,
              modeCaption: "Typing is paused. Keys do other jobs now.",
-             pressedKey: "Esc", caption: "Press Esc. Caret thickens — typing stops.", duration: 1.9),
+             pressedKey: "Esc", caption: "Press Esc. Typing stops.", duration: 1.9),
 
         // ── 3. Normal mode: letter keys don't type ───────────────
         Beat(text: "hi there", caret: 8, mode: .normal,
@@ -245,7 +245,7 @@ struct ModesDemoView: View {
         // ── 4. Switch back to Insert ─────────────────────────────
         Beat(text: "hi there", caret: 8, mode: .insert,
              modeCaption: "Every key becomes a letter.",
-             pressedKey: "i",  caption: "Press i. Caret thins — typing resumes.", duration: 1.4),
+             pressedKey: "i",  caption: "Press i. Typing resumes.", duration: 1.4),
 
         // ── 5. Insert mode again: typing works ───────────────────
         Beat(text: "hi there ",     caret: 9,  mode: .insert,

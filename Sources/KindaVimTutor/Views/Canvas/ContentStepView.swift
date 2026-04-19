@@ -51,19 +51,28 @@ struct ContentStepView: View {
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 56)
         .onAppear {
-            if revealStyle == .instant {
-                // Show everything at once. Still fire onContentReady so
-                // the canvas can drop in the "to continue" hint.
+            switch revealStyle {
+            case .instant:
+                // Show everything at once. Fire onContentReady so the
+                // canvas can drop in the "to continue" hint.
                 visibleBlockCount = bodyBlocks.count
                 headingDone = true
                 if !didNotifyReady {
                     didNotifyReady = true
-                    // Give the layout a tick to settle before the hint
-                    // can animate in.
                     Task { @MainActor in
                         try? await Task.sleep(for: .seconds(0.12))
                         onContentReady?()
                     }
+                }
+            case .typewriter:
+                // If there's a heading, the TypewriterText's completion
+                // callback triggers revealBodyBlocks(). If there isn't,
+                // we have to trigger it ourselves — previously this
+                // was done via an EmptyView's onAppear, which SwiftUI
+                // silently optimizes away, leaving visibleBlockCount at
+                // 0 and the page rendering nothing.
+                if headingText == nil {
+                    revealBodyBlocks()
                 }
             }
         }
@@ -94,10 +103,10 @@ struct ContentStepView: View {
                     .foregroundStyle(.primary)
                     .tracking(-0.6)
             }
-        } else if revealStyle == .typewriter {
-            EmptyView()
-                .onAppear { revealBodyBlocks() }
         }
+        // No heading → no view; revealBodyBlocks is called from the
+        // parent .onAppear instead of relying on EmptyView's onAppear,
+        // which doesn't fire reliably.
     }
 
     @ViewBuilder
