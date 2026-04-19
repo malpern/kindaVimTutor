@@ -51,12 +51,10 @@ struct KeyCapView: View {
         }
     }
 
-    // Keystroke Pro palette
-    private let faceTop = Color(red: 0.26, green: 0.26, blue: 0.28)
-    private let faceBottom = Color(red: 0.20, green: 0.20, blue: 0.22)
-    private let sideColor = Color(red: 0.14, green: 0.14, blue: 0.16)
-    private let highlightTop = Color.white.opacity(0.12)
-    private let highlightBottom = Color.white.opacity(0.02)
+    // Flat, typographic palette — keeps the keycap readable without
+    // competing with the surrounding prose.
+    private let fillColor = Color.secondary.opacity(0.14)
+    private let borderColor = Color.secondary.opacity(0.30)
     private let labelColor = Color(white: 0.88)
 
     var body: some View {
@@ -65,37 +63,12 @@ struct KeyCapView: View {
             .foregroundStyle(labelColor)
             .frame(minWidth: size.minWidth, minHeight: size.height)
             .background {
-                ZStack {
-                    // Side/depth layer — visible below the face
-                    RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-                        .fill(sideColor)
-                        .offset(y: size.depthOffset)
-
-                    // Key face — slight top-to-bottom gradient for concave feel
-                    RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-                        .fill(
-                            LinearGradient(
-                                colors: [faceTop, faceBottom],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            )
-                        )
-
-                    // Inner highlight — top edge catch
-                    RoundedRectangle(cornerRadius: size.cornerRadius - 0.5, style: .continuous)
-                        .strokeBorder(
-                            LinearGradient(
-                                colors: [highlightTop, highlightBottom],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 0.75
-                        )
-                        .padding(0.5)
-                }
+                RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
+                    .fill(fillColor)
             }
-            // Outer glow/shadow — key floating above surface
-            .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
-            .shadow(color: .black.opacity(0.15), radius: 1, y: 1)
+            .overlay {
+                RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
+                    .strokeBorder(borderColor, lineWidth: 0.5)
+            }
     }
 }
