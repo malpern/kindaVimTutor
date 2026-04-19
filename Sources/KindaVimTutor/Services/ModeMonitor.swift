@@ -12,6 +12,28 @@ final class ModeMonitor {
     func startMonitoring() {
         let center = DistributedNotificationCenter.default()
 
+        checkKindaVimRunning()
+        AppLogger.shared.info("modeMonitor", "startMonitoring", fields: [
+            "isKindaVimRunning": isKindaVimRunning ? "1" : "0"
+        ])
+
+
+
+        // Also poll kindaVim running state + current mode once per second for
+        // the first 10 seconds so we can see the state even if no broadcast
+        // arrived.
+        Task { @MainActor in
+            for i in 0..<10 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self.checkKindaVimRunning()
+                AppLogger.shared.info("modeMonitor", "tick", fields: [
+                    "t": String(i),
+                    "running": self.isKindaVimRunning ? "1" : "0",
+                    "mode": String(describing: self.currentMode),
+                ])
+            }
+        }
+
         let enterMappings: [(String, VimMode)] = [
             ("kindaVimDidEnterNormalMode", .normal),
             ("kindaVimDidEnterInsertMode", .insert),
@@ -57,26 +79,6 @@ final class ModeMonitor {
             }
             observers.append(observer)
         }
-
-        // Catch-all diagnostic: log every distributed notification whose
-        // name contains "kindaVim" (case-insensitive) so we can see what the
-        // actual broadcast names are if the ones above are wrong.
-        let catchAll = center.addObserver(
-            forName: nil,
-            object: nil,
-            queue: .main
-        ) { notification in
-            let n = notification.name.rawValue
-            guard n.range(of: "kindavim", options: .caseInsensitive) != nil else { return }
-            let objDesc = String(describing: notification.object)
-            let userDesc = String(describing: notification.userInfo ?? [:])
-            AppLogger.shared.info("modeMonitor", "distNotifSeen", fields: [
-                "name": n,
-                "object": objDesc,
-                "userInfo": userDesc
-            ])
-        }
-        observers.append(catchAll)
 
         checkKindaVimRunning()
     }
