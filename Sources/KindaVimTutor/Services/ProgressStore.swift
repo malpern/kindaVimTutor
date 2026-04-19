@@ -45,7 +45,23 @@ final class ProgressStore {
     }
 
     func isExerciseCompleted(_ exerciseId: String) -> Bool {
-        progress.completedExercises[exerciseId] != nil
+        guard let result = progress.completedExercises[exerciseId] else { return false }
+        if let threshold = progress.startedOverAt, result.completedAt <= threshold {
+            return false
+        }
+        return true
+    }
+
+    /// Begin a new tutor run. Historic best-results remain in storage and in
+    /// aggregate stats, but the sidebar/chapter/lesson completion UI treats
+    /// those pre-threshold results as no longer completed.
+    func startOver() {
+        progress.startedOverAt = Date()
+        progress.currentLessonId = nil
+        AppLogger.shared.info("progress", "startOver", fields: [
+            "previousCompleted": String(progress.completedExercises.count)
+        ])
+        save()
     }
 
     func bestResult(for exerciseId: String) -> ExerciseResult? {

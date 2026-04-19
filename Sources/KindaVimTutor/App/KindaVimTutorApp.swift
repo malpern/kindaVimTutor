@@ -55,6 +55,10 @@ struct KindaVimTutorApp: App {
                 .keyboardShortcut("p", modifiers: [.command, .shift])
             }
         }
+
+        Settings {
+            SettingsView(progressStore: appState.progressStore)
+        }
     }
 
     @ViewBuilder
