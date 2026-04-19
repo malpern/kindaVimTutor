@@ -26,9 +26,15 @@ struct StepCanvasView: View {
                             TitleStepView(lesson: lesson, chapterTitle: chapterTitle,
                                           onAdvance: { advanceForward() })
 
-                        case .content(_, let blocks):
+                        case .content(let contentId, let blocks):
+                            // The first content step of a lesson (id suffix
+                            // ".c0") immediately follows the lesson title,
+                            // which already typewrites. We skip the typewriter
+                            // + staggered reveal there so the student isn't
+                            // made to sit through two typewriters back-to-back.
                             ContentStepView(
                                 blocks: blocks,
+                                revealStyle: contentId.hasSuffix(".c0") ? .instant : .typewriter,
                                 onAutoAdvance: advanceForward,
                                 onContentReady: {
                                     withAnimation(.easeIn(duration: 0.35)) {

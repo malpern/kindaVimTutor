@@ -2,12 +2,24 @@ import SwiftUI
 
 struct ContentStepView: View {
     let blocks: [ContentBlock]
+    var revealStyle: RevealStyle = .typewriter
     var onAutoAdvance: (() -> Void)?
     /// Called once the heading has finished typing and all body blocks have
     /// faded in. The canvas uses this to time the appearance of its shared
     /// "press to continue" CTA — we only show the chip once reading material
     /// has settled.
     var onContentReady: (() -> Void)?
+
+    enum RevealStyle {
+        /// Typewriter the heading; stagger body blocks in with a 0.08s
+        /// gap. Used for mid-lesson content steps where a typewriter
+        /// cues "new subtopic".
+        case typewriter
+        /// Skip the typewriter and show the whole page in one pass.
+        /// Used for the first content step after a title, so the student
+        /// isn't made to sit through two typewriters back-to-back.
+        case instant
+    }
 
     @State private var headingDone = false
     @State private var visibleBlockCount = 0
@@ -28,27 +40,8 @@ struct ContentStepView: View {
             Spacer(minLength: 20)
 
             VStack(alignment: .leading, spacing: 20) {
-                if let heading = headingText {
-                    TypewriterText(
-                        heading,
-                        font: .system(size: 28, weight: .bold),
-                        foregroundStyle: .primary
-                    ) {
-                        headingDone = true
-                        revealBodyBlocks()
-                    }
-                    .tracking(-0.6)
-                } else {
-                    EmptyView()
-                        .onAppear { revealBodyBlocks() }
-                }
-
-                ForEach(Array(bodyBlocks.enumerated()), id: \.offset) { index, block in
-                    if index < visibleBlockCount {
-                        contentBlockView(block)
-                            .transition(.opacity.combined(with: .offset(y: 4)))
-                    }
-                }
+                headingView
+                bodyView
             }
             .frame(maxWidth: 640, alignment: .leading)
             .animation(.spring(duration: 0.4, bounce: 0.0), value: visibleBlockCount)
@@ -57,9 +50,67 @@ struct ContentStepView: View {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 56)
+        .onAppear {
+            if revealStyle == .instant {
+                // Show everything at once. Still fire onContentReady so
+                // the canvas can drop in the "to continue" hint.
+                visibleBlockCount = bodyBlocks.count
+                headingDone = true
+                if !didNotifyReady {
+                    didNotifyReady = true
+                    // Give the layout a tick to settle before the hint
+                    // can animate in.
+                    Task { @MainActor in
+                        try? await Task.sleep(for: .seconds(0.12))
+                        onContentReady?()
+                    }
+                }
+            }
+        }
         .onDisappear {
             headingDone = false
             visibleBlockCount = 0
+            didNotifyReady = false
+        }
+    }
+
+    @ViewBuilder
+    private var headingView: some View {
+        if let heading = headingText {
+            switch revealStyle {
+            case .typewriter:
+                TypewriterText(
+                    heading,
+                    font: .system(size: 28, weight: .bold),
+                    foregroundStyle: .primary
+                ) {
+                    headingDone = true
+                    revealBodyBlocks()
+                }
+                .tracking(-0.6)
+            case .instant:
+                Text(heading)
+                    .font(.system(size: 28, weight: .bold))
+                    .foregroundStyle(.primary)
+                    .tracking(-0.6)
+            }
+        } else if revealStyle == .typewriter {
+            EmptyView()
+                .onAppear { revealBodyBlocks() }
+        }
+    }
+
+    @ViewBuilder
+    private var bodyView: some View {
+        ForEach(Array(bodyBlocks.enumerated()), id: \.offset) { index, block in
+            if index < visibleBlockCount {
+                contentBlockView(block)
+                    .transition(
+                        revealStyle == .typewriter
+                            ? .opacity.combined(with: .offset(y: 4))
+                            : .identity
+                    )
+            }
         }
     }
 
