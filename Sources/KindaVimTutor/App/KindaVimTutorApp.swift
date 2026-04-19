@@ -51,19 +51,10 @@ struct KindaVimTutorApp: App {
             ToolbarModeBadge(monitor: appState.modeMonitor)
         }
         ToolbarItem(placement: .automatic) {
-            Button {
-                showStats.toggle()
-            } label: {
-                AchievementRingsView(
-                    lessonsProgress: Double(appState.progressStore.completedLessonCount) / max(Double(appState.progressStore.totalLessons), 1),
-                    exercisesProgress: Double(appState.progressStore.completedExerciseCount) / max(Double(appState.progressStore.totalExercises), 1),
-                    streakProgress: 0,
-                    compact: true
-                )
-            }
-            .popover(isPresented: $showStats) {
-                StatsView(progressStore: appState.progressStore)
-            }
+            ToolbarStatsButton(
+                progressStore: appState.progressStore,
+                showStats: $showStats
+            )
         }
     }
 

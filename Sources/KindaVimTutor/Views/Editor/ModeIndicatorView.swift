@@ -8,11 +8,41 @@ import SwiftUI
 struct ToolbarModeBadge: View {
     let monitor: ModeMonitor
 
+    @State private var isHovering = false
+
     var body: some View {
         ModeIndicatorView(
             mode: monitor.currentMode,
             isKindaVimRunning: monitor.isKindaVimRunning
         )
+        // Subtle lift on hover — this is a status indicator, not a
+        // button, so the treatment stays very quiet: no scale change,
+        // just a slightly brighter capsule ring.
+        .overlay {
+            Capsule()
+                .strokeBorder(monitor.currentMode.color.opacity(isHovering ? 0.55 : 0),
+                              lineWidth: 1)
+        }
+        .animation(.easeInOut(duration: 0.15), value: isHovering)
+        .onHover { isHovering = $0 }
+        .help(tooltip)
+        .accessibilityLabel(tooltip)
+    }
+
+    private var tooltip: String {
+        guard monitor.isKindaVimRunning else {
+            return "kindaVim isn't running — click the menu-bar icon to launch it."
+        }
+        switch monitor.currentMode {
+        case .normal:
+            return "kindaVim is in Normal mode. Press i to switch to Insert."
+        case .insert:
+            return "kindaVim is in Insert mode. Press Esc to switch to Normal."
+        case .visual:
+            return "kindaVim is in Visual mode. Press Esc to return to Normal."
+        case .unknown:
+            return "Live kindaVim mode — green is Normal, blue is Insert, purple is Visual."
+        }
     }
 }
 
