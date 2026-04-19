@@ -28,7 +28,7 @@ extension Curriculum {
         subtitle: "Normal and Insert — the two keys that matter today",
         explanation: [
             .heading("Two Modes for Two Jobs"),
-            .text("On a Mac, any text field is a typing field — you press a key, a letter appears. kindaVim adds a second mode where the keys *stop typing* and do other jobs instead. `Esc` switches to that mode, `i` switches back. You'll learn what the keys actually do once you're in it across the next few lessons. For now, just watch the switch:"),
+            .text("On a Mac, any text field is a typing field — you press a key, a letter appears. kindaVim adds a second mode where the keys stop typing and do other jobs instead. `Esc` switches to that mode, `i` switches back. You'll learn what the keys actually do over the next few lessons. For now, just watch the switch:"),
             .spacer,
             .modesDemo,
             .spacer,

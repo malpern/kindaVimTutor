@@ -18,7 +18,10 @@ struct AnnotatedText: View {
     var foregroundStyle: Color? = nil
 
     var body: some View {
-        WrapLayout(hSpacing: 4, vSpacing: 6) {
+        // hSpacing is 0 because the per-word segmentation already keeps
+        // trailing space glyphs inside each Text chunk. Anything higher
+        // stacks with those glyphs and makes the text look justified.
+        WrapLayout(hSpacing: 0, vSpacing: 6) {
             ForEach(Array(Self.segments(from: string).enumerated()), id: \.offset) { _, seg in
                 switch seg {
                 case .text(let s):
