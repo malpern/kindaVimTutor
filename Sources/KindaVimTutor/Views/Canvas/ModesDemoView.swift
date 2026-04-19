@@ -1,129 +1,65 @@
 import SwiftUI
 
-/// Two stacked looping demos that frame the modes concept in the way
-/// a new Mac user thinks about it: "this is how text fields normally
-/// work" followed by "but with kindaVim, you can…". Each panel runs
-/// independently on its own timer; tap either panel to replay it from
-/// frame 0.
+/// Single-panel, single-timeline demonstration of Normal vs Insert.
 ///
-/// Deliberately does NOT render a mode chip inside either panel —
-/// kindaVim doesn't embed chips into text fields, and showing one
-/// would misrepresent how it actually works. The caret shape (thin
-/// line vs solid block) carries the mode cue, which is how Vim has
-/// signaled it for decades.
+/// Shape of the page:
+///
+///   INSERT MODE    ← big named state label (narrator chrome, not UI)
+///   Letters type.
+///   ┌────────────────────────────────┐
+///   │  hi there|                     │ ← scripted text field
+///   └────────────────────────────────┘
+///   [h]  Every key → a letter.        ← pressed-key chip + caption
+///
+/// One continuous script takes the student from Insert → Esc →
+/// Normal (h / x / dd) → i → Insert, with the mode label flipping
+/// BEFORE the behavior changes so the vocabulary lands ahead of the
+/// visual. Tap to replay. Obeys AnimationReplayTracker so back-nav
+/// doesn't re-play.
 struct ModesDemoView: View {
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            DemoPanel(
-                phase: .macDefault,
-                intro: "How Mac text fields normally work",
-                script: Self.macDefaultScript
-            )
-            DemoPanel(
-                phase: .withKindaVim,
-                intro: "With kindaVim, press `Esc` and keys become commands",
-                script: Self.withKindaVimScript
-            )
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    // MARK: - Scripts
-
-    /// Mac-default demo: start empty, type "hi there", linger, loop.
-    /// Caret is always a thin line. No Esc, no commands — this is the
-    /// behavior every Mac user already knows.
-    static let macDefaultScript: [Beat] = [
-        Beat(text: "",        caret: 0, mode: .insert, pressedKey: nil,    caption: "Click in, type, letters appear. That's it.", duration: 1.6),
-        Beat(text: "h",       caret: 1, mode: .insert, pressedKey: "h",    caption: nil,                                           duration: 0.28),
-        Beat(text: "hi",      caret: 2, mode: .insert, pressedKey: "i",    caption: nil,                                           duration: 0.28),
-        Beat(text: "hi ",     caret: 3, mode: .insert, pressedKey: "Space",caption: nil,                                           duration: 0.20),
-        Beat(text: "hi t",    caret: 4, mode: .insert, pressedKey: "t",    caption: nil,                                           duration: 0.22),
-        Beat(text: "hi th",   caret: 5, mode: .insert, pressedKey: "h",    caption: nil,                                           duration: 0.22),
-        Beat(text: "hi the",  caret: 6, mode: .insert, pressedKey: "e",    caption: nil,                                           duration: 0.22),
-        Beat(text: "hi ther", caret: 7, mode: .insert, pressedKey: "r",    caption: nil,                                           duration: 0.22),
-        Beat(text: "hi there",caret: 8, mode: .insert, pressedKey: "e",    caption: "Every key → a letter.",                       duration: 2.0),
-    ]
-
-    /// kindaVim demo: start with the same "hi there", press Esc to
-    /// enter Normal, walk the caret left, delete chars, wipe line,
-    /// press i, retype "done". Caret morphs between thin-line (Insert)
-    /// and solid-block (Normal) as Vim itself does.
-    static let withKindaVimScript: [Beat] = [
-        Beat(text: "hi there",caret: 8, mode: .insert, pressedKey: nil,    caption: "Start in the normal Mac way — typing mode.",    duration: 1.4),
-        Beat(text: "hi there",caret: 8, mode: .normal, pressedKey: "Esc",  caption: "Press Esc. Caret flips — keys are now commands.", duration: 1.8),
-        Beat(text: "hi there",caret: 7, mode: .normal, pressedKey: "h",    caption: "h moves the cursor left.",                      duration: 0.7),
-        Beat(text: "hi there",caret: 6, mode: .normal, pressedKey: "h",    caption: nil,                                             duration: 0.35),
-        Beat(text: "hi there",caret: 5, mode: .normal, pressedKey: "h",    caption: nil,                                             duration: 0.35),
-        Beat(text: "hi ther", caret: 5, mode: .normal, pressedKey: "x",    caption: "x deletes a character.",                        duration: 0.8),
-        Beat(text: "hi the",  caret: 5, mode: .normal, pressedKey: "x",    caption: nil,                                             duration: 0.4),
-        Beat(text: "hi th",   caret: 5, mode: .normal, pressedKey: "x",    caption: nil,                                             duration: 0.4),
-        Beat(text: "",        caret: 0, mode: .normal, pressedKey: "dd",   caption: "dd wipes the whole line.",                      duration: 1.6),
-        Beat(text: "",        caret: 0, mode: .insert, pressedKey: "i",    caption: "Press i. Back to typing.",                      duration: 1.2),
-        Beat(text: "d",       caret: 1, mode: .insert, pressedKey: "d",    caption: nil,                                             duration: 0.22),
-        Beat(text: "do",      caret: 2, mode: .insert, pressedKey: "o",    caption: nil,                                             duration: 0.22),
-        Beat(text: "don",     caret: 3, mode: .insert, pressedKey: "n",    caption: nil,                                             duration: 0.22),
-        Beat(text: "done",    caret: 4, mode: .insert, pressedKey: "e",    caption: "Same keyboard. Two jobs.",                      duration: 2.4),
-    ]
-}
-
-// MARK: - Beat
-
-extension ModesDemoView {
-    struct Beat {
-        let text: String
-        let caret: Int
-        let mode: VimMode
-        let pressedKey: String?
-        let caption: String?
-        let duration: TimeInterval
-    }
-}
-
-// MARK: - Demo panel
-
-private enum DemoPhase { case macDefault, withKindaVim }
-
-private struct DemoPanel: View {
-    let phase: DemoPhase
-    let intro: String
-    let script: [ModesDemoView.Beat]
+    private static let animationID = "modesDemo.ch1.l0"
 
     @State private var beatIndex: Int = 0
     @State private var timer: Timer?
     @State private var caretVisible: Bool = true
     @State private var cursorTimer: Timer?
+    @State private var didComplete: Bool = false
 
-    private var beat: ModesDemoView.Beat { script[beatIndex] }
+    private var beat: Beat { Self.script[min(beatIndex, Self.script.count - 1)] }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Intro framing — the sentence that names what this panel
-            // demonstrates.
-            AnnotatedText(string: intro,
-                          font: .system(size: 14, weight: .medium),
-                          capSize: .small,
-                          foregroundStyle: .secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            // Named mode supralabel — the page's anchor. Flips color
+            // and text with the beat, always visible.
+            ModeStateLabel(mode: beat.mode, caption: beat.modeCaption)
+                .animation(.easeOut(duration: 0.25), value: beat.mode)
 
-            documentPanel
-            captionRow
+            documentField
+            actionLine
         }
-        .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(22)
         .background {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(Color.black.opacity(0.22))
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 14, style: .continuous)
-                .strokeBorder(Color.secondary.opacity(0.18), lineWidth: 0.75)
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .strokeBorder(Color.secondary.opacity(0.20), lineWidth: 0.75)
         }
         .contentShape(Rectangle())
         .onTapGesture { restart() }
         .help("Tap to replay")
         .onAppear {
-            start()
             startCaretBlink()
+            if AnimationReplayTracker.shared.hasPlayed(Self.animationID) {
+                // Already seen — park on the final beat, no playback.
+                beatIndex = Self.script.count - 1
+                didComplete = true
+                return
+            }
+            AnimationReplayTracker.shared.markPlayed(Self.animationID)
+            start()
         }
         .onDisappear {
             timer?.invalidate(); timer = nil
@@ -131,47 +67,47 @@ private struct DemoPanel: View {
         }
     }
 
-    private var documentPanel: some View {
+    // MARK: - Subviews
+
+    private var documentField: some View {
         HStack(spacing: 0) {
             Text(beat.text.prefix(beat.caret))
-                .font(.system(size: 22, weight: .regular, design: .monospaced))
+                .font(.system(size: 24, weight: .regular, design: .monospaced))
                 .foregroundStyle(.primary)
             CaretView(mode: beat.mode, visible: caretVisible)
                 .padding(.horizontal, 0.5)
             Text(beat.text.dropFirst(beat.caret))
-                .font(.system(size: 22, weight: .regular, design: .monospaced))
+                .font(.system(size: 24, weight: .regular, design: .monospaced))
                 .foregroundStyle(.primary)
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 18)
         .background {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .fill(Color.black.opacity(0.30))
         }
         .overlay {
-            RoundedRectangle(cornerRadius: 8, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(Color.secondary.opacity(0.18), lineWidth: 0.75)
         }
         .animation(.easeOut(duration: 0.12), value: beat.text)
         .animation(.easeOut(duration: 0.15), value: beat.caret)
     }
 
-    private var captionRow: some View {
+    private var actionLine: some View {
         HStack(spacing: 12) {
-            if let keyLabel = beat.pressedKey {
-                PressedKeyChip(label: keyLabel)
+            if let key = beat.pressedKey {
+                PressedKeyChip(label: key)
                     .id("key-\(beatIndex)")
                     .transition(.scale(scale: 0.6).combined(with: .opacity))
             } else {
-                // Keep the caption column stable when no key is active
-                // so text doesn't jitter horizontally between beats.
                 Color.clear.frame(width: 40, height: 30)
             }
 
             Text(beat.caption ?? "")
-                .font(.system(size: 14, weight: .regular))
+                .font(.system(size: 15, weight: .regular))
                 .foregroundStyle(.secondary)
                 .animation(.easeOut(duration: 0.2), value: beat.caption)
 
@@ -187,9 +123,16 @@ private struct DemoPanel: View {
 
     private func scheduleNext() {
         timer?.invalidate()
-        timer = Timer.scheduledTimer(withTimeInterval: beat.duration, repeats: false) { _ in
+        let hold = beat.duration
+        timer = Timer.scheduledTimer(withTimeInterval: hold, repeats: false) { _ in
             Task { @MainActor in
-                beatIndex = (beatIndex + 1) % script.count
+                if beatIndex + 1 >= Self.script.count {
+                    // Completed — park on the final frame, no loop.
+                    // User can tap to replay.
+                    didComplete = true
+                    return
+                }
+                beatIndex += 1
                 scheduleNext()
             }
         }
@@ -197,6 +140,7 @@ private struct DemoPanel: View {
 
     private func restart() {
         timer?.invalidate()
+        didComplete = false
         beatIndex = 0
         scheduleNext()
     }
@@ -204,6 +148,126 @@ private struct DemoPanel: View {
     private func startCaretBlink() {
         cursorTimer = Timer.scheduledTimer(withTimeInterval: 0.53, repeats: true) { _ in
             Task { @MainActor in caretVisible.toggle() }
+        }
+    }
+
+    // MARK: - Beat model
+
+    struct Beat {
+        let text: String
+        let caret: Int
+        let mode: VimMode
+        let modeCaption: String
+        let pressedKey: String?
+        let caption: String?
+        let duration: TimeInterval
+    }
+
+    /// One linear script. The `mode` field flips on the Esc / i beats
+    /// BEFORE the following actions start, so the student reads the
+    /// mode name first and then sees the behavior that matches it.
+    static let script: [Beat] = [
+        // ── Insert mode: typing ────────────────────────────────────
+        Beat(text: "",         caret: 0, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: nil,  caption: "Click in, type, letters appear.", duration: 1.6),
+        Beat(text: "h",        caret: 1, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "h",  caption: nil,                                duration: 0.28),
+        Beat(text: "hi",       caret: 2, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "i",  caption: nil,                                duration: 0.28),
+        Beat(text: "hi ",      caret: 3, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "Space", caption: nil,                             duration: 0.20),
+        Beat(text: "hi t",     caret: 4, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "t",  caption: nil,                                duration: 0.22),
+        Beat(text: "hi th",    caret: 5, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "h",  caption: nil,                                duration: 0.22),
+        Beat(text: "hi the",   caret: 6, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "e",  caption: nil,                                duration: 0.22),
+        Beat(text: "hi ther",  caret: 7, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "r",  caption: nil,                                duration: 0.22),
+        Beat(text: "hi there", caret: 8, mode: .insert,
+             modeCaption: "The normal Mac way — letters type.",
+             pressedKey: "e",  caption: "Every key → a letter.",             duration: 1.6),
+
+        // ── Transition to Normal ──────────────────────────────────
+        Beat(text: "hi there", caret: 8, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "Esc", caption: "Press Esc. Caret thickens — commands mode.", duration: 1.9),
+
+        // ── Normal mode: commands ─────────────────────────────────
+        Beat(text: "hi there", caret: 7, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "h",  caption: "h moves the cursor left.",          duration: 0.75),
+        Beat(text: "hi there", caret: 6, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "h",  caption: nil,                                duration: 0.35),
+        Beat(text: "hi there", caret: 5, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "h",  caption: nil,                                duration: 0.35),
+        Beat(text: "hi ther",  caret: 5, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "x",  caption: "x deletes a character.",            duration: 0.8),
+        Beat(text: "hi the",   caret: 5, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "x",  caption: nil,                                duration: 0.4),
+        Beat(text: "hi th",    caret: 5, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "x",  caption: nil,                                duration: 0.4),
+        Beat(text: "",         caret: 0, mode: .normal,
+             modeCaption: "Now letters are commands, not characters.",
+             pressedKey: "dd", caption: "dd wipes the whole line.",          duration: 1.7),
+
+        // ── Transition back to Insert ─────────────────────────────
+        Beat(text: "",         caret: 0, mode: .insert,
+             modeCaption: "Back to typing — letters again.",
+             pressedKey: "i",  caption: "Press i. Caret thins — typing mode.", duration: 1.3),
+        Beat(text: "d",        caret: 1, mode: .insert,
+             modeCaption: "Back to typing — letters again.",
+             pressedKey: "d",  caption: nil,                                duration: 0.22),
+        Beat(text: "do",       caret: 2, mode: .insert,
+             modeCaption: "Back to typing — letters again.",
+             pressedKey: "o",  caption: nil,                                duration: 0.22),
+        Beat(text: "don",      caret: 3, mode: .insert,
+             modeCaption: "Back to typing — letters again.",
+             pressedKey: "n",  caption: nil,                                duration: 0.22),
+        Beat(text: "done",     caret: 4, mode: .insert,
+             modeCaption: "Back to typing — letters again.",
+             pressedKey: "e",  caption: "Same keyboard. Two modes.",         duration: 2.2),
+    ]
+}
+
+// MARK: - Mode state label (big supralabel)
+
+/// Narrator chrome — a page-level label that names the current mode.
+/// Styled as typographic caption, not a chip, to avoid implying kV
+/// embeds this into text fields.
+private struct ModeStateLabel: View {
+    let mode: VimMode
+    let caption: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(mode.color)
+                    .frame(width: 9, height: 9)
+                Text("\(mode.displayName) MODE")
+                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .foregroundStyle(.primary)
+                    .tracking(1.5)
+                    .contentTransition(.numericText())
+            }
+            Text(caption)
+                .font(.system(size: 14, weight: .regular))
+                .foregroundStyle(.secondary)
+                .animation(.easeOut(duration: 0.2), value: caption)
         }
     }
 }
@@ -215,12 +279,9 @@ private struct CaretView: View {
     let visible: Bool
 
     var body: some View {
-        // Thin line caret in Insert (typing), solid block in Normal
-        // (commands). This is how terminal Vim and kindaVim both cue
-        // the current mode at the cursor itself.
         Rectangle()
             .fill(mode == .insert ? Color.accentColor : Color.primary.opacity(0.85))
-            .frame(width: mode == .insert ? 2 : 13, height: 26)
+            .frame(width: mode == .insert ? 2 : 14, height: 28)
             .opacity(visible ? 1 : 0.1)
             .animation(.easeInOut(duration: 0.12), value: mode)
     }

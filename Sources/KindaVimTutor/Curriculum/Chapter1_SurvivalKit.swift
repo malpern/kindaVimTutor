@@ -37,9 +37,8 @@ extension Curriculum {
             .spacer,
             .tip("There's a third mode — Visual — for selecting text. You don't need it yet; it shows up properly in Chapter 5. A muted chip below lets you peek if you want."),
 
-            // Dedicated spotlight step — a heading creates a step break,
-            // and the spotlight block fills that page.
-            .heading("Your Compass"),
+            // Spotlight gets its own full page — LessonStep.steps
+            // breaks on .modeIndicatorSpotlight, no heading needed.
             .modeIndicatorSpotlight,
         ],
         exercises: [],

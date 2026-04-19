@@ -8,16 +8,15 @@ struct TitleStepView: View {
     @State private var showChapter = false
     @State private var showSubtitle = false
     @State private var showHint = false
+    @State private var skipTypewriter = false
+
+    private var animationID: String { "title.\(lesson.id)" }
 
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
 
-            // Chapter label — fades in first, no movement.
-            // Prefix with "CHAPTER N ·" when we can derive a number from
-            // the lesson id (e.g. "ch1.l0" → 1), so prose references in
-            // earlier chapters like "see Chapter 5" land on a visible
-            // marker when the reader arrives.
+            // Chapter label — fades in first, no movement
             Text(chapterHeader)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(.tint)
@@ -25,41 +24,46 @@ struct TitleStepView: View {
                 .opacity(showChapter ? 1 : 0)
                 .offset(y: showChapter ? 0 : 4)
 
-            // Title — types in
-            TypewriterText(
-                lesson.title,
-                font: .system(size: 44, weight: .bold),
-                foregroundStyle: .primary,
-                alignment: .center
-            ) {
-                withAnimation(.spring(duration: 0.5, bounce: 0.0)) {
-                    showSubtitle = true
+            // Title. Typewrites on first visit, otherwise shows final
+            // text immediately — back-nav to a lesson you've already
+            // seen shouldn't make you wait through an animation again.
+            Group {
+                if skipTypewriter {
+                    Text(lesson.title)
+                        .font(.system(size: 44, weight: .bold))
+                        .foregroundStyle(.primary)
+                        .multilineTextAlignment(.center)
+                } else {
+                    TypewriterText(
+                        lesson.title,
+                        font: .system(size: 44, weight: .bold),
+                        foregroundStyle: .primary,
+                        alignment: .center
+                    ) {
+                        withAnimation(.easeOut(duration: 0.25)) {
+                            showSubtitle = true
+                        }
+                    }
                 }
             }
             .tracking(-1.2)
             .multilineTextAlignment(.center)
             .frame(maxWidth: 600)
 
-            // Subtitle — types in after title
+            // Subtitle — static Text with a quick fade-in. Previously a
+            // second typewriter which felt slow on every visit.
             if showSubtitle {
-                TypewriterText(
-                    lesson.subtitle,
-                    font: .system(size: 20, weight: .regular),
-                    foregroundStyle: .secondary,
-                    alignment: .center
-                ) {
-                    withAnimation(.easeOut(duration: 0.4).delay(0.15)) {
-                        showHint = true
-                    }
-                }
-                .tracking(-0.3)
-                .multilineTextAlignment(.center)
-                .transition(.opacity)
+                Text(lesson.subtitle)
+                    .font(.system(size: 20, weight: .regular))
+                    .foregroundStyle(.secondary)
+                    .tracking(-0.3)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: 640)
+                    .transition(.opacity)
             }
 
             Spacer()
 
-            // Navigation hint
             if showHint {
                 AdvanceHintView("to begin", action: onAdvance)
                     .padding(.bottom, 44)
@@ -68,14 +72,33 @@ struct TitleStepView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
-            withAnimation(.spring(duration: 0.5, bounce: 0.0).delay(0.05)) {
+            let tracker = AnimationReplayTracker.shared
+            if tracker.hasPlayed(animationID) {
+                // Instant-appear path for return visits.
+                skipTypewriter = true
                 showChapter = true
+                showSubtitle = true
+                showHint = true
+            } else {
+                tracker.markPlayed(animationID)
+                withAnimation(.spring(duration: 0.45, bounce: 0.0).delay(0.05)) {
+                    showChapter = true
+                }
+                // Typewriter's completion callback triggers showSubtitle.
+                // Hint follows shortly after subtitle appears.
+                Task { @MainActor in
+                    try? await Task.sleep(nanoseconds: 900_000_000)
+                    withAnimation(.easeOut(duration: 0.3)) {
+                        showHint = true
+                    }
+                }
             }
         }
         .onDisappear {
             showChapter = false
             showSubtitle = false
             showHint = false
+            skipTypewriter = false
         }
     }
 

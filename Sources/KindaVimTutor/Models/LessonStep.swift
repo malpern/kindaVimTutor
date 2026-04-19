@@ -27,8 +27,14 @@ enum LessonStep: Identifiable {
         var groupIndex = 0
 
         for block in lesson.explanation {
-            if case .heading = block, !currentGroup.isEmpty {
-                // Flush current group as a step
+            // Either a heading or a modeIndicatorSpotlight forces a
+            // step break so the spotlight gets its own full page.
+            let forcesBreak: Bool = {
+                if case .heading = block { return true }
+                if case .modeIndicatorSpotlight = block { return true }
+                return false
+            }()
+            if forcesBreak, !currentGroup.isEmpty {
                 result.append(.content(id: "\(lesson.id).c\(groupIndex)", blocks: currentGroup))
                 currentGroup = []
                 groupIndex += 1
