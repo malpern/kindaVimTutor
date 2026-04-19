@@ -48,11 +48,6 @@ struct StepCanvasView: View {
                     .transition(stepTransition)
                 }
 
-                // Mode badge lives inside the ZStack, always top-trailing.
-                LiveModeBadge()
-                    .padding(.top, 14)
-                    .padding(.trailing, 18)
-                    .allowsHitTesting(false)
             }
             .frame(maxWidth: .infinity)
             .layoutPriority(1)  // step content flexes; chrome stays fixed
