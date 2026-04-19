@@ -86,6 +86,10 @@ struct ExplanationView: View {
         case .modesDemo:
             ModesDemoView()
 
+        case .modeIndicatorSpotlight:
+            ModeIndicatorSpotlightView()
+                .frame(minHeight: 260)
+
         case .linkTip(_, _, let label, let url):
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "lightbulb")

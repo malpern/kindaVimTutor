@@ -35,9 +35,12 @@ extension Curriculum {
             .keyCommand(keys: ["Esc"], description: "Switch to Normal — letters become commands"),
             .keyCommand(keys: ["i"], description: "Switch to Insert — letters type"),
             .spacer,
-            .text("The chip in the top-right of this window is your live mode. Watch it flip while you practice."),
-            .spacer,
             .tip("There's a third mode — Visual — for selecting text. You don't need it yet; it shows up properly in Chapter 5. A muted chip below lets you peek if you want."),
+
+            // Dedicated spotlight step — a heading creates a step break,
+            // and the spotlight block fills that page.
+            .heading("Your Compass"),
+            .modeIndicatorSpotlight,
         ],
         exercises: [],
         motionsIntroduced: ["Esc", "i"],

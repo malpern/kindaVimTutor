@@ -22,6 +22,11 @@ enum ContentBlock: Sendable {
     /// mode. Plays a scripted sequence with a caret, a pressed-key chip,
     /// a mode chip, and a caption. Loops until the student advances.
     case modesDemo
+    /// A one-beat content step that draws an animated arrow gesturing
+    /// up toward the live mode chip in the toolbar. Anchors the abstract
+    /// mode concept to the concrete UI element the learner will
+    /// reference forever.
+    case modeIndicatorSpotlight
     /// External link rendered in a tip-style container. Opens in the
     /// user's default browser.
     case linkTip(sfSymbol: String, accent: LinkAccent, label: String, url: String)

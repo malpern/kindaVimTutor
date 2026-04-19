@@ -210,6 +210,10 @@ struct ContentStepView: View {
             ModesDemoView()
                 .padding(.vertical, 4)
 
+        case .modeIndicatorSpotlight:
+            ModeIndicatorSpotlightView()
+                .frame(minHeight: 320)
+
         case .linkTip(let symbol, let accent, let label, let url):
             linkTipView(symbol: symbol, accent: accent, label: label, url: url)
 
