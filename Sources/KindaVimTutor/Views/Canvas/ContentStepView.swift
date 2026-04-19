@@ -193,24 +193,30 @@ struct ContentStepView: View {
                 .tracking(-0.6)
 
         case .text(let text):
-            Text(text)
-                .font(.system(size: 16, weight: .regular))
-                .lineSpacing(6)
-                .foregroundStyle(.primary.opacity(0.85))
+            AnnotatedText(
+                string: text,
+                font: .system(size: 16, weight: .regular),
+                capSize: .small,
+                foregroundStyle: .primary.opacity(0.85)
+            )
+            .frame(maxWidth: .infinity, alignment: .leading)
 
         case .tip(let text):
-            // Inline SF-Symbol + text concatenation so wrapping works natively.
-            // Wrapping Text in .padding(16)+.background() currently breaks the
-            // wrap (SwiftUI quirk with this view tree), so we keep the tip
-            // visually lighter with a subtle leading border only.
-            (
-                Text(Image(systemName: "lightbulb")).foregroundStyle(.secondary)
-                + Text("  ")
-                + Text(text).foregroundStyle(.secondary)
-            )
-            .font(.system(size: 15))
-            .lineSpacing(4)
-            .multilineTextAlignment(.leading)
+            // Lightbulb + AnnotatedText so mode chips / keycaps inside
+            // the tip string render properly.
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "lightbulb")
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .padding(.top, 2)
+                AnnotatedText(
+                    string: text,
+                    font: .system(size: 15),
+                    capSize: .small,
+                    foregroundStyle: .secondary
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
             .padding(.leading, 14)
             .overlay(alignment: .leading) {
                 Rectangle()
@@ -242,12 +248,13 @@ struct ContentStepView: View {
                     }
                 }
                 .frame(minWidth: 72, alignment: .leading)
-                Text(description)
-                    .font(.system(size: 16))
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.leading)
-                    .lineLimit(nil)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                AnnotatedText(
+                    string: description,
+                    font: .system(size: 16),
+                    capSize: .small,
+                    foregroundStyle: .secondary
+                )
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(.vertical, 4)
 
