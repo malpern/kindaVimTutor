@@ -14,6 +14,7 @@ struct ModeSequenceStepView: View {
 
     @State private var progressIndex: Int = 0
     @State private var didComplete: Bool = false
+    @State private var visualDiscovered: Bool = false
 
     private var currentExpected: VimMode? {
         progressIndex < expected.count ? expected[progressIndex] : nil
@@ -42,9 +43,16 @@ struct ModeSequenceStepView: View {
                 .multilineTextAlignment(.leading)
 
             // Visual preview chip (if this lesson wants to mention it).
+            // Not part of the drill sequence, but if the student happens
+            // to press `v` while on this page it acknowledges the
+            // discovery with a green check — a quiet easter-egg nod,
+            // not a required step.
             if let target = visualPreviewLessonId {
-                VisualPreviewPill(onTap: { onJumpToLesson?(target) })
-                    .padding(.top, 8)
+                VisualPreviewPill(
+                    discovered: visualDiscovered,
+                    onTap: { onJumpToLesson?(target) }
+                )
+                .padding(.top, 8)
             }
 
             Spacer()
@@ -53,6 +61,11 @@ struct ModeSequenceStepView: View {
         .padding(.horizontal, 48)
         .padding(.vertical, 24)
         .onChange(of: monitor.currentMode) { _, newMode in
+            // Mark the Visual preview pill as discovered if the student
+            // happens to flip into Visual mode — regardless of whether
+            // the main sequence is finished.
+            if newMode == .visual { visualDiscovered = true }
+
             guard !didComplete else { return }
             if newMode == currentExpected {
                 progressIndex += 1
@@ -139,18 +152,27 @@ private struct SequenceTarget: View {
 }
 
 private struct VisualPreviewPill: View {
+    var discovered: Bool = false
     var onTap: () -> Void
     @State private var hover = false
+
+    private var purple: Color { VimMode.visual.color }
 
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 6) {
                 Circle()
-                    .fill(VimMode.visual.color.opacity(hover ? 0.6 : 0.35))
+                    .fill(purple.opacity(dotOpacity))
                     .frame(width: 7, height: 7)
                 Text("visual")
                     .font(.system(.caption, design: .monospaced, weight: .semibold))
-                    .foregroundStyle(.secondary.opacity(hover ? 1.0 : 0.75))
+                    .foregroundStyle(labelStyle)
+                if discovered {
+                    Image(systemName: "checkmark")
+                        .font(.system(size: 10, weight: .bold))
+                        .foregroundStyle(.green.opacity(0.85))
+                        .transition(.scale.combined(with: .opacity))
+                }
                 Image(systemName: "arrow.up.forward")
                     .font(.system(size: 9, weight: .bold))
                     .foregroundStyle(.tertiary.opacity(hover ? 1.0 : 0.6))
@@ -162,18 +184,34 @@ private struct VisualPreviewPill: View {
             .padding(.vertical, 6)
             .background {
                 Capsule()
-                    .fill(Color.secondary.opacity(hover ? 0.10 : 0.05))
+                    .fill(discovered
+                          ? purple.opacity(hover ? 0.22 : 0.15)
+                          : Color.secondary.opacity(hover ? 0.10 : 0.05))
             }
             .overlay {
                 Capsule()
-                    .strokeBorder(Color.secondary.opacity(0.18), lineWidth: 1)
+                    .strokeBorder(discovered
+                                  ? purple.opacity(0.45)
+                                  : Color.secondary.opacity(0.18),
+                                  lineWidth: 1)
             }
         }
         .buttonStyle(.plain)
+        .animation(.spring(duration: 0.25), value: discovered)
         .onHover { hovering in
             hover = hovering
             if hovering { NSCursor.pointingHand.push() } else { NSCursor.pop() }
         }
         .help("Jump to Chapter 5 — Visual Mode")
+    }
+
+    private var dotOpacity: Double {
+        if discovered { return 0.9 }
+        return hover ? 0.6 : 0.35
+    }
+
+    private var labelStyle: Color {
+        if discovered { return .primary }
+        return .secondary.opacity(hover ? 1.0 : 0.75)
     }
 }
