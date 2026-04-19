@@ -17,10 +17,7 @@ struct KindaVimTutorApp: App {
             mainUI
             .toolbar {
                 ToolbarItem(placement: .automatic) {
-                    ModeIndicatorView(
-                        mode: appState.modeMonitor.currentMode,
-                        isKindaVimRunning: appState.modeMonitor.isKindaVimRunning
-                    )
+                    ToolbarModeBadge(monitor: appState.modeMonitor)
                 }
                 ToolbarItem(placement: .automatic) {
                     Button {

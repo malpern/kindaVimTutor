@@ -1,5 +1,21 @@
 import SwiftUI
 
+/// Toolbar wrapper that re-reads the monitor's state on every render,
+/// which is what gives the Observation framework the hook it needs to
+/// re-invalidate when `currentMode` flips. Reading the monitor's
+/// properties inline inside `@ToolbarContentBuilder` doesn't reliably
+/// establish that dependency.
+struct ToolbarModeBadge: View {
+    let monitor: ModeMonitor
+
+    var body: some View {
+        ModeIndicatorView(
+            mode: monitor.currentMode,
+            isKindaVimRunning: monitor.isKindaVimRunning
+        )
+    }
+}
+
 struct ModeIndicatorView: View {
     let mode: VimMode
     let isKindaVimRunning: Bool
