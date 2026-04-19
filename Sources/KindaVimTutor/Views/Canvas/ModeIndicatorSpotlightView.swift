@@ -128,15 +128,19 @@ private struct SpotlightArrow: Shape {
     /// Length of each arrowhead chevron leg, in points.
     private static let headLen: CGFloat = 14
 
+    /// Anchors above the leading edge of the caption text below.
+    /// Matches the caption's own leading x (its frame is positioned by
+    /// center, maxWidth clamped, so the left edge lands around 20pt
+    /// from the content area's leading margin).
     static func startPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.28, y: size.height * 0.72)
+        CGPoint(x: 30, y: size.height * 0.64)
     }
 
     /// Far-right, near-start-y. Keeps the curve low and near-horizontal
     /// for most of its length, then the high tip pulls it into a
     /// sharp upward hook.
     static func controlPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.88, y: size.height * 0.68)
+        CGPoint(x: size.width * 0.86, y: size.height * 0.64)
     }
 
     /// The tip lands slightly above the spotlight's own top edge so
