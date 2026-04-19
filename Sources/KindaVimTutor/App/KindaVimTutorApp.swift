@@ -30,6 +30,17 @@ struct KindaVimTutorApp: App {
                 if ProcessInfo.processInfo.environment["KINDAVIMTUTOR_ENABLE_CHANNEL"] == "1" {
                     AppCommandChannel.shared.start(appState: appState)
                 }
+                // Reschedule the streak reminder on every launch.
+                // Opening the app doesn't count as "practice" — only
+                // completing an exercise does — so the tier might
+                // still be e.g. .daily and needs its reminder pushed
+                // back to tomorrow.
+                Task {
+                    await NotificationService.shared.rescheduleIfNeeded(
+                        progress: appState.progressStore.progress,
+                        prefs: NotificationPreferencesStorage.current()
+                    )
+                }
             }
         }
         .commands {

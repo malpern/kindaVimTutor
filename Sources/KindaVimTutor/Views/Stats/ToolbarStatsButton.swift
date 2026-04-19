@@ -17,7 +17,7 @@ struct ToolbarStatsButton: View {
             AchievementRingsView(
                 lessonsProgress: lessonProgress,
                 exercisesProgress: exerciseProgress,
-                streakProgress: 0,
+                streakProgress: streakWeekProgress,
                 compact: true
             )
             .scaleEffect(isHovering ? 1.08 : 1.0)
@@ -49,9 +49,22 @@ struct ToolbarStatsButton: View {
             / max(Double(progressStore.totalExercises), 1)
     }
 
+    private var streakWeekProgress: Double {
+        Double(progressStore.daysThisWeek) / 7.0
+    }
+
     private var tooltip: String {
         let lessonPct = Int((lessonProgress * 100).rounded())
         let exercisePct = Int((exerciseProgress * 100).rounded())
-        return "Progress — \(lessonPct)% lessons, \(exercisePct)% exercises (⌘⇧P)"
+        let streak = progressStore.currentStreak
+        let streakPart: String
+        if streak >= 2 {
+            streakPart = ", \(streak)-day streak"
+        } else if progressStore.practicedToday {
+            streakPart = ", practiced today"
+        } else {
+            streakPart = ""
+        }
+        return "Progress — \(lessonPct)% lessons, \(exercisePct)% exercises\(streakPart) (⌘⇧P)"
     }
 }

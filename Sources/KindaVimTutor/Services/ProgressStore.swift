@@ -6,6 +6,7 @@ final class ProgressStore {
     private(set) var progress: UserProgress
 
     private let fileURL: URL
+    private let streak = StreakService()
 
     init() {
         let appSupport = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
@@ -42,7 +43,29 @@ final class ProgressStore {
         progress.totalTimeSpent += result.timeSeconds
         progress.lastPracticeDate = Date()
         save()
+
+        // Reschedule the streak reminder now that practice state
+        // advanced. If this is the student's first-ever completion,
+        // take the opportunity to request notification permission —
+        // they've just shown they're invested, so the ask has context.
+        let isFirstCompletion = progress.completedExercises.count == 1
+        Task {
+            if isFirstCompletion && !NotificationPreferencesStorage.didRequestPermission {
+                NotificationPreferencesStorage.didRequestPermission = true
+                await NotificationService.shared.requestAuthorizationIfNeeded()
+            }
+            await NotificationService.shared.rescheduleIfNeeded(
+                progress: progress,
+                prefs: NotificationPreferencesStorage.current()
+            )
+        }
     }
+
+    // MARK: - Streak (derived)
+
+    var currentStreak: Int { streak.currentStreak(in: progress) }
+    var daysThisWeek: Int { streak.daysThisWeek(in: progress) }
+    var practicedToday: Bool { streak.practicedToday(in: progress) }
 
     func isExerciseCompleted(_ exerciseId: String) -> Bool {
         guard let result = progress.completedExercises[exerciseId] else { return false }
