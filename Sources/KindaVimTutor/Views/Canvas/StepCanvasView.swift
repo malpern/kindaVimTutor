@@ -20,7 +20,8 @@ struct StepCanvasView: View {
                     Group {
                         switch step {
                         case .title(let lesson, let chapterTitle):
-                            TitleStepView(lesson: lesson, chapterTitle: chapterTitle)
+                            TitleStepView(lesson: lesson, chapterTitle: chapterTitle,
+                                          onAdvance: { advanceForward() })
 
                         case .content(_, let blocks):
                             ContentStepView(
@@ -59,7 +60,8 @@ struct StepCanvasView: View {
             // Canvas-level chrome — real sibling in the VStack, renders reliably.
             VStack(spacing: 16) {
                 if shouldShowCanvasAdvanceHint {
-                    AdvanceHintView("press to continue")
+                    AdvanceHintView("press to continue",
+                                    action: canNavigateForward ? { advanceForward() } : nil)
                         .transition(.opacity.combined(with: .offset(y: 4)))
                 }
                 StepIndicatorView(

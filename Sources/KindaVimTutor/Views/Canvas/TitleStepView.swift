@@ -3,6 +3,7 @@ import SwiftUI
 struct TitleStepView: View {
     let lesson: Lesson
     let chapterTitle: String
+    var onAdvance: (() -> Void)? = nil
 
     @State private var showChapter = false
     @State private var showSubtitle = false
@@ -56,7 +57,7 @@ struct TitleStepView: View {
 
             // Navigation hint
             if showHint {
-                AdvanceHintView("press to begin")
+                AdvanceHintView("press to begin", action: onAdvance)
                     .padding(.bottom, 44)
                     .transition(.opacity)
             }
