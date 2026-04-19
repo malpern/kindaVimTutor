@@ -28,66 +28,92 @@ struct SidebarView: View {
             }
 
             ForEach(chapters) { chapter in
-                let isExpanded = expandedChapterId == chapter.id
-
-                // Chapter header — tall, tracked, uppercase caption.
-                Section {
-                    if isExpanded {
-                        ForEach(chapter.lessons) { lesson in
-                            LessonRowView(
-                                lesson: lesson,
-                                chapterNumber: chapter.number,
-                                isCompleted: progressStore.isLessonCompleted(lesson)
-                            )
-                            .tag(lesson.id)
-                        }
-                    }
-                } header: {
-                    Button {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            expandedChapterId = (expandedChapterId == chapter.id) ? nil : chapter.id
-                        }
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: chapter.systemImage)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(.tertiary)
-                                .frame(width: 14)
-                            Text(chapter.title)
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundStyle(.secondary)
-                                .textCase(.uppercase)
-                                .tracking(0.6)
-                                .lineLimit(1)
-                            Spacer()
-                            Image(systemName: "chevron.right")
-                                .font(.system(size: 8, weight: .bold))
-                                .foregroundStyle(.quaternary)
-                                .rotationEffect(.degrees(isExpanded ? 90 : 0))
-                                .padding(.trailing, 10)
-                        }
-                        .contentShape(Rectangle())
-                        .padding(.top, 6)
-                        .padding(.bottom, 2)
-                    }
-                    .buttonStyle(.plain)
-                }
+                chapterSection(chapter)
             }
         }
         .listStyle(.sidebar)
         .frame(minWidth: 200)
         .navigationTitle("kindaVim Tutor")
         .onAppear {
-            // Auto-expand the chapter of the selected lesson
             expandedChapterId = selectedChapterId
         }
         .onChange(of: selectedLessonId) {
-            // Auto-expand when selection changes
             if let chId = selectedChapterId, expandedChapterId != chId {
                 withAnimation(.easeInOut(duration: 0.2)) {
                     expandedChapterId = chId
                 }
             }
         }
+    }
+
+    @ViewBuilder
+    private func chapterSection(_ chapter: Chapter) -> some View {
+        let isExpanded = expandedChapterId == chapter.id
+        let isChapterComplete = !chapter.lessons.isEmpty &&
+            chapter.lessons.allSatisfy { progressStore.isLessonCompleted($0) }
+
+        Section {
+            if isExpanded {
+                ForEach(chapter.lessons) { lesson in
+                    LessonRowView(
+                        lesson: lesson,
+                        chapterNumber: chapter.number,
+                        isCompleted: progressStore.isLessonCompleted(lesson)
+                    )
+                    .tag(lesson.id)
+                }
+            }
+        } header: {
+            ChapterHeader(
+                chapter: chapter,
+                isExpanded: isExpanded,
+                isComplete: isChapterComplete,
+                onTap: {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        expandedChapterId = (expandedChapterId == chapter.id) ? nil : chapter.id
+                    }
+                }
+            )
+        }
+    }
+}
+
+private struct ChapterHeader: View {
+    let chapter: Chapter
+    let isExpanded: Bool
+    let isComplete: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 8) {
+                Image(systemName: chapter.systemImage)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(isComplete ? Color.green.opacity(0.75) : Color.secondary.opacity(0.6))
+                    .frame(width: 14)
+                Text(chapter.title)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .textCase(.uppercase)
+                    .tracking(0.6)
+                    .lineLimit(1)
+                if isComplete {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.green.opacity(0.75))
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.quaternary)
+                    .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                    .padding(.trailing, 10)
+            }
+            .contentShape(Rectangle())
+            .padding(.top, 6)
+            .padding(.bottom, 2)
+        }
+        .buttonStyle(.plain)
+        .animation(.easeInOut(duration: 0.2), value: isComplete)
     }
 }
