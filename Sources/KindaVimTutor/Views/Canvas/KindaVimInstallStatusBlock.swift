@@ -5,6 +5,7 @@ import SwiftUI
 /// a re-check button that flips to the confirmation once the user returns.
 struct KindaVimInstallStatusBlock: View {
     @State private var isInstalled: Bool = KindaVimDetector.isInstalled()
+    @State private var sealPulse: Bool = false
     private let downloadURL = URL(string: "https://kindavim.app")!
 
     var body: some View {
@@ -13,6 +14,14 @@ struct KindaVimInstallStatusBlock: View {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 20))
                     .foregroundStyle(.green)
+                    .scaleEffect(sealPulse ? 1.08 : 1.0)
+                    .shadow(color: .green.opacity(sealPulse ? 0.55 : 0.15),
+                            radius: sealPulse ? 8 : 3)
+                    .animation(
+                        .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
+                        value: sealPulse
+                    )
+                    .onAppear { sealPulse = true }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("kindaVim is installed")
                         .font(.system(size: 15, weight: .semibold))
