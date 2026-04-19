@@ -52,13 +52,6 @@ struct ModesDemoView: View {
         .help("Tap to replay")
         .onAppear {
             startCaretBlink()
-            if AnimationReplayTracker.shared.hasPlayed(Self.animationID) {
-                // Already seen — park on the final beat, no playback.
-                beatIndex = Self.script.count - 1
-                didComplete = true
-                return
-            }
-            AnimationReplayTracker.shared.markPlayed(Self.animationID)
             start()
         }
         .onDisappear {
@@ -140,9 +133,14 @@ struct ModesDemoView: View {
         timer = Timer.scheduledTimer(withTimeInterval: hold, repeats: false) { _ in
             Task { @MainActor in
                 if beatIndex + 1 >= Self.script.count {
-                    // Completed — park on the final frame, no loop.
-                    // User can tap to replay.
-                    didComplete = true
+                    // Settle on the final frame for a beat, then loop
+                    // back to the start. The student may still be
+                    // reading the opening paragraph when the first
+                    // cycle ends — the loop means they'll always
+                    // catch a full cycle when they look up.
+                    try? await Task.sleep(for: .seconds(1.8))
+                    beatIndex = 0
+                    scheduleNext()
                     return
                 }
                 beatIndex += 1
