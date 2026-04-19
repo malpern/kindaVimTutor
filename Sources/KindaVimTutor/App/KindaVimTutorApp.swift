@@ -68,21 +68,28 @@ struct KindaVimTutorApp: App {
                 inspectorState: appState.inspectorState
             )
         } detail: {
-            if let lesson = appState.selectedLesson,
-               let chapter = appState.selectedChapter {
-                StepCanvasView(
-                    lesson: lesson,
-                    chapterTitle: chapter.title,
-                    progressStore: appState.progressStore,
-                    inspectorState: appState.inspectorState,
-                    modeMonitor: appState.modeMonitor,
-                    onNextLesson: { appState.goToNextLesson() },
-                    onJumpToLesson: { id in appState.goToLesson(id) }
-                )
-                .id(lesson.id)
-            } else {
-                WelcomeView(onStartLearning: { appState.goToFirstLesson() })
+            Group {
+                if let lesson = appState.selectedLesson,
+                   let chapter = appState.selectedChapter {
+                    StepCanvasView(
+                        lesson: lesson,
+                        chapterTitle: chapter.title,
+                        progressStore: appState.progressStore,
+                        inspectorState: appState.inspectorState,
+                        modeMonitor: appState.modeMonitor,
+                        onNextLesson: { appState.goToNextLesson() },
+                        onJumpToLesson: { id in appState.goToLesson(id) }
+                    )
+                    .id(lesson.id)
+                } else {
+                    WelcomeView(onStartLearning: { appState.goToFirstLesson() })
+                }
             }
+            // Text throughout the detail view — lesson titles, prose,
+            // instructions, tips, drill captions — is selectable and
+            // copyable with ⌘C. Doesn't affect buttons/links or the
+            // NSTextView drill editor (which has its own selection).
+            .textSelection(.enabled)
         }
     }
 }
