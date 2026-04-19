@@ -99,9 +99,22 @@ struct ModesDemoView: View {
     private var actionLine: some View {
         HStack(spacing: 12) {
             if let key = beat.pressedKey {
-                PressedKeyChip(label: key)
-                    .id("key-\(beatIndex)")
-                    .transition(.scale(scale: 0.6).combined(with: .opacity))
+                HStack(spacing: 6) {
+                    PressedKeyChip(label: key)
+                    if beat.isCommandPress {
+                        // Tells the student "this key did something,
+                        // but not the typing thing you're used to"
+                        // — defuses the "wait, nothing happened"
+                        // confusion without teaching the specific
+                        // command yet.
+                        Text("(command)")
+                            .font(.system(size: 11, weight: .regular, design: .rounded))
+                            .foregroundStyle(.tertiary)
+                            .transition(.opacity)
+                    }
+                }
+                .id("key-\(beatIndex)")
+                .transition(.scale(scale: 0.6).combined(with: .opacity))
             } else {
                 Color.clear.frame(width: 40, height: 30)
             }
@@ -159,87 +172,99 @@ struct ModesDemoView: View {
         let mode: VimMode
         let modeCaption: String
         let pressedKey: String?
+        /// When true, the key chip gets a muted "(command)" tag next to
+        /// it. Use on Normal-mode letter presses that don't produce
+        /// text, so the "nothing happened" reads as intentional rather
+        /// than a broken demo.
+        let isCommandPress: Bool
         let caption: String?
         let duration: TimeInterval
+
+        init(text: String, caret: Int, mode: VimMode, modeCaption: String,
+             pressedKey: String?, isCommandPress: Bool = false,
+             caption: String?, duration: TimeInterval) {
+            self.text = text; self.caret = caret; self.mode = mode
+            self.modeCaption = modeCaption
+            self.pressedKey = pressedKey
+            self.isCommandPress = isCommandPress
+            self.caption = caption; self.duration = duration
+        }
     }
 
-    /// One linear script. The `mode` field flips on the Esc / i beats
-    /// BEFORE the following actions start, so the student reads the
-    /// mode name first and then sees the behavior that matches it.
+    /// Simplified pedagogy: show that typing works in Insert, stops in
+    /// Normal, and resumes in Insert again. No h/x/dd — those teach
+    /// specific commands the student doesn't know yet and would make
+    /// the demo compete with itself.
     static let script: [Beat] = [
-        // ── Insert mode: typing ────────────────────────────────────
+        // ── 1. Insert mode: typing works ─────────────────────────
         Beat(text: "",         caret: 0, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: nil,  caption: "Click in, type, letters appear.", duration: 1.6),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: nil,  caption: "Click in and type — like any Mac text field.", duration: 1.4),
         Beat(text: "h",        caret: 1, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "h",  caption: nil,                                duration: 0.28),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "h",  caption: nil,  duration: 0.26),
         Beat(text: "hi",       caret: 2, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "i",  caption: nil,                                duration: 0.28),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "i",  caption: nil,  duration: 0.26),
         Beat(text: "hi ",      caret: 3, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "Space", caption: nil,                             duration: 0.20),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "Space", caption: nil,  duration: 0.18),
         Beat(text: "hi t",     caret: 4, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "t",  caption: nil,                                duration: 0.22),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "t",  caption: nil,  duration: 0.20),
         Beat(text: "hi th",    caret: 5, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "h",  caption: nil,                                duration: 0.22),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "h",  caption: nil,  duration: 0.20),
         Beat(text: "hi the",   caret: 6, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "e",  caption: nil,                                duration: 0.22),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "e",  caption: nil,  duration: 0.20),
         Beat(text: "hi ther",  caret: 7, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "r",  caption: nil,                                duration: 0.22),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "r",  caption: nil,  duration: 0.20),
         Beat(text: "hi there", caret: 8, mode: .insert,
-             modeCaption: "The normal Mac way — letters type.",
-             pressedKey: "e",  caption: "Every key → a letter.",             duration: 1.6),
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "e",  caption: "Typing works the way you'd expect.", duration: 1.4),
 
-        // ── Transition to Normal ──────────────────────────────────
+        // ── 2. Switch to Normal ──────────────────────────────────
         Beat(text: "hi there", caret: 8, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "Esc", caption: "Press Esc. Caret thickens — commands mode.", duration: 1.9),
+             modeCaption: "Typing is paused. Keys do other jobs now.",
+             pressedKey: "Esc", caption: "Press Esc. Caret thickens — typing stops.", duration: 1.9),
 
-        // ── Normal mode: commands ─────────────────────────────────
-        Beat(text: "hi there", caret: 7, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "h",  caption: "h moves the cursor left.",          duration: 0.75),
-        Beat(text: "hi there", caret: 6, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "h",  caption: nil,                                duration: 0.35),
-        Beat(text: "hi there", caret: 5, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "h",  caption: nil,                                duration: 0.35),
-        Beat(text: "hi ther",  caret: 5, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "x",  caption: "x deletes a character.",            duration: 0.8),
-        Beat(text: "hi the",   caret: 5, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "x",  caption: nil,                                duration: 0.4),
-        Beat(text: "hi th",    caret: 5, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "x",  caption: nil,                                duration: 0.4),
-        Beat(text: "",         caret: 0, mode: .normal,
-             modeCaption: "Now letters are commands, not characters.",
-             pressedKey: "dd", caption: "dd wipes the whole line.",          duration: 1.7),
+        // ── 3. Normal mode: letter keys don't type ───────────────
+        Beat(text: "hi there", caret: 8, mode: .normal,
+             modeCaption: "Typing is paused. Keys do other jobs now.",
+             pressedKey: "h",  isCommandPress: true,
+             caption: "Press a letter — nothing types.",               duration: 1.2),
+        Beat(text: "hi there", caret: 8, mode: .normal,
+             modeCaption: "Typing is paused. Keys do other jobs now.",
+             pressedKey: "a",  isCommandPress: true,
+             caption: nil,                                             duration: 0.65),
+        Beat(text: "hi there", caret: 8, mode: .normal,
+             modeCaption: "Typing is paused. Keys do other jobs now.",
+             pressedKey: "x",  isCommandPress: true,
+             caption: "Each one runs a command. You'll learn them next.", duration: 2.0),
 
-        // ── Transition back to Insert ─────────────────────────────
-        Beat(text: "",         caret: 0, mode: .insert,
-             modeCaption: "Back to typing — letters again.",
-             pressedKey: "i",  caption: "Press i. Caret thins — typing mode.", duration: 1.3),
-        Beat(text: "d",        caret: 1, mode: .insert,
-             modeCaption: "Back to typing — letters again.",
-             pressedKey: "d",  caption: nil,                                duration: 0.22),
-        Beat(text: "do",       caret: 2, mode: .insert,
-             modeCaption: "Back to typing — letters again.",
-             pressedKey: "o",  caption: nil,                                duration: 0.22),
-        Beat(text: "don",      caret: 3, mode: .insert,
-             modeCaption: "Back to typing — letters again.",
-             pressedKey: "n",  caption: nil,                                duration: 0.22),
-        Beat(text: "done",     caret: 4, mode: .insert,
-             modeCaption: "Back to typing — letters again.",
-             pressedKey: "e",  caption: "Same keyboard. Two modes.",         duration: 2.2),
+        // ── 4. Switch back to Insert ─────────────────────────────
+        Beat(text: "hi there", caret: 8, mode: .insert,
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "i",  caption: "Press i. Caret thins — typing resumes.", duration: 1.4),
+
+        // ── 5. Insert mode again: typing works ───────────────────
+        Beat(text: "hi there ",     caret: 9,  mode: .insert,
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "Space",  caption: nil,  duration: 0.20),
+        Beat(text: "hi there d",    caret: 10, mode: .insert,
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "d",      caption: nil,  duration: 0.20),
+        Beat(text: "hi there do",   caret: 11, mode: .insert,
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "o",      caption: nil,  duration: 0.20),
+        Beat(text: "hi there don",  caret: 12, mode: .insert,
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "n",      caption: nil,  duration: 0.20),
+        Beat(text: "hi there done", caret: 13, mode: .insert,
+             modeCaption: "Every key becomes a letter.",
+             pressedKey: "e",      caption: "Same keyboard. Two modes.", duration: 2.2),
     ]
 }
 

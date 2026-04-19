@@ -28,14 +28,14 @@ extension Curriculum {
         subtitle: "Normal and Insert — the two keys that matter today",
         explanation: [
             .heading("Two Modes for Two Jobs"),
-            .text("Same keyboard, two jobs. kindaVim lets you flip between typing letters and running commands:"),
+            .text("On a Mac, any text field is a typing field — you press a key, a letter appears. kindaVim adds a second mode where the keys *stop typing* and do other jobs instead. `Esc` switches to that mode, `i` switches back. You'll learn what the keys actually do once you're in it across the next few lessons. For now, just watch the switch:"),
             .spacer,
             .modesDemo,
             .spacer,
-            .keyCommand(keys: ["Esc"], description: "Switch to {{normal}} — letters become commands"),
-            .keyCommand(keys: ["i"], description: "Switch to {{insert}} — letters type"),
+            .keyCommand(keys: ["Esc"], description: "Stop typing. {{normal}} — keys do other jobs."),
+            .keyCommand(keys: ["i"], description: "Start typing. {{insert}} — letters appear."),
             .spacer,
-            .tip("There's a third mode — {{visual}} — for selecting text. You don't need it yet; it shows up properly in Chapter 5. A muted chip below lets you peek if you want."),
+            .tip("There's a third mode — {{visual}} — for selecting text. Coming in Chapter 5. The muted chip below lets you peek if you want."),
 
             // Spotlight gets its own full page — LessonStep.steps
             // breaks on .modeIndicatorSpotlight, no heading needed.
