@@ -19,6 +19,17 @@ struct ModeIndicatorSpotlightView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .topLeading) {
+                // Small filled dot at the arrow's origin — anchors the
+                // start of the gesture. Appears with the stroke so it
+                // reads as "the line emerges from here".
+                Circle()
+                    .fill(Color.accentColor.opacity(0.9))
+                    .frame(width: 9, height: 9)
+                    .position(SpotlightArrow.startPoint(in: geo.size))
+                    .opacity(drawProgress > 0.02 ? 1 : 0)
+                    .scaleEffect(drawProgress > 0.02 ? 1 : 0.2)
+                    .animation(.spring(duration: 0.3, bounce: 0.35), value: drawProgress > 0.02)
+
                 // Single stroked path — bezier + arrowhead chevrons
                 // live in the same Path, so trim animates them together
                 // as one pointing gesture.
@@ -99,15 +110,18 @@ struct ModeIndicatorSpotlightView: View {
 
 // MARK: - Arrow geometry
 
-/// Swooping cubic bezier from the lower-left of the view up and over
-/// to the upper-right, landing just above the view's own top edge
-/// where the live mode chip sits in the toolbar. Cubic (two control
-/// points) rather than quadratic gives a properly swoopy arc — the
-/// stroke rises steeply before sweeping right into the tip rather
-/// than tracing a near-straight diagonal.
+/// Hockey-stick curve: mostly horizontal along the bottom, then
+/// hooks UP sharply near the end to land on the chip. Single control
+/// point placed near the END's x at the START's y — keeps the bezier
+/// hugging the bottom-horizontal for most of its length, then the
+/// attractor to the high tip pulls it into a sharp upward bend at the
+/// very end. Reads as "sweep across, then point up" instead of the
+/// smoother diagonal the cubic was giving.
 ///
-/// The arrowhead chevrons are appended to the same Path so trim
-/// reveals them together with the curve as one pointing gesture.
+/// Arrowhead chevrons are appended to the same Path so trim reveals
+/// them with the curve as one pointing gesture. The tangent at t=1 is
+/// (end - control), which for this control-point layout points almost
+/// straight up — so the chevrons naturally aim at the chip.
 private struct SpotlightArrow: Shape {
     let size: CGSize
 
@@ -115,24 +129,19 @@ private struct SpotlightArrow: Shape {
     private static let headLen: CGFloat = 14
 
     static func startPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.30, y: size.height * 0.75)
+        CGPoint(x: size.width * 0.28, y: size.height * 0.72)
     }
 
-    /// First control point — directly above the start. Pulls the
-    /// curve STRAIGHT UP out of the tail.
-    static func control1(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.32, y: size.height * 0.15)
-    }
-
-    /// Second control point — up and left of the tip. Pulls the curve
-    /// OVER toward the right to glide into the arrowhead.
-    static func control2(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.70, y: -60)
+    /// Far-right, near-start-y. Keeps the curve low and near-horizontal
+    /// for most of its length, then the high tip pulls it into a
+    /// sharp upward hook.
+    static func controlPoint(in size: CGSize) -> CGPoint {
+        CGPoint(x: size.width * 0.88, y: size.height * 0.68)
     }
 
     /// The tip lands slightly above the spotlight's own top edge so
     /// the stroke extends into the toolbar strip and reads as
-    /// pointing AT the chip — not overshooting above it.
+    /// pointing AT the chip — not overshooting past it.
     static func endPoint(in size: CGSize) -> CGPoint {
         CGPoint(x: size.width * 0.92, y: -18)
     }
@@ -140,18 +149,18 @@ private struct SpotlightArrow: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
         let start = Self.startPoint(in: size)
-        let c1 = Self.control1(in: size)
-        let c2 = Self.control2(in: size)
+        let control = Self.controlPoint(in: size)
         let end = Self.endPoint(in: size)
 
         p.move(to: start)
-        p.addCurve(to: end, control1: c1, control2: c2)
+        p.addQuadCurve(to: end, control: control)
 
-        // Arrowhead chevrons — legs from the tip angled back along
-        // the curve's end tangent. Tangent of a cubic bezier at t=1
-        // is (end - c2).
-        let dx = end.x - c2.x
-        let dy = end.y - c2.y
+        // Arrowhead chevrons — from the tip, angled back along the
+        // curve's end tangent. Tangent of a quadratic bezier at t=1
+        // is (end - control). With this layout it points nearly
+        // straight up, so the chevrons face the chip.
+        let dx = end.x - control.x
+        let dy = end.y - control.y
         let len = max(sqrt(dx * dx + dy * dy), 0.001)
         let ux = dx / len, uy = dy / len
 
