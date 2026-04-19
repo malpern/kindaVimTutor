@@ -83,8 +83,12 @@ struct DrillStepView: View {
                             .strokeBorder(editorBorderColor, lineWidth: editorBorderWidth)
                     }
                     .overlay(alignment: .top) {
+                        // Sits INSIDE the editor at its top edge so
+                        // it doesn't overlap the instruction text
+                        // above. Toast-style: solid background, drops
+                        // in over the first line of the drill.
                         WrongModeHintView(isVisible: showWrongModeHint)
-                            .offset(y: -48)
+                            .padding(.top, 10)
                     }
                     .onHover { hovering in
                         withAnimation(.easeInOut(duration: 0.12)) {

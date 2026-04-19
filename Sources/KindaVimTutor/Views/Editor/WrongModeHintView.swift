@@ -20,13 +20,18 @@ struct WrongModeHintView: View {
         .padding(.horizontal, 14)
         .padding(.vertical, 10)
         .background(
+            // Solid opaque background — translucent orange on top of
+            // translucent orange on top of prose behind it was
+            // unreadable. Keep the orange tint via the border and
+            // icon alone.
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .fill(Color.orange.opacity(0.12))
+                .fill(Color(nsColor: .windowBackgroundColor))
         )
         .overlay(
             RoundedRectangle(cornerRadius: 10, style: .continuous)
-                .strokeBorder(Color.orange.opacity(0.4), lineWidth: 1)
+                .strokeBorder(Color.orange.opacity(0.7), lineWidth: 1)
         )
+        .shadow(color: .black.opacity(0.35), radius: 10, y: 3)
         .opacity(isVisible ? 1 : 0)
         .offset(y: isVisible ? 0 : -6)
         .animation(.easeInOut(duration: 0.18), value: isVisible)
