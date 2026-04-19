@@ -4,6 +4,7 @@ import SwiftUI
 struct KindaVimTutorApp: App {
     @State private var appState = AppState()
     @State private var showStats = false
+    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
 
     init() {
         AppLogger.shared.info("app", "launch", fields: [
@@ -32,6 +33,21 @@ struct KindaVimTutorApp: App {
             }
         }
         .commands {
+            // Put sidebar toggle in the View menu at the standard slot
+            // (CommandGroup(before: .sidebar) replaces the empty system
+            // sidebar slot). `⌘⌃S` matches Xcode's toggle-navigator
+            // shortcut, which is the closest established convention for
+            // dev-tool apps on macOS.
+            CommandGroup(before: .sidebar) {
+                Button(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar") {
+                    withAnimation(.easeInOut(duration: 0.25)) {
+                        columnVisibility = (columnVisibility == .detailOnly)
+                            ? .automatic
+                            : .detailOnly
+                    }
+                }
+                .keyboardShortcut("s", modifiers: [.command, .control])
+            }
             CommandGroup(after: .toolbar) {
                 Button("Show Progress") {
                     showStats.toggle()
@@ -60,7 +76,7 @@ struct KindaVimTutorApp: App {
 
     @ViewBuilder
     private var mainUI: some View {
-        NavigationSplitView {
+        NavigationSplitView(columnVisibility: $columnVisibility) {
             SidebarView(
                 chapters: appState.chapters,
                 selectedLessonId: $appState.selectedLessonId,
