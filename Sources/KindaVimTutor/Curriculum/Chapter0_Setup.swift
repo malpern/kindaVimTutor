@@ -33,8 +33,6 @@ extension Curriculum {
                 label: "Watch the DevOps Toolkit kindaVim tutorial (12:40) on YouTube",
                 url: "https://www.youtube.com/watch?v=4NpE8q_bLcM"
             ),
-            .spacer,
-            .tip("Once kindaVim is installed and running, head to Chapter 1 — the first lesson introduces the two modes you'll use constantly."),
         ],
         exercises: [],
         motionsIntroduced: []
