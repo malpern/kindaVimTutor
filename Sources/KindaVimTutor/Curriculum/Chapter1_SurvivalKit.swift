@@ -35,7 +35,7 @@ extension Curriculum {
             .keyCommand(keys: ["Esc"], description: "Stop typing. {{normal}} — keys do other jobs."),
             .keyCommand(keys: ["i"], description: "Start typing. {{insert}} — letters appear."),
             .spacer,
-            .tip("There's a third mode — {{visual}} — for selecting text. Coming in Chapter 5. The muted chip below lets you peek if you want."),
+            .tip("There's a third mode — {{visual}} — for selecting text. You'll meet it properly in Chapter 5."),
 
             // Spotlight gets its own full page — LessonStep.steps
             // breaks on .modeIndicatorSpotlight, no heading needed.
