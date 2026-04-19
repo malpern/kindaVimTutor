@@ -160,20 +160,6 @@ final class ExerciseEngine {
             cursorMatches = true
         }
 
-        // Diagnostic: log every attempt with byte-level detail so we can
-        // compare what the user produced vs what we expected. Filter later
-        // with `grep validate ~/Library/Logs/KindaVimTutor/app.log`.
-        AppLogger.shared.info("engine", "validate", fields: [
-            "textMatch": textMatches ? "1" : "0",
-            "cursorMatch": cursorMatches ? "1" : "0",
-            "actualLen": String(currentText.count),
-            "expectedLen": String(variation.expectedText.count),
-            "cursor": String(cursorPosition),
-            "expectedCursor": variation.expectedCursorPosition.map(String.init) ?? "nil",
-            "actual": currentText,
-            "expected": variation.expectedText,
-        ])
-
         if textMatches && cursorMatches {
             completeRep(finalText: currentText, finalCursor: cursorPosition)
         }
