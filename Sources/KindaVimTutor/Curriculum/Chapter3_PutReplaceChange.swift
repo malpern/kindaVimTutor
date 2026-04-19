@@ -32,12 +32,20 @@ extension Curriculum {
             Exercise(
                 id: "ch3.l1.e1",
                 instruction: "Swap the lines: delete line B with dd, move down, paste with p",
-                initialText: "A) First\nC) Third\nB) Second",
-                initialCursorPosition: 9,
-                expectedText: "A) First\nB) Second\nC) Third",
+                initialText: "\n\n\n// Reorder: dd the out-of-order line, move, then p\nA) First\nC) Third\nB) Second\nD) Fourth\n\n\n\n\n\n\n",
+                initialCursorPosition: 96,
+                expectedText: "\n\n\n// Reorder: dd the out-of-order line, move, then p\nA) First\nB) Second\nC) Third\nD) Fourth\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["On 'C) Third', press dd to cut it, move to 'B) Second', press p"],
-                difficulty: .learn
+                hints: ["On the out-of-order line, press dd, move to the correct spot, press p"],
+                difficulty: .learn,
+                drillCount: 10,
+                variations: [
+                    .init(initialText: "\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\n1. Wake\n3. Work\n2. Eat\n4. Sleep\n\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\n1. Wake\n2. Eat\n3. Work\n4. Sleep\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\nred\nblue\ngreen\nyellow\n", initialCursorPosition: 8, expectedText: "\n\n\n\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\nred\ngreen\nblue\nyellow\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n// Reorder: dd the out-of-order line, move, then p\none\nthree\ntwo\nfour\n\n\n\n\n\n\n\n\n", initialCursorPosition: 72, expectedText: "\n// Reorder: dd the out-of-order line, move, then p\none\ntwo\nthree\nfour\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\nAlpha\nGamma\nBeta\nDelta\n\n\n\n\n", initialCursorPosition: 81, expectedText: "\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\nAlpha\nBeta\nGamma\nDelta\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\ncat\nmouse\ndog\nfish\n\n", initialCursorPosition: 2, expectedText: "\n\n\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\ncat\ndog\nmouse\nfish\n\n", expectedCursorPosition: nil),
+                ]
             ),
         ],
         motionsIntroduced: ["p", "P"]
@@ -138,12 +146,20 @@ extension Curriculum {
             Exercise(
                 id: "ch3.l4.e1",
                 instruction: "Use C to replace everything after | with the text shown in // comment",
-                initialText: "Good start |XXXXX // good end.",
-                initialCursorPosition: 11,
-                expectedText: "Good start good end.",
+                initialText: "\n\n\n// Go to |, C then type \"good end\" + Esc\nGood start |XXXXX\n\n\n\n\n\n\n\n\n\n",
+                initialCursorPosition: 69,
+                expectedText: "\n\n\n// Go to |, C then type \"good end\" + Esc\nGood start good end\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
                 hints: ["Move to |, press C, type what the // comment says, press Esc"],
-                difficulty: .learn
+                difficulty: .learn,
+                drillCount: 10,
+                variations: [
+                    .init(initialText: "\n\n\n\n\n\n// Go to |, C then type \"is clear now\" + Esc\nThe path |YYYYYYY\n\n\n\n\n\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n// Go to |, C then type \"is clear now\" + Esc\nThe path is clear now\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to |, C then type \"go home soon\" + Esc\nI will |ZZZZZZZZZ\n\n\n\n", initialCursorPosition: 8, expectedText: "\n\n\n\n\n\n\n\n\n// Go to |, C then type \"go home soon\" + Esc\nI will go home soon\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n\n// Go to |, C then type \"worked well\" + Esc\nHer plan |WWWWWWWW\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n\n\n\n\n\n// Go to |, C then type \"worked well\" + Esc\nHer plan worked well\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n// Go to |, C then type \"turned blue\" + Esc\nThe sky |VVVVVVV\n\n\n\n\n\n\n\n", initialCursorPosition: 68, expectedText: "\n\n\n\n\n// Go to |, C then type \"turned blue\" + Esc\nThe sky turned blue\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n\n\n// Go to |, C then type \"runs fast\" + Esc\nMy code |UUUUUUU\n", initialCursorPosition: 7, expectedText: "\n\n\n\n\n\n\n\n\n\n\n\n// Go to |, C then type \"runs fast\" + Esc\nMy code runs fast\n", expectedCursorPosition: nil),
+                ]
             ),
         ],
         motionsIntroduced: ["c$", "C"]
@@ -169,12 +185,20 @@ extension Curriculum {
             Exercise(
                 id: "ch3.l5.e1",
                 instruction: "Add 'Line two' between the lines using o",
-                initialText: "Line one\nLine three",
-                initialCursorPosition: 0,
-                expectedText: "Line one\nLine two\nLine three",
+                initialText: "\n\n\n// On \"Line one\", press o, type \"Line two\" + Esc\nLine one\nLine three\n\n\n\n\n\n\n\n\n",
+                initialCursorPosition: 78,
+                expectedText: "\n\n\n// On \"Line one\", press o, type \"Line two\" + Esc\nLine one\nLine two\nLine three\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["On 'Line one', press o, type 'Line two', press Esc"],
-                difficulty: .learn
+                hints: ["On the upper line, press o, type the new line, press Esc"],
+                difficulty: .learn,
+                drillCount: 10,
+                variations: [
+                    .init(initialText: "\n\n\n\n\n\n// On \"First part\", press o, type \"Second part\" + Esc\nFirst part\nThird part\n\n\n\n\n\n", initialCursorPosition: 82, expectedText: "\n\n\n\n\n\n// On \"First part\", press o, type \"Second part\" + Esc\nFirst part\nSecond part\nThird part\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n// On \"Step 1\", press o, type \"Step 2\" + Esc\nStep 1\nStep 3\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n\n\n\n// On \"Step 1\", press o, type \"Step 2\" + Esc\nStep 1\nStep 2\nStep 3\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n\n// On \"Morning\", press o, type \"Afternoon\" + Esc\nMorning\nEvening\n", initialCursorPosition: 0, expectedText: "\n\n\n\n\n\n\n\n\n\n\n// On \"Morning\", press o, type \"Afternoon\" + Esc\nMorning\nAfternoon\nEvening\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n// On \"Chapter A\", press o, type \"Chapter B\" + Esc\nChapter A\nChapter C\n\n\n\n\n\n\n", initialCursorPosition: 82, expectedText: "\n\n\n\n\n// On \"Chapter A\", press o, type \"Chapter B\" + Esc\nChapter A\nChapter B\nChapter C\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n\n\n// On \"red\", press o, type \"orange\" + Esc\nred\ngreen", initialCursorPosition: 10, expectedText: "\n\n\n\n\n\n\n\n\n\n\n\n// On \"red\", press o, type \"orange\" + Esc\nred\norange\ngreen", expectedCursorPosition: nil),
+                ]
             ),
         ],
         motionsIntroduced: ["o", "O"]

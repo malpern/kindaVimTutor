@@ -64,6 +64,7 @@ struct SidebarView: View {
                                 .font(.system(size: 8, weight: .bold))
                                 .foregroundStyle(.quaternary)
                                 .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                                .padding(.trailing, 10)
                         }
                         .contentShape(Rectangle())
                         .padding(.top, 6)
