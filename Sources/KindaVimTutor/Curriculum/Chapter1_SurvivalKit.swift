@@ -66,7 +66,9 @@ extension Curriculum {
             .keyCommand(keys: ["k"], description: "Move up"),
             .keyCommand(keys: ["l"], description: "Move right"),
             .spacer,
-            .tip("Think of j as having a little hook at the bottom pointing downward. That's how you remember j goes down."),
+            .text("You'll also need one more key for the drills below: `x` deletes the character under the cursor. Use it to clear the `*` once you've landed on it. The next lesson teaches deletion properly."),
+            .spacer,
+            .tip("Think of `j` as having a little hook at the bottom pointing downward. That's how you remember `j` goes down."),
         ],
         exercises: [
             // Exercise 1: Move down with j — navigate to the * and delete it
