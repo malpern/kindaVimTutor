@@ -57,18 +57,29 @@ struct KeyCapView: View {
     private let borderColor = Color.secondary.opacity(0.30)
     private let labelColor = Color(white: 0.88)
 
+    /// Observes the shared tracker so the cap can react while the
+    /// matching key is physically held down.
+    @State private var tracker = KeyPressTracker.shared
+
+    private var isPressed: Bool { tracker.isPressed(label) }
+
     var body: some View {
         Text(label)
             .font(size.font)
-            .foregroundStyle(labelColor)
+            .foregroundStyle(isPressed ? .white : labelColor)
             .frame(minWidth: size.minWidth, minHeight: size.height)
             .background {
                 RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-                    .fill(fillColor)
+                    .fill(isPressed ? Color.accentColor.opacity(0.42) : fillColor)
             }
             .overlay {
                 RoundedRectangle(cornerRadius: size.cornerRadius, style: .continuous)
-                    .strokeBorder(borderColor, lineWidth: 0.5)
+                    .strokeBorder(isPressed ? Color.accentColor : borderColor,
+                                  lineWidth: isPressed ? 1.0 : 0.5)
             }
+            .scaleEffect(isPressed ? 0.94 : 1.0)
+            .shadow(color: isPressed ? Color.accentColor.opacity(0.5) : .clear,
+                    radius: isPressed ? 8 : 0)
+            .animation(.easeOut(duration: 0.08), value: isPressed)
     }
 }

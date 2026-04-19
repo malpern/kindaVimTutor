@@ -125,7 +125,20 @@ struct StepCanvasView: View {
     /// transition and our `.onKeyPress` never fires.
     private func installKeyMonitor() {
         guard keyMonitor == nil else { return }
-        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+        keyMonitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .keyUp]) { event in
+            // Feed KeyPressTracker on both edges so any KeyCapView
+            // on screen can give live-press feedback. Regardless of
+            // whether we end up consuming the event below.
+            Task { @MainActor in
+                if event.type == .keyUp {
+                    KeyPressTracker.shared.handleKeyUp(event)
+                } else if event.type == .keyDown {
+                    KeyPressTracker.shared.handleKeyDown(event)
+                }
+            }
+
+            // Navigation handling only fires on keyDown.
+            guard event.type == .keyDown else { return event }
             guard let ch = event.charactersIgnoringModifiers?.first else { return event }
             // Don't hijack when modifier keys are pressed (Cmd+], etc.).
             if event.modifierFlags.contains(.command) || event.modifierFlags.contains(.option) {
@@ -156,6 +169,10 @@ struct StepCanvasView: View {
     }
 
     private func removeKeyMonitor() {
+        // Drop any lingering "pressed" state so the next appearance
+        // starts clean — macOS doesn't always deliver a keyUp if the
+        // window loses focus while a key is held.
+        KeyPressTracker.shared.clearAll()
         if let m = keyMonitor {
             NSEvent.removeMonitor(m)
             keyMonitor = nil
