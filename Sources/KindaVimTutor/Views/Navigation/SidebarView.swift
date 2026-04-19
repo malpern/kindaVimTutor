@@ -30,45 +30,46 @@ struct SidebarView: View {
             ForEach(chapters) { chapter in
                 let isExpanded = expandedChapterId == chapter.id
 
-                // Chapter header — tappable to expand/collapse
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        if expandedChapterId == chapter.id {
-                            expandedChapterId = nil
-                        } else {
-                            expandedChapterId = chapter.id
+                // Chapter header — tall, tracked, uppercase caption.
+                Section {
+                    if isExpanded {
+                        ForEach(chapter.lessons) { lesson in
+                            LessonRowView(
+                                lesson: lesson,
+                                chapterNumber: chapter.number,
+                                isCompleted: progressStore.isLessonCompleted(lesson)
+                            )
+                            .tag(lesson.id)
                         }
                     }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: chapter.systemImage)
-                            .font(.system(size: 12))
-                            .foregroundStyle(.secondary)
-                            .frame(width: 16)
-                        Text(chapter.title)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(.secondary)
-                            .lineLimit(1)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 9, weight: .semibold))
-                            .foregroundStyle(.quaternary)
-                            .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                } header: {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            expandedChapterId = (expandedChapterId == chapter.id) ? nil : chapter.id
+                        }
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: chapter.systemImage)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.tertiary)
+                                .frame(width: 14)
+                            Text(chapter.title)
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.secondary)
+                                .textCase(.uppercase)
+                                .tracking(0.6)
+                                .lineLimit(1)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 8, weight: .bold))
+                                .foregroundStyle(.quaternary)
+                                .rotationEffect(.degrees(isExpanded ? 90 : 0))
+                        }
+                        .contentShape(Rectangle())
+                        .padding(.top, 6)
+                        .padding(.bottom, 2)
                     }
-                    .padding(.vertical, 4)
-                }
-                .buttonStyle(.plain)
-
-                // Lessons — only visible when expanded
-                if isExpanded {
-                    ForEach(chapter.lessons) { lesson in
-                        LessonRowView(
-                            lesson: lesson,
-                            chapterNumber: chapter.number,
-                            isCompleted: progressStore.isLessonCompleted(lesson)
-                        )
-                        .tag(lesson.id)
-                    }
+                    .buttonStyle(.plain)
                 }
             }
         }
