@@ -9,7 +9,7 @@ struct AdvanceHintView: View {
 
     @State private var isHovering = false
 
-    init(_ label: String = "press to continue", action: (() -> Void)? = nil) {
+    init(_ label: String = "to continue", action: (() -> Void)? = nil) {
         self.label = label
         self.action = action
     }

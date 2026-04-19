@@ -184,10 +184,13 @@ struct ContentStepView: View {
             }
 
         case .keyCommand(let keys, let description):
-            HStack(alignment: .top, spacing: 16) {
-                Text(keys.joined(separator: " "))
-                    .font(.system(size: 18, weight: .medium, design: .monospaced))
-                    .frame(minWidth: 56, alignment: .leading)
+            HStack(alignment: .center, spacing: 16) {
+                HStack(spacing: 6) {
+                    ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
+                        KeyCapView(label: key, size: .regular)
+                    }
+                }
+                .frame(minWidth: 72, alignment: .leading)
                 Text(description)
                     .font(.system(size: 16))
                     .foregroundStyle(.secondary)

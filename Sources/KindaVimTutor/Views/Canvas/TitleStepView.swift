@@ -57,7 +57,7 @@ struct TitleStepView: View {
 
             // Navigation hint
             if showHint {
-                AdvanceHintView("press to begin", action: onAdvance)
+                AdvanceHintView("to begin", action: onAdvance)
                     .padding(.bottom, 44)
                     .transition(.opacity)
             }

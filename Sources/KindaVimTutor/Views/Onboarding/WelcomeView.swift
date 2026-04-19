@@ -39,7 +39,7 @@ struct WelcomeView: View {
             Spacer()
 
             VStack(spacing: 16) {
-                AdvanceHintView("press to begin", action: onStartLearning)
+                AdvanceHintView("to begin", action: onStartLearning)
 
                 kindaVimStatus
             }

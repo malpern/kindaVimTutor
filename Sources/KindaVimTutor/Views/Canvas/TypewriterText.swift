@@ -121,17 +121,22 @@ struct TypewriterText: View {
         onComplete?()
     }
 
+    /// Multiplier applied to every computed delay. Lower is faster.
+    /// 0.75 makes the typewriter 25% quicker overall while keeping the
+    /// relative cadence between letters, punctuation, and pauses intact.
+    private static let speedFactor: Double = 0.75
+
     private func typingDelay(for action: TypingAction) -> TimeInterval {
+        let raw: TimeInterval
         switch action {
         case .pause(let duration):
-            return duration
+            raw = duration
 
         case .backspace:
-            return Double.random(in: 0.028...0.056)
+            raw = Double.random(in: 0.028...0.056)
 
         case .type(let char):
             var delay: TimeInterval = Double.random(in: 0.032...0.072)
-
             if ".!?".contains(char) {
                 delay = Double.random(in: 0.176...0.304)
             } else if ",;:".contains(char) {
@@ -143,9 +148,9 @@ struct TypewriterText: View {
             } else if char.isUppercase {
                 delay += Double.random(in: 0.016...0.04)
             }
-
-            return delay
+            raw = delay
         }
+        return raw * Self.speedFactor
     }
 
     private func buildTypingActions(for text: String) -> [TypingAction] {
