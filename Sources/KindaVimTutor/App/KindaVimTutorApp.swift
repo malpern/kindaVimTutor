@@ -16,23 +16,10 @@ struct KindaVimTutorApp: App {
         Window("kindaVim Tutor", id: "main") {
             mainUI
             .toolbar {
-                ToolbarItem(placement: .automatic) {
-                    ToolbarModeBadge(monitor: appState.modeMonitor)
-                }
-                ToolbarItem(placement: .automatic) {
-                    Button {
-                        showStats.toggle()
-                    } label: {
-                        AchievementRingsView(
-                            lessonsProgress: Double(appState.progressStore.completedLessonCount) / max(Double(appState.progressStore.totalLessons), 1),
-                            exercisesProgress: Double(appState.progressStore.completedExerciseCount) / max(Double(appState.progressStore.totalExercises), 1),
-                            streakProgress: 0,
-                            compact: true
-                        )
-                    }
-                    .popover(isPresented: $showStats) {
-                        StatsView(progressStore: appState.progressStore)
-                    }
+                if #available(macOS 26.0, *) {
+                    toolbarContent.sharedBackgroundVisibility(.hidden)
+                } else {
+                    toolbarContent
                 }
             }
             .frame(minWidth: 900, minHeight: 600)
@@ -55,6 +42,28 @@ struct KindaVimTutorApp: App {
 
         Settings {
             SettingsView(progressStore: appState.progressStore)
+        }
+    }
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItem(placement: .automatic) {
+            ToolbarModeBadge(monitor: appState.modeMonitor)
+        }
+        ToolbarItem(placement: .automatic) {
+            Button {
+                showStats.toggle()
+            } label: {
+                AchievementRingsView(
+                    lessonsProgress: Double(appState.progressStore.completedLessonCount) / max(Double(appState.progressStore.totalLessons), 1),
+                    exercisesProgress: Double(appState.progressStore.completedExerciseCount) / max(Double(appState.progressStore.totalExercises), 1),
+                    streakProgress: 0,
+                    compact: true
+                )
+            }
+            .popover(isPresented: $showStats) {
+                StatsView(progressStore: appState.progressStore)
+            }
         }
     }
 
