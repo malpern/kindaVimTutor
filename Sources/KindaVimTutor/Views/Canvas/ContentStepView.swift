@@ -206,6 +206,10 @@ struct ContentStepView: View {
         case .modeFlowNarrative:
             ModeFlowNarrativeView()
 
+        case .modesDemo:
+            ModesDemoView()
+                .padding(.vertical, 4)
+
         case .linkTip(let symbol, let accent, let label, let url):
             linkTipView(symbol: symbol, accent: accent, label: label, url: url)
 

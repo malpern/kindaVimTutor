@@ -18,6 +18,10 @@ enum ContentBlock: Sendable {
     /// Hand-crafted prose paragraph describing the typical mode-flip flow,
     /// with inline mode chips rendered directly inside the text.
     case modeFlowNarrative
+    /// Animated show-rather-than-tell demonstration of Insert vs Normal
+    /// mode. Plays a scripted sequence with a caret, a pressed-key chip,
+    /// a mode chip, and a caption. Loops until the student advances.
+    case modesDemo
     /// External link rendered in a tip-style container. Opens in the
     /// user's default browser.
     case linkTip(sfSymbol: String, accent: LinkAccent, label: String, url: String)

@@ -83,6 +83,9 @@ struct ExplanationView: View {
         case .modeFlowNarrative:
             ModeFlowNarrativeView()
 
+        case .modesDemo:
+            ModesDemoView()
+
         case .linkTip(_, _, let label, let url):
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "lightbulb")
