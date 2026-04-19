@@ -99,10 +99,15 @@ struct ModeIndicatorSpotlightView: View {
 
 // MARK: - Arrow geometry
 
-/// Bezier from the lower-left of the view up toward the upper-right,
-/// landing just above the view's own top edge (the real mode chip in
-/// the toolbar sits just past that edge). The arrowhead chevrons are
-/// appended to the same path so trim reveals them alongside the curve.
+/// Swooping cubic bezier from the lower-left of the view up and over
+/// to the upper-right, landing just above the view's own top edge
+/// where the live mode chip sits in the toolbar. Cubic (two control
+/// points) rather than quadratic gives a properly swoopy arc — the
+/// stroke rises steeply before sweeping right into the tip rather
+/// than tracing a near-straight diagonal.
+///
+/// The arrowhead chevrons are appended to the same Path so trim
+/// reveals them together with the curve as one pointing gesture.
 private struct SpotlightArrow: Shape {
     let size: CGSize
 
@@ -110,11 +115,19 @@ private struct SpotlightArrow: Shape {
     private static let headLen: CGFloat = 14
 
     static func startPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.38, y: size.height * 0.62)
+        CGPoint(x: size.width * 0.30, y: size.height * 0.75)
     }
 
-    static func controlPoint(in size: CGSize) -> CGPoint {
-        CGPoint(x: size.width * 0.70, y: size.height * 0.22)
+    /// First control point — directly above the start. Pulls the
+    /// curve STRAIGHT UP out of the tail.
+    static func control1(in size: CGSize) -> CGPoint {
+        CGPoint(x: size.width * 0.32, y: size.height * 0.15)
+    }
+
+    /// Second control point — up and left of the tip. Pulls the curve
+    /// OVER toward the right to glide into the arrowhead.
+    static func control2(in size: CGSize) -> CGPoint {
+        CGPoint(x: size.width * 0.70, y: -60)
     }
 
     /// The tip lands slightly above the spotlight's own top edge so
@@ -127,23 +140,21 @@ private struct SpotlightArrow: Shape {
     func path(in rect: CGRect) -> Path {
         var p = Path()
         let start = Self.startPoint(in: size)
-        let control = Self.controlPoint(in: size)
+        let c1 = Self.control1(in: size)
+        let c2 = Self.control2(in: size)
         let end = Self.endPoint(in: size)
 
         p.move(to: start)
-        p.addQuadCurve(to: end, control: control)
+        p.addCurve(to: end, control1: c1, control2: c2)
 
-        // Arrowhead chevrons — two short legs from the tip angled
-        // back along the curve's end tangent. Tangent of a quadratic
-        // bezier at t=1 is (end - control), which points along the
-        // direction of travel at the tip.
-        let dx = end.x - control.x
-        let dy = end.y - control.y
+        // Arrowhead chevrons — legs from the tip angled back along
+        // the curve's end tangent. Tangent of a cubic bezier at t=1
+        // is (end - c2).
+        let dx = end.x - c2.x
+        let dy = end.y - c2.y
         let len = max(sqrt(dx * dx + dy * dy), 0.001)
-        let ux = dx / len, uy = dy / len   // unit tangent at tip
+        let ux = dx / len, uy = dy / len
 
-        // Rotate tangent by ±140° to get the chevron leg directions,
-        // then walk back from the tip by `headLen`.
         let angle: CGFloat = .pi * (140.0 / 180.0)
         let cosA = cos(angle), sinA = sin(angle)
         let leftDX  = ux * cosA - uy * sinA
@@ -156,9 +167,6 @@ private struct SpotlightArrow: Shape {
         let rightLeg = CGPoint(x: end.x + rightDX * Self.headLen,
                                y: end.y + rightDY * Self.headLen)
 
-        // Draw the chevrons as part of the same path so trim animates
-        // through them in order: curve -> left leg (pen back to tip)
-        // -> right leg. The small retracing produces the V shape.
         p.addLine(to: leftLeg)
         p.move(to: end)
         p.addLine(to: rightLeg)
