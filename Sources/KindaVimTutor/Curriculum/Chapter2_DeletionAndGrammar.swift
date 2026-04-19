@@ -30,14 +30,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch2.l1.e1",
-                instruction: "Delete the UPPERCASE word using dw",
+                instruction: "Delete the UPPERCASE word using `dw`",
                 initialText: "\n\n\n// Use w to reach the UPPERCASE word, then dw\nThe QUICK brown fox jumps\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 78,
                 expectedText: "\n\n\n// Use w to reach the UPPERCASE word, then dw\nThe brown fox jumps\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to the start of the uppercase word, then press dw"],
+                hints: ["Move to the start of the uppercase word, then press `dw`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Use w to reach the UPPERCASE word, then dw\nA BAD sentence shows up\n\n\n\n\n\n\n", initialCursorPosition: 2, expectedText: "\n\n\n\n\n\n// Use w to reach the UPPERCASE word, then dw\nA sentence shows up\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Use w to reach the UPPERCASE word, then dw\nThe UGLY result came back\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n\n\n\n\n\n\n\n// Use w to reach the UPPERCASE word, then dw\nThe result came back\n\n\n\n", expectedCursorPosition: nil),
@@ -67,14 +67,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch2.l2.e1",
-                instruction: "Delete from the uppercase word to the end of the line using D",
+                instruction: "Delete from the uppercase word to the end of the line using `D`",
                 initialText: "\n\n\n// Go to the UPPERCASE word, then D\nKeep this part DELETE ALL OF THIS\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 74,
                 expectedText: "\n\n\n// Go to the UPPERCASE word, then D\nKeep this part \n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to the first uppercase letter, then press D"],
+                hints: ["Move to the first uppercase letter, then press `D`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to the UPPERCASE word, then D\nGood code stays BAD CODE GOES\n\n\n\n\n\n\n", initialCursorPosition: 73, expectedText: "\n\n\n\n\n\n// Go to the UPPERCASE word, then D\nGood code stays \n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to the UPPERCASE word, then D\nFirst half lives REMOVE THIS\n\n\n\n", initialCursorPosition: 7, expectedText: "\n\n\n\n\n\n\n\n\n// Go to the UPPERCASE word, then D\nFirst half lives \n\n\n\n", expectedCursorPosition: nil),
@@ -109,14 +109,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch2.l3.e1",
-                instruction: "Delete the line marked DELETE using dd",
+                instruction: "Delete the line marked DELETE using `dd`",
                 initialText: "\n\n\n// Use j to reach the DELETE line, then dd\nLine one stays put\n// DELETE this line\nLine three stays put\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 2,
                 expectedText: "\n\n\n// Use j to reach the DELETE line, then dd\nLine one stays put\nLine three stays put\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to the marked line with j, then press dd"],
+                hints: ["Move to the marked line with `j`, then press `dd`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Use j to reach the DELETE line, then dd\nLine one stays put\n// DELETE this line\nLine three stays put\n\n\n\n\n", initialCursorPosition: 112, expectedText: "\n\n\n\n\n\n// Use j to reach the DELETE line, then dd\nLine one stays put\nLine three stays put\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Use j to reach the DELETE line, then dd\nLine one stays put\n// DELETE this line\nLine three stays put\n\n", initialCursorPosition: 2, expectedText: "\n\n\n\n\n\n\n\n\n// Use j to reach the DELETE line, then dd\nLine one stays put\nLine three stays put\n\n", expectedCursorPosition: nil),
@@ -149,14 +149,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch2.l4.e1",
-                instruction: "Use de to delete from cursor to end of the UPPERCASE word",
+                instruction: "Use `de` to delete from cursor to end of the UPPERCASE word",
                 initialText: "\n\n\n// Go to the UPPERCASE word, then de (stops at word end)\nKeep the EXTRA bits here\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 94,
                 expectedText: "\n\n\n// Go to the UPPERCASE word, then de (stops at word end)\nKeep the  bits here\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to the start of the uppercase word, then press de"],
+                hints: ["Move to the start of the uppercase word, then press `de`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to the UPPERCASE word, then de (stops at word end)\nRead LOUD part again soon\n\n\n\n\n\n\n", initialCursorPosition: 93, expectedText: "\n\n\n\n\n\n// Go to the UPPERCASE word, then de (stops at word end)\nRead  part again soon\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to the UPPERCASE word, then de (stops at word end)\nSome BIG thing stays put\n\n\n\n", initialCursorPosition: 8, expectedText: "\n\n\n\n\n\n\n\n\n// Go to the UPPERCASE word, then de (stops at word end)\nSome  thing stays put\n\n\n\n", expectedCursorPosition: nil),
@@ -189,14 +189,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch2.l5.e1",
-                instruction: "Use a count + w to jump directly to the * and delete it with x",
+                instruction: "Use `a` count + w to jump directly to the * and delete it with `x`",
                 initialText: "\n\n\n// Use a count + w (e.g. 3w) to reach *, then x\none two * three four\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 0,
                 expectedText: "\n\n\n// Use a count + w (e.g. 3w) to reach *, then x\none two  three four\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Type 3w to jump 3 words forward to the *, then x"],
+                hints: ["Type 3w to jump 3 words forward to the *, then `x`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Use a count + w (e.g. 3w) to reach *, then x\nred blue green * yellow\n\n\n\n\n\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n// Use a count + w (e.g. 3w) to reach *, then x\nred blue green  yellow\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Use a count + w (e.g. 3w) to reach *, then x\na b c * d e\n\n\n\n", initialCursorPosition: 72, expectedText: "\n\n\n\n\n\n\n\n\n// Use a count + w (e.g. 3w) to reach *, then x\na b c  d e\n\n\n\n", expectedCursorPosition: nil),
@@ -228,14 +228,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch2.l6.e1",
-                instruction: "Use d2w to delete the two UPPERCASE words",
+                instruction: "Use `d2w` to delete the two UPPERCASE words",
                 initialText: "\n\n\n// Navigate to the first UPPERCASE word, then d2w\nSome BAD LOUD words here\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 84,
                 expectedText: "\n\n\n// Navigate to the first UPPERCASE word, then d2w\nSome words here\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to 'DELETE', then type d2w"],
+                hints: ["Move to 'DELETE', then type `d2w`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Navigate to the first UPPERCASE word, then d2w\nA UGLY NASTY thing lives\n\n\n\n\n\n\n", initialCursorPosition: 81, expectedText: "\n\n\n\n\n\n// Navigate to the first UPPERCASE word, then d2w\nA thing lives\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Navigate to the first UPPERCASE word, then d2w\nOur FAST BIG train runs\n\n\n\n", initialCursorPosition: 8, expectedText: "\n\n\n\n\n\n\n\n\n// Navigate to the first UPPERCASE word, then d2w\nOur train runs\n\n\n\n", expectedCursorPosition: nil),

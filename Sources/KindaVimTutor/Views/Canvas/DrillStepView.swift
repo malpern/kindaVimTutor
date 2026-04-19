@@ -38,9 +38,9 @@ struct DrillStepView: View {
                 .tracking(0.8)
 
                 // Instruction
-                Text(exercise.instruction)
-                    .font(.system(size: 18, weight: .regular))
-                    .lineSpacing(4)
+                AnnotatedText(string: exercise.instruction,
+                              font: .system(size: 18, weight: .regular),
+                              capSize: .small)
 
                 // Editor
                 if let variation = engine.currentVariation {
@@ -101,11 +101,6 @@ struct DrillStepView: View {
 
             Spacer()
                 .frame(minHeight: 80)
-
-            if false {
-                // Advance CTA is rendered at the canvas level on drill complete.
-                EmptyView()
-            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(.horizontal, 56)

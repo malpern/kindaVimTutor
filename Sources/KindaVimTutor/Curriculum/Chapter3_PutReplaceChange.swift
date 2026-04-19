@@ -31,14 +31,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch3.l1.e1",
-                instruction: "Swap the lines: delete line B with dd, move down, paste with p",
+                instruction: "Swap the lines: delete line B with `dd`, move down, paste with `p`",
                 initialText: "\n\n\n// Reorder: dd the out-of-order line, move, then p\nA) First\nC) Third\nB) Second\nD) Fourth\n\n\n\n\n\n\n",
                 initialCursorPosition: 96,
                 expectedText: "\n\n\n// Reorder: dd the out-of-order line, move, then p\nA) First\nB) Second\nC) Third\nD) Fourth\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["On the out-of-order line, press dd, move to the correct spot, press p"],
+                hints: ["On the out-of-order line, press `dd`, move to the correct spot, press `p`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\n1. Wake\n3. Work\n2. Eat\n4. Sleep\n\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\n1. Wake\n2. Eat\n3. Work\n4. Sleep\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\nred\nblue\ngreen\nyellow\n", initialCursorPosition: 8, expectedText: "\n\n\n\n\n\n\n\n\n// Reorder: dd the out-of-order line, move, then p\nred\ngreen\nblue\nyellow\n", expectedCursorPosition: nil),
@@ -69,14 +69,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch3.l2.e1",
-                instruction: "Fix the wrong letter using r — change * to the correct character shown after //",
+                instruction: "Fix the wrong letter using `r` — change * to the correct character shown after //",
                 initialText: "\n\n\n// Navigate to the *, then ra\nThe c*t sat on a mat\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 55,
                 expectedText: "\n\n\n// Navigate to the *, then ra\nThe cat sat on a mat\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to *, press r, then type the letter shown after //"],
+                hints: ["Move to *, press `r`, then type the letter shown after //"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Navigate to the *, then ra\nWe r*n fast to home\n\n\n\n\n\n\n", initialCursorPosition: 3, expectedText: "\n\n\n\n\n\n// Navigate to the *, then ra\nWe ran fast to home\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Navigate to the *, then rr\nA fi*e alarm rang loud\n\n\n\n", initialCursorPosition: 6, expectedText: "\n\n\n\n\n\n\n\n\n// Navigate to the *, then rr\nA fire alarm rang loud\n\n\n\n", expectedCursorPosition: nil),
@@ -107,14 +107,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch3.l3.e1",
-                instruction: "Change the WRONG word to RIGHT using ce",
+                instruction: "Change the WRONG word to RIGHT using `ce`",
                 initialText: "\n\n\n// Go to UPPERCASE, cw then type \"new\" + Esc\nSet OLD value now please\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 2,
                 expectedText: "\n\n\n// Go to UPPERCASE, cw then type \"new\" + Esc\nSet new value now please\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to WRONG, press ce, type RIGHT, press Esc"],
+                hints: ["Move to WRONG, press `ce`, type RIGHT, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to UPPERCASE, cw then type \"right\" + Esc\nThe WRONG answer stood out\n\n\n\n\n\n\n", initialCursorPosition: 85, expectedText: "\n\n\n\n\n\n// Go to UPPERCASE, cw then type \"right\" + Esc\nThe right answer stood out\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to UPPERCASE, cw then type \"good\" + Esc\nA BAD choice was made\n\n\n\n", initialCursorPosition: 80, expectedText: "\n\n\n\n\n\n\n\n\n// Go to UPPERCASE, cw then type \"good\" + Esc\nA good choice was made\n\n\n\n", expectedCursorPosition: nil),
@@ -145,14 +145,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch3.l4.e1",
-                instruction: "Use C to replace everything after | with the text shown in // comment",
+                instruction: "Use `C` to replace everything after | with the text shown in // comment",
                 initialText: "\n\n\n// Go to |, C then type \"good end\" + Esc\nGood start |XXXXX\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 69,
                 expectedText: "\n\n\n// Go to |, C then type \"good end\" + Esc\nGood start good end\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to |, press C, type what the // comment says, press Esc"],
+                hints: ["Move to |, press `C`, type what the // comment says, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to |, C then type \"is clear now\" + Esc\nThe path |YYYYYYY\n\n\n\n\n\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n// Go to |, C then type \"is clear now\" + Esc\nThe path is clear now\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to |, C then type \"go home soon\" + Esc\nI will |ZZZZZZZZZ\n\n\n\n", initialCursorPosition: 8, expectedText: "\n\n\n\n\n\n\n\n\n// Go to |, C then type \"go home soon\" + Esc\nI will go home soon\n\n\n\n", expectedCursorPosition: nil),
@@ -184,14 +184,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch3.l5.e1",
-                instruction: "Add 'Line two' between the lines using o",
+                instruction: "Add 'Line two' between the lines using `o`",
                 initialText: "\n\n\n// On \"Line one\", press o, type \"Line two\" + Esc\nLine one\nLine three\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 78,
                 expectedText: "\n\n\n// On \"Line one\", press o, type \"Line two\" + Esc\nLine one\nLine two\nLine three\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["On the upper line, press o, type the new line, press Esc"],
+                hints: ["On the upper line, press `o`, type the new line, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// On \"First part\", press o, type \"Second part\" + Esc\nFirst part\nThird part\n\n\n\n\n\n", initialCursorPosition: 82, expectedText: "\n\n\n\n\n\n// On \"First part\", press o, type \"Second part\" + Esc\nFirst part\nSecond part\nThird part\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// On \"Step 1\", press o, type \"Step 2\" + Esc\nStep 1\nStep 3\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n\n\n\n// On \"Step 1\", press o, type \"Step 2\" + Esc\nStep 1\nStep 2\nStep 3\n\n\n", expectedCursorPosition: nil),

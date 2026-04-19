@@ -40,14 +40,14 @@ extension Curriculum {
             // Exercise 1: Move down with j — navigate to the * and delete it
             Exercise(
                 id: "ch1.l1.e1",
-                instruction: "Move down to the * using j, then delete it with x",
+                instruction: "Move down to the * using `j`, then delete it with `x`",
                 initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n*\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 53,
                 expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press j repeatedly to move down, then x to delete the *"],
+                hints: ["Press `j` repeatedly to move down, then `x` to delete the *"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n*\n\n\n\n\n\n\n\n", initialCursorPosition: 53, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n*\n\n\n\n\n\n", initialCursorPosition: 54, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
@@ -59,14 +59,14 @@ extension Curriculum {
             // Exercise 2: Move up with k — navigate to the * and delete it
             Exercise(
                 id: "ch1.l1.e2",
-                instruction: "Move up to the * using k, then delete it with x",
+                instruction: "Move up to the * using `k`, then delete it with `x`",
                 initialText: "// Move up with k to reach *, then x to delete it\n\n*\n\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 55,
                 expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press k repeatedly to move up, then x to delete the *"],
+                hints: ["Press `k` repeatedly to move up, then `x` to delete the *"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n*\n\n\n\n\n\n\n\n\n\n\n", initialCursorPosition: 57, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n\n*\n\n\n\n\n\n\n\n\n\n", initialCursorPosition: 59, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
@@ -78,14 +78,14 @@ extension Curriculum {
             // Exercise 3: Move right with l — navigate to the * and delete it
             Exercise(
                 id: "ch1.l1.e3",
-                instruction: "Move right to the * using l, then delete it with x",
+                instruction: "Move right to the * using `l`, then delete it with `x`",
                 initialText: "\n\n// Move right with l to reach *, then x to delete it\n        *\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 55,
                 expectedText: "\n\n// Move right with l to reach *, then x to delete it\n        \n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press l repeatedly to move right, then x to delete the *"],
+                hints: ["Press `l` repeatedly to move right, then `x` to delete the *"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Move right with l to reach *, then x to delete it\n              *\n\n\n\n\n\n\n\n", initialCursorPosition: 58, expectedText: "\n\n\n\n\n// Move right with l to reach *, then x to delete it\n              \n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                    *\n\n\n\n\n", initialCursorPosition: 61, expectedText: "\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                    \n\n\n\n\n", expectedCursorPosition: nil),
@@ -97,14 +97,14 @@ extension Curriculum {
             // Exercise 4: Combined hjkl — navigate to the * anywhere on the grid
             Exercise(
                 id: "ch1.l1.e4",
-                instruction: "Navigate to the * using h, j, k, l and delete it with x",
+                instruction: "Navigate to the * using `h`, `j`, `k`, `l` and delete it with `x`",
                 initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . * . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n",
                 initialCursorPosition: 56,
                 expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. .   . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Use j/k to move vertically, h/l to move horizontally"],
+                hints: ["Use `j`/`k` to move vertically, `h`/`l` to move horizontally"],
                 difficulty: .practice,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . * . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . .   . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n* . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n  . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
@@ -135,12 +135,12 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l2.e1",
-                instruction: "Fix the sentence by deleting the extra characters with x",
+                instruction: "Fix the sentence by deleting the extra characters with `x`",
                 initialText: "\n\n// Navigate to the duplicate letter and press x\nThe ccow jumped\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 71,
                 expectedText: "\n\n// Navigate to the duplicate letter and press x\nThe cow jumped\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to the extra 'c' and press x"],
+                hints: ["Move to the extra 'c' and press `x`"],
                 difficulty: .learn,
                 drillCount: 5,
                 variations: [
@@ -175,14 +175,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l3.e1",
-                instruction: "Press i to enter Insert mode, type \"Hello\", then press Esc",
+                instruction: "Press `i` to enter Insert mode, type \"Hello\", then press `Esc`",
                 initialText: "\n\n// Fix the typo by inserting \"n\" with i\nfunctio test\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 62,
                 expectedText: "\n\n// Fix the typo by inserting \"n\" with i\nfunction test\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Navigate to the gap, press i, type the missing letter, press Esc"],
+                hints: ["Navigate to the gap, press `i`, type the missing letter, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Fix the typo by inserting \"n\" with i\nretur value\n\n\n\n\n\n\n\n", initialCursorPosition: 61, expectedText: "\n\n\n\n\n// Fix the typo by inserting \"n\" with i\nreturn value\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Fix the typo by inserting \"t\" with i\nprin message\n\n\n\n\n", initialCursorPosition: 5, expectedText: "\n\n\n\n\n\n\n\n// Fix the typo by inserting \"t\" with i\nprint message\n\n\n\n\n", expectedCursorPosition: nil),
@@ -193,14 +193,14 @@ extension Curriculum {
             ),
             Exercise(
                 id: "ch1.l3.e2",
-                instruction: "Insert a missing word using i",
+                instruction: "Insert a missing word using `i`",
                 initialText: "\n\n// Insert \"some\" using i (press i, type, Esc)\nThere is text missing\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 77,
                 expectedText: "\n\n// Insert \"some\" using i (press i, type, Esc)\nThere is some text missing\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to the right spot, press i, type the word + space, press Esc"],
+                hints: ["Move to the right spot, press `i`, type the word + space, press `Esc`"],
                 difficulty: .practice,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Insert \"just\" using i (press i, type, Esc)\nI ate breakfast\n\n\n\n\n\n\n\n", initialCursorPosition: 68, expectedText: "\n\n\n\n\n// Insert \"just\" using i (press i, type, Esc)\nI just ate breakfast\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Insert \"it\" using i (press i, type, Esc)\nDo it now\n\n\n\n\n", initialCursorPosition: 63, expectedText: "\n\n\n\n\n\n\n\n// Insert \"it\" using i (press i, type, Esc)\nDo it it now\n\n\n\n\n", expectedCursorPosition: nil),
@@ -232,14 +232,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l4.e1",
-                instruction: "Complete the line using A. It should read \"This line is complete.\"",
+                instruction: "Complete the line using `A`. It should read \"This line is complete.\"",
                 initialText: "\n\n// Use A to append \"complete.\" at the end\nThis line is\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 62,
                 expectedText: "\n\n// Use A to append \"complete.\" at the end\nThis line is complete.\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press A to jump to end and enter Insert mode, type the suffix, press Esc"],
+                hints: ["Press `A` to jump to end and enter Insert mode, type the suffix, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Use A to append \"powerful.\" at the end\nVim is\n\n\n\n\n\n\n\n", initialCursorPosition: 3, expectedText: "\n\n\n\n\n// Use A to append \"powerful.\" at the end\nVim is powerful.\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Use A to append \"ready.\" at the end\nI am\n\n\n\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n\n\n// Use A to append \"ready.\" at the end\nI am ready.\n\n\n\n\n", expectedCursorPosition: nil),
@@ -255,7 +255,7 @@ extension Curriculum {
                 initialCursorPosition: 0,
                 expectedText: "Vim is powerful.",
                 expectedCursorPosition: nil,
-                hints: ["Press A, type \" powerful.\", press Esc"],
+                hints: ["Press `A`, type \" powerful.\", press `Esc`"],
                 difficulty: .practice
             ),
         ],
@@ -281,12 +281,12 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l5.e1",
-                instruction: "The word \"world\" was deleted by mistake. Press u to undo and restore it.",
+                instruction: "The word \"world\" was deleted by mistake. Press `u` to undo and restore it.",
                 initialText: "Hello ",
                 initialCursorPosition: 5,
                 expectedText: "Hello world",
                 expectedCursorPosition: nil,
-                hints: ["Press u to undo the last change"],
+                hints: ["Press `u` to undo the last change"],
                 difficulty: .learn
             ),
         ],
@@ -314,12 +314,12 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l6.e1",
-                instruction: "Jump from the beginning to the word \"fox\" using w",
+                instruction: "Jump from the beginning to the word \"fox\" using `w`",
                 initialText: "\n\n// Use w to jump forward to \"fox\"\nA sly fox chased rabbits\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 36,
                 expectedText: "\n\n// Use w to jump forward to \"fox\"\nA sly fox chased rabbits\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 42,
-                hints: ["Press w three times: The → quick → brown → fox"],
+                hints: ["Press `w` three times: The → quick → brown → fox"],
                 difficulty: .learn,
                 drillCount: 5,
                 variations: [
@@ -332,14 +332,14 @@ extension Curriculum {
             ),
             Exercise(
                 id: "ch1.l6.e2",
-                instruction: "Jump backward from the end to \"quick\" using b",
+                instruction: "Jump backward from the end to \"quick\" using `b`",
                 initialText: "\n\n// Start at end of line, use b to jump back to \"quick\"\nThe quick brown fox jumps\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 81,
                 expectedText: "\n\n// Start at end of line, use b to jump back to \"quick\"\nThe quick brown fox jumps\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 61,
-                hints: ["From end of line, press b to jump back word-by-word"],
+                hints: ["From end of line, press `b` to jump back word-by-word"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Start at end of line, use b to jump back to \"quick\"\nA quick brown cat ran\n\n\n\n\n\n\n\n", initialCursorPosition: 80, expectedText: "\n\n\n\n\n// Start at end of line, use b to jump back to \"quick\"\nA quick brown cat ran\n\n\n\n\n\n\n\n", expectedCursorPosition: 62),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Start at end of line, use b to jump back to \"quick\"\nSee the quick deer run\n\n\n\n\n", initialCursorPosition: 84, expectedText: "\n\n\n\n\n\n\n\n// Start at end of line, use b to jump back to \"quick\"\nSee the quick deer run\n\n\n\n\n", expectedCursorPosition: 71),
@@ -350,14 +350,14 @@ extension Curriculum {
             ),
             Exercise(
                 id: "ch1.l6.e3",
-                instruction: "Jump to the end of \"brown\" using e",
+                instruction: "Jump to the end of \"brown\" using `e`",
                 initialText: "\n\n// Use e to jump to the end of \"brown\"\nThe quick brown fox jumps\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 49,
                 expectedText: "\n\n// Use e to jump to the end of \"brown\"\nThe quick brown fox jumps\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 55,
-                hints: ["Press e to jump to the end of the current/next word"],
+                hints: ["Press `e` to jump to the end of the current/next word"],
                 difficulty: .practice,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Use e to jump to the end of \"brown\"\nSee the brown bear walk\n\n\n\n\n\n\n\n", initialCursorPosition: 50, expectedText: "\n\n\n\n\n// Use e to jump to the end of \"brown\"\nSee the brown bear walk\n\n\n\n\n\n\n\n", expectedCursorPosition: 56),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Use e to jump to the end of \"brown\"\nA big brown dog barks\n\n\n\n\n", initialCursorPosition: 51, expectedText: "\n\n\n\n\n\n\n\n// Use e to jump to the end of \"brown\"\nA big brown dog barks\n\n\n\n\n", expectedCursorPosition: 57),
@@ -390,12 +390,12 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch1.l7.e1",
-                instruction: "Jump to the end of the line using $",
+                instruction: "Jump to the end of the line using `$`",
                 initialText: "\n\n// Use $ to jump to the end of the line\nJump to the very end of this line\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 42,
                 expectedText: "\n\n// Use $ to jump to the end of the line\nJump to the very end of this line\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 74,
-                hints: ["Press $ to jump to the last character"],
+                hints: ["Press `$` to jump to the last character"],
                 difficulty: .learn,
                 drillCount: 5,
                 variations: [
@@ -408,14 +408,14 @@ extension Curriculum {
             ),
             Exercise(
                 id: "ch1.l7.e2",
-                instruction: "Jump to the beginning of the line using 0",
+                instruction: "Jump to the beginning of the line using `0`",
                 initialText: "\n\n// Use 0 to jump to the first character of the line\nGet back to the start\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 74,
                 expectedText: "\n\n// Use 0 to jump to the first character of the line\nGet back to the start\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 54,
-                hints: ["Press 0 to jump to the first character"],
+                hints: ["Press `0` to jump to the first character"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Use 0 to jump to the first character of the line\nGo all the way left\n\n\n\n\n\n\n\n", initialCursorPosition: 75, expectedText: "\n\n\n\n\n// Use 0 to jump to the first character of the line\nGo all the way left\n\n\n\n\n\n\n\n", expectedCursorPosition: 57),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Use 0 to jump to the first character of the line\nReturn to the beginning\n\n\n\n\n", initialCursorPosition: 82, expectedText: "\n\n\n\n\n\n\n\n// Use 0 to jump to the first character of the line\nReturn to the beginning\n\n\n\n\n", expectedCursorPosition: 60),
@@ -426,14 +426,14 @@ extension Curriculum {
             ),
             Exercise(
                 id: "ch1.l7.e3",
-                instruction: "Jump to the first non-space character using ^",
+                instruction: "Jump to the first non-space character using `^`",
                 initialText: "\n\n// Use ^ to jump to the first non-blank character\n    indented text here\n\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 73,
                 expectedText: "\n\n// Use ^ to jump to the first non-blank character\n    indented text here\n\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 56,
-                hints: ["Press ^ to jump past the leading spaces"],
+                hints: ["Press `^` to jump past the leading spaces"],
                 difficulty: .practice,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n// Use ^ to jump to the first non-blank character\n        deeply indented\n\n\n\n\n\n\n\n", initialCursorPosition: 77, expectedText: "\n\n\n\n\n// Use ^ to jump to the first non-blank character\n        deeply indented\n\n\n\n\n\n\n\n", expectedCursorPosition: 63),
                     .init(initialText: "\n\n\n\n\n\n\n\n// Use ^ to jump to the first non-blank character\n  two spaces first\n\n\n\n\n", initialCursorPosition: 75, expectedText: "\n\n\n\n\n\n\n\n// Use ^ to jump to the first non-blank character\n  two spaces first\n\n\n\n\n", expectedCursorPosition: 60),

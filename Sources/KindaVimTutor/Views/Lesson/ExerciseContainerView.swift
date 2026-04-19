@@ -35,9 +35,9 @@ struct ExerciseContainerView: View {
             Spacer().frame(height: 12)
 
             // Instruction
-            Text(exercise.instruction)
-                .font(Typography.body)
-                .lineSpacing(4)
+            AnnotatedText(string: exercise.instruction,
+                          font: Typography.body,
+                          capSize: .small)
 
             Spacer().frame(height: 12)
 

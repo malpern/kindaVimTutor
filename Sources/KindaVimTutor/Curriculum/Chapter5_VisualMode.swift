@@ -31,14 +31,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch5.l1.e1",
-                instruction: "Select the UPPERCASE text with v + motion, then delete with d",
+                instruction: "Select the UPPERCASE text with `v` + motion, then delete with `d`",
                 initialText: "\n\n\n// Go to UPPERCASE, v then e w e, then d\nKeep REMOVE THIS end.\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 67,
                 expectedText: "\n\n\n// Go to UPPERCASE, v then e w e, then d\nKeep  end.\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press v, then e w e to cover the UPPERCASE pair, then d"],
+                hints: ["Press `v`, then `e` w e to cover the UPPERCASE pair, then `d`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to UPPERCASE, v then e w e, then d\nGood DROP BAD ok.\n\n\n\n\n\n\n", initialCursorPosition: 69, expectedText: "\n\n\n\n\n\n// Go to UPPERCASE, v then e w e, then d\nGood  ok.\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to UPPERCASE, v then e w e, then d\nHi DELETE NOW bye.\n\n\n\n", initialCursorPosition: 2, expectedText: "\n\n\n\n\n\n\n\n\n// Go to UPPERCASE, v then e w e, then d\nHi  bye.\n\n\n\n", expectedCursorPosition: nil),
@@ -69,14 +69,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch5.l2.e1",
-                instruction: "Select the two marked lines with V + j, then delete with d",
+                instruction: "Select the two marked lines with `V` + j, then delete with `d`",
                 initialText: "\n\n\n// Go to the first marked line, V then j, then d\nKeep\n--- DELETE ---\n--- DELETE ---\nKeep\n\n\n\n\n\n\n",
                 initialCursorPosition: 0,
                 expectedText: "\n\n\n// Go to the first marked line, V then j, then d\nKeep\nKeep\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["On first marked line, press V, then j, then d"],
+                hints: ["On first marked line, press `V`, then `j`, then `d`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to the first marked line, V then j, then d\nStart\ndrop me\ndrop me too\nEnd\n\n\n\n", initialCursorPosition: 85, expectedText: "\n\n\n\n\n\n// Go to the first marked line, V then j, then d\nStart\nEnd\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to the first marked line, V then j, then d\nhead\ncut line A\ncut line B\nfoot\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n\n\n\n// Go to the first marked line, V then j, then d\nhead\nfoot\n", expectedCursorPosition: nil),
@@ -109,14 +109,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch5.l3.e1",
-                instruction: "Select 'lower' with ve, then toggle its case to 'LOWER' with ~",
+                instruction: "Select 'lower' with ve, then toggle its case to 'LOWER' with `~`",
                 initialText: "\n\n\n// Go to \"lower\", ve then ~ to uppercase it\nMake lower UPPER.\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 68,
                 expectedText: "\n\n\n// Go to \"lower\", ve then ~ to uppercase it\nMake LOWER UPPER.\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press v, then e to select the lowercase word, then ~ to toggle case"],
+                hints: ["Press `v`, then `e` to select the lowercase word, then `~` to toggle case"],
                 difficulty: .practice,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to \"small\", ve then ~ to uppercase it\nFlip small BIG now.\n\n\n\n\n\n\n", initialCursorPosition: 71, expectedText: "\n\n\n\n\n\n// Go to \"small\", ve then ~ to uppercase it\nFlip SMALL BIG now.\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to \"one\", ve then ~ to uppercase it\nChange one TWO.\n\n\n\n", initialCursorPosition: 6, expectedText: "\n\n\n\n\n\n\n\n\n// Go to \"one\", ve then ~ to uppercase it\nChange ONE TWO.\n\n\n\n", expectedCursorPosition: nil),

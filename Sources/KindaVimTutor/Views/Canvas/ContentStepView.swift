@@ -153,9 +153,9 @@ struct ContentStepView: View {
             // wrap (SwiftUI quirk with this view tree), so we keep the tip
             // visually lighter with a subtle leading border only.
             (
-                Text(Image(systemName: "lightbulb")).foregroundColor(.secondary)
+                Text(Image(systemName: "lightbulb")).foregroundStyle(.secondary)
                 + Text("  ")
-                + Text(text).foregroundColor(.secondary)
+                + Text(text).foregroundStyle(.secondary)
             )
             .font(.system(size: 15))
             .lineSpacing(4)
@@ -169,9 +169,9 @@ struct ContentStepView: View {
 
         case .important(let text):
             (
-                Text(Image(systemName: "exclamationmark.triangle")).foregroundColor(.orange)
+                Text(Image(systemName: "exclamationmark.triangle")).foregroundStyle(.orange)
                 + Text("  ")
-                + Text(text).foregroundColor(.secondary)
+                + Text(text).foregroundStyle(.secondary)
             )
             .font(.system(size: 15))
             .lineSpacing(4)

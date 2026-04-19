@@ -32,14 +32,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch6.l1.e1",
-                instruction: "Copy 'Hello ' with yw, move to end with $, paste with p",
+                instruction: "Copy 'Hello ' with `yw`, move to end with `$`, paste with `p`",
                 initialText: "\n\n\n// Go to start of line, yw then $ then p\nHello world\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 65,
                 expectedText: "\n\n\n// Go to start of line, yw then $ then p\nHello worldHello \n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["At start of line press yw, then $, then p"],
+                hints: ["At start of line press `yw`, then `$`, then `p`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to start of line, yw then $ then p\nBright sun\n\n\n\n\n\n\n", initialCursorPosition: 63, expectedText: "\n\n\n\n\n\n// Go to start of line, yw then $ then p\nBright sunBright \n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to start of line, yw then $ then p\nQuick fox\n\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n\n\n\n// Go to start of line, yw then $ then p\nQuick foxQuick \n\n\n\n", expectedCursorPosition: nil),
@@ -70,14 +70,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch6.l2.e1",
-                instruction: "Duplicate the line: yy to copy, then p to paste below",
+                instruction: "Duplicate the line: `yy` to copy, then `p` to paste below",
                 initialText: "\n\n\n// Go to the line, yy then p to duplicate\nCopy me down\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 60,
                 expectedText: "\n\n\n// Go to the line, yy then p to duplicate\nCopy me down\nCopy me down\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Go to the line, press yy, then p"],
+                hints: ["Go to the line, press `yy`, then `p`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to the line, yy then p to duplicate\nDuplicate this\n\n\n\n\n\n\n", initialCursorPosition: 69, expectedText: "\n\n\n\n\n\n// Go to the line, yy then p to duplicate\nDuplicate this\nDuplicate this\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to the line, yy then p to duplicate\nClone this line\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n\n\n\n\n\n\n\n// Go to the line, yy then p to duplicate\nClone this line\nClone this line\n\n\n\n", expectedCursorPosition: nil),
@@ -106,14 +106,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch6.l3.e1",
-                instruction: "Toggle the lowercase word to UPPERCASE by pressing ~ repeatedly",
+                instruction: "Toggle the lowercase word to UPPERCASE by pressing `~` repeatedly",
                 initialText: "\n\n\n// Go to \"hello\", press ~ for each letter\nMake hello loud.\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 66,
                 expectedText: "\n\n\n// Go to \"hello\", press ~ for each letter\nMake HELLO loud.\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Position on 'h', press ~ five times"],
+                hints: ["Position on 'h', press `~` five times"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to \"world\", press ~ for each letter\nSay world fast.\n\n\n\n\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n// Go to \"world\", press ~ for each letter\nSay WORLD fast.\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to \"power\", press ~ for each letter\nCall power up.\n\n\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n\n\n\n// Go to \"power\", press ~ for each letter\nCall POWER up.\n\n\n\n", expectedCursorPosition: nil),
@@ -150,7 +150,7 @@ extension Curriculum {
                 expectedCursorPosition: nil,
                 hints: ["Go to the line, then press >> to indent"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to the line, >> to indent it\nShift this right\n\n\n\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n\n\n\n\n// Go to the line, >> to indent it\n    Shift this right\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to the line, >> to indent it\nPush me over\n\n\n\n", initialCursorPosition: 58, expectedText: "\n\n\n\n\n\n\n\n\n// Go to the line, >> to indent it\n    Push me over\n\n\n\n", expectedCursorPosition: nil),
@@ -180,12 +180,12 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch6.l5.e1",
-                instruction: "Jump to the first line using gg, then delete the * with x",
+                instruction: "Jump to the first line using `gg`, then delete the * with `x`",
                 initialText: "* delete me\nLine two\nLine three\nLast\n\n\n// Press gg to jump to top, then x to delete *\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 37,
                 expectedText: " delete me\nLine two\nLine three\nLast\n\n\n// Press gg to jump to top, then x to delete *\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Press gg to jump to top, then x to delete *"],
+                hints: ["Press `gg` to jump to top, then `x` to delete *"],
                 difficulty: .learn,
                 drillCount: 5,
                 variations: [
@@ -217,14 +217,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch6.l6.e1",
-                instruction: "Use s to replace * with the letter shown after //",
+                instruction: "Use `s` to replace * with the letter shown after //",
                 initialText: "\n\n\n// Go to *, press s, type e + Esc\nh*llo\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 48,
                 expectedText: "\n\n\n// Go to *, press s, type e + Esc\nhello\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to *, press s, type the correct letter, press Esc"],
+                hints: ["Move to *, press `s`, type the correct letter, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to *, press s, type o + Esc\nw*rld\n\n\n\n\n\n\n", initialCursorPosition: 51, expectedText: "\n\n\n\n\n\n// Go to *, press s, type o + Esc\nworld\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to *, press s, type o + Esc\nc*de\n\n\n\n", initialCursorPosition: 1, expectedText: "\n\n\n\n\n\n\n\n\n// Go to *, press s, type o + Esc\ncode\n\n\n\n", expectedCursorPosition: nil),
@@ -253,14 +253,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch6.l7.e1",
-                instruction: "Use R to overwrite *** with the text shown after //",
+                instruction: "Use `R` to overwrite *** with the text shown after //",
                 initialText: "\n\n\n// Go to first X, press R, type \"123\" + Esc\nValue: XXX\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 58,
                 expectedText: "\n\n\n// Go to first X, press R, type \"123\" + Esc\nValue: 123\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Move to first *, press R, type 123, press Esc"],
+                hints: ["Move to first *, press `R`, type 123, press `Esc`"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Go to first X, press R, type \"abc\" + Esc\nCode: XXX\n\n\n\n\n\n\n", initialCursorPosition: 61, expectedText: "\n\n\n\n\n\n// Go to first X, press R, type \"abc\" + Esc\nCode: abc\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Go to first X, press R, type \"xyz\" + Esc\nKey: XXX\n\n\n\n", initialCursorPosition: 2, expectedText: "\n\n\n\n\n\n\n\n\n// Go to first X, press R, type \"xyz\" + Esc\nKey: xyz\n\n\n\n", expectedCursorPosition: nil),

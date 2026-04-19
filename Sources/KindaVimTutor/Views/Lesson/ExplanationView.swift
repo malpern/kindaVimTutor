@@ -62,10 +62,13 @@ struct ExplanationView: View {
             .background(AppColors.importantBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
 
         case .keyCommand(let keys, let description):
-            HStack(alignment: .top, spacing: 12) {
-                Text(keys.joined(separator: " "))
-                    .font(.system(size: 15, weight: .medium, design: .monospaced))
-                    .frame(minWidth: 56, alignment: .leading)
+            HStack(alignment: .center, spacing: 12) {
+                HStack(spacing: 6) {
+                    ForEach(Array(keys.enumerated()), id: \.offset) { _, key in
+                        KeyCapView(label: key, size: .small)
+                    }
+                }
+                .frame(minWidth: 72, alignment: .leading)
                 Text(description)
                     .font(Typography.body)
                     .foregroundStyle(.secondary)

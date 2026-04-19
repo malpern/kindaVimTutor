@@ -31,14 +31,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch4.l1.e1",
-                instruction: "Use f* to jump to the * and delete it with x",
+                instruction: "Use `f`* to jump to the * and delete it with `x`",
                 initialText: "\n\n\n// Use f* to jump to *, then x to delete it\nThe * is lost here\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 0,
                 expectedText: "\n\n\n// Use f* to jump to *, then x to delete it\nThe  is lost here\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: nil,
-                hints: ["Type f* to find the asterisk, then x to delete"],
+                hints: ["Type `f`* to find the asterisk, then `x` to delete"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Use f* to jump to *, then x to delete it\nPlease find * now\n\n\n\n\n\n\n", initialCursorPosition: 5, expectedText: "\n\n\n\n\n\n// Use f* to jump to *, then x to delete it\nPlease find  now\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Use f* to jump to *, then x to delete it\nA * needs removing\n\n\n\n", initialCursorPosition: 74, expectedText: "\n\n\n\n\n\n\n\n\n// Use f* to jump to *, then x to delete it\nA  needs removing\n\n\n\n", expectedCursorPosition: nil),
@@ -77,7 +77,7 @@ extension Curriculum {
                 expectedCursorPosition: nil,
                 hints: ["Position after (, then type dt)"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Navigate onto (, then dt) to delete up to )\n(ERASE ALL)\n\n\n\n\n\n\n", initialCursorPosition: 3, expectedText: "\n\n\n\n\n\n// Navigate onto (, then dt) to delete up to )\n()\n\n\n\n\n\n\n", expectedCursorPosition: nil),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Navigate onto (, then dt) to delete up to )\n(CLEAN UP NOW)\n\n\n\n", initialCursorPosition: 4, expectedText: "\n\n\n\n\n\n\n\n\n// Navigate onto (, then dt) to delete up to )\n()\n\n\n\n", expectedCursorPosition: nil),
@@ -109,14 +109,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch4.l3.e1",
-                instruction: "Use f. to find the first period, then ; to reach the last one",
+                instruction: "Use `f`. to find the first period, then `;` to reach the last one",
                 initialText: "\n\n\n// Use f. then ; repeatedly to reach the LAST period\nOne. Two. Three.\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 75,
                 expectedText: "\n\n\n// Use f. then ; repeatedly to reach the LAST period\nOne. Two. Three.\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 71,
-                hints: ["Type f. then ; twice to reach the last period"],
+                hints: ["Type `f`. then `;` twice to reach the last period"],
                 difficulty: .learn,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Use f. then ; repeatedly to reach the LAST period\nRed. Blue. Green.\n\n\n\n\n\n\n", initialCursorPosition: 77, expectedText: "\n\n\n\n\n\n// Use f. then ; repeatedly to reach the LAST period\nRed. Blue. Green.\n\n\n\n\n\n\n", expectedCursorPosition: 75),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Use f. then ; repeatedly to reach the LAST period\nA. B. C.\n\n\n\n", initialCursorPosition: 7, expectedText: "\n\n\n\n\n\n\n\n\n// Use f. then ; repeatedly to reach the LAST period\nA. B. C.\n\n\n\n", expectedCursorPosition: 69),
@@ -146,14 +146,14 @@ extension Curriculum {
         exercises: [
             Exercise(
                 id: "ch4.l4.e1",
-                instruction: "Use n to jump between occurrences of 'the'",
+                instruction: "Use `n` to jump between occurrences of 'the'",
                 initialText: "\n\n\n// Cmd+F search \"the\", close search, then n to reach the 3rd match\nFind the word. The word is the one here.\n\n\n\n\n\n\n\n\n\n",
                 initialCursorPosition: 2,
                 expectedText: "\n\n\n// Cmd+F search \"the\", close search, then n to reach the 3rd match\nFind the word. The word is the one here.\n\n\n\n\n\n\n\n\n\n",
                 expectedCursorPosition: 97,
-                hints: ["Search for 'the' with Cmd+F, close search, then use n to jump"],
+                hints: ["Search for 'the' with `Cmd+F`, close search, then use `n` to jump"],
                 difficulty: .practice,
-                drillCount: 10,
+                drillCount: 6,
                 variations: [
                     .init(initialText: "\n\n\n\n\n\n// Cmd+F search \"the\", close search, then n to reach the 3rd match\nSee the dog. The dog saw the cat.\n\n\n\n\n\n\n", initialCursorPosition: 112, expectedText: "\n\n\n\n\n\n// Cmd+F search \"the\", close search, then n to reach the 3rd match\nSee the dog. The dog saw the cat.\n\n\n\n\n\n\n", expectedCursorPosition: 98),
                     .init(initialText: "\n\n\n\n\n\n\n\n\n// Cmd+F search \"the\", close search, then n to reach the 3rd match\nPut the box. The box holds the key.\n\n\n\n", initialCursorPosition: 112, expectedText: "\n\n\n\n\n\n\n\n\n// Cmd+F search \"the\", close search, then n to reach the 3rd match\nPut the box. The box holds the key.\n\n\n\n", expectedCursorPosition: 103),
