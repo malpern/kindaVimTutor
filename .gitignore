@@ -2,3 +2,5 @@
 .build/
 *.app/
 .swiftpm/
+.vscode/
+outputs/
