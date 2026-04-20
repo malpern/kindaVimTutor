@@ -44,6 +44,10 @@ final class FinderDrillEngine {
     private(set) var state: State = .idle
     private(set) var folder: URL?
     private(set) var reps: [Rep] = []
+    /// Human-readable goal of this drill, shown at the top of the
+    /// coaching panel so the student always has context.
+    private(set) var title: String = "Finder Navigation"
+    private(set) var subtitle: String = "Move the selection to each red file using h j k l"
     private(set) var completedRepIndex: Int = 0
     private(set) var moveCount: Int = 0
     private(set) var elapsedTime: TimeInterval = 0
@@ -76,11 +80,17 @@ final class FinderDrillEngine {
     /// the AX observer, run reps sequentially. Returns false if the
     /// setup fails (e.g. AX not trusted or Finder not responding).
     @discardableResult
-    func start(reps: [Rep], rows: Int = 3, cols: Int = 4) async -> Bool {
+    func start(reps: [Rep],
+               title: String = "Finder Navigation",
+               subtitle: String = "Move the selection to each red file using h j k l",
+               rows: Int = 3,
+               cols: Int = 4) async -> Bool {
         guard !reps.isEmpty else { return false }
         stop()
         state = .preparing
         self.reps = reps
+        self.title = title
+        self.subtitle = subtitle
         self.completedRepIndex = 0
         self.results = []
 

@@ -43,6 +43,8 @@ enum FinderDrillPrototype {
         try? await Task.sleep(for: .milliseconds(700))
         activateFinderAndSwitchToIconView()
         try? await Task.sleep(for: .milliseconds(300))
+        await MainActor.run { moveFinderWindowToLeft() }
+        try? await Task.sleep(for: .milliseconds(200))
         // Clear the seed tag — the engine will re-tag the active rep's
         // target each time so the red dot always reflects the goal.
         tagURL(target, with: nil)
@@ -108,6 +110,21 @@ enum FinderDrillPrototype {
             AppLogger.shared.info("finderDrill", "tagFailed",
                                   fields: ["err": "\(error)"])
         }
+    }
+
+    // MARK: - Layout
+
+    /// Moves (without resizing) the focused Finder window to the
+    /// left side of the main screen. We don't set size because
+    /// Finder's icon view doesn't reflow on resize — clipping icons
+    /// if we shrink it. The coaching panel positions itself to the
+    /// right of wherever Finder ended up.
+    @MainActor
+    private static func moveFinderWindowToLeft() {
+        guard let screen = NSScreen.main else { return }
+        let axY = screen.frame.maxY - screen.visibleFrame.maxY + 40
+        let origin = CGPoint(x: screen.visibleFrame.minX + 40, y: axY)
+        FinderGrid.moveFocusedFinderWindow(to: origin)
     }
 
     // MARK: - View mode

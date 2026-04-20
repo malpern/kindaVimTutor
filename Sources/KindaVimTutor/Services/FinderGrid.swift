@@ -131,6 +131,34 @@ enum FinderGrid {
         setWindowFrame(window, size: size, origin: origin)
     }
 
+    /// Moves the focused Finder window without changing its size.
+    /// Safer than `resizeFocusedFinderWindow` because shrinking the
+    /// window clips icons in icon view (Finder doesn't reflow on
+    /// resize).
+    static func moveFocusedFinderWindow(to origin: CGPoint) {
+        guard let window = focusedFinderWindow() else { return }
+        var pt = origin
+        if let posValue = AXValueCreate(.cgPoint, &pt) {
+            AXUIElementSetAttributeValue(window, kAXPositionAttribute as CFString, posValue)
+        }
+    }
+
+    /// Returns the focused Finder window's current frame in AX
+    /// (top-left origin) coordinates, or nil if unavailable.
+    static func focusedFinderWindowFrame() -> CGRect? {
+        guard let window = focusedFinderWindow() else { return nil }
+        var posRef: CFTypeRef?
+        var sizeRef: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(window, kAXPositionAttribute as CFString, &posRef) == .success,
+              AXUIElementCopyAttributeValue(window, kAXSizeAttribute as CFString, &sizeRef) == .success,
+              let posRef, let sizeRef else { return nil }
+        var pt = CGPoint.zero
+        var sz = CGSize.zero
+        guard AXValueGetValue(posRef as! AXValue, .cgPoint, &pt),
+              AXValueGetValue(sizeRef as! AXValue, .cgSize, &sz) else { return nil }
+        return CGRect(origin: pt, size: sz)
+    }
+
     private static func setWindowFrame(_ window: AXUIElement,
                                        size: CGSize,
                                        origin: CGPoint) {

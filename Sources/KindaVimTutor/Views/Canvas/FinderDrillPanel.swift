@@ -42,12 +42,10 @@ final class FinderDrillPanel {
 
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 360, height: 170),
-            styleMask: [.nonactivatingPanel, .titled, .closable, .fullSizeContentView],
+            styleMask: [.borderless, .nonactivatingPanel, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
-        panel.titleVisibility = .hidden
-        panel.titlebarAppearsTransparent = true
         panel.isFloatingPanel = true
         panel.level = .floating
         panel.hidesOnDeactivate = false
@@ -60,13 +58,7 @@ final class FinderDrillPanel {
         panel.isOpaque = false
         panel.hasShadow = true
 
-        // Top-right of the main screen, inset from the corner.
-        if let screen = NSScreen.main {
-            let frame = panel.frame
-            let x = screen.visibleFrame.maxX - frame.width - 24
-            let y = screen.visibleFrame.maxY - frame.height - 24
-            panel.setFrameOrigin(NSPoint(x: x, y: y))
-        }
+        positionPanel(panel)
 
         panel.orderFrontRegardless()
         self.panel = panel
@@ -75,6 +67,31 @@ final class FinderDrillPanel {
     func hide() {
         panel?.orderOut(nil)
         panel = nil
+    }
+
+    /// Position the panel so it sits to the right of Finder's actual
+    /// window frame with a generous gap. Falls back to a fixed
+    /// right-edge inset if we can't read Finder's frame.
+    private func positionPanel(_ panel: NSPanel) {
+        guard let screen = NSScreen.main else { return }
+        let visible = screen.visibleFrame
+        let panelW = panel.frame.width
+        let panelH = panel.frame.height
+        let rightInset: CGFloat = 32
+        let gap: CGFloat = 40
+        let topInset: CGFloat = 80
+
+        var x = visible.maxX - panelW - rightInset
+        if let finderAX = FinderGrid.focusedFinderWindowFrame() {
+            // AX and NSWindow use the same x coordinate (left-origin
+            // in both cases), so we can pin directly.
+            let desired = finderAX.maxX + gap
+            if desired + panelW <= visible.maxX - rightInset {
+                x = desired
+            }
+        }
+        let y = visible.maxY - panelH - topInset
+        panel.setFrameOrigin(NSPoint(x: x, y: y))
     }
 
     /// Seamless end-of-drill: close the drill's Finder window, drop
