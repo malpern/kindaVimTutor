@@ -1,10 +1,9 @@
 import SwiftUI
 
 /// Minimal floating coaching panel for the Finder-navigation drill.
-/// Intentionally flat — one card, one vertical axis. Three lines:
-/// title + rep counter, one-line direction/guidance, small context
-/// hint. No boxed sub-panels, no chrome, no live timer, no
-/// keystroke counter.
+/// Flat layout, one vertical axis, but with deliberate pops of
+/// color: orange for the exercise identity (Finder), accent blue
+/// for the action the student should take next, red for the target.
 struct FinderDrillCoachingView: View {
     let engine: FinderDrillEngine
     let modeMonitor: ModeMonitor
@@ -20,7 +19,8 @@ struct FinderDrillCoachingView: View {
 
     var body: some View {
         card
-            .padding(18)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
             .frame(width: 300)
             .background(panelBackground)
             .overlay(panelBorder)
@@ -42,7 +42,7 @@ struct FinderDrillCoachingView: View {
 
     @ViewBuilder
     private var card: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 16) {
             titleRow
             if showsInsertModePrompt {
                 insertModeGuidance.transition(.opacity)
@@ -55,27 +55,55 @@ struct FinderDrillCoachingView: View {
     // MARK: - Title row
 
     private var titleRow: some View {
-        HStack(alignment: .firstTextBaseline) {
-            Text(engine.title)
-                .font(.system(size: 15, weight: .semibold))
-                .foregroundStyle(.primary)
+        HStack(alignment: .center, spacing: 10) {
+            Image(systemName: "folder.fill")
+                .font(.system(size: 16))
+                .foregroundStyle(Color.orange)
+                .frame(width: 22, height: 22)
+                .background(
+                    Circle().fill(Color.orange.opacity(0.15))
+                )
+            VStack(alignment: .leading, spacing: 1) {
+                Text(engine.title)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Text("Exercise")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.tertiary)
+                    .textCase(.uppercase)
+                    .tracking(0.7)
+            }
             Spacer()
-            Text("\(min(engine.completedRepIndex + 1, engine.reps.count)) of \(engine.reps.count)")
-                .font(.system(size: 11, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.tertiary)
+            repDots
         }
     }
 
-    // MARK: - Active guidance
+    /// Compact rep progress as filled/empty dots. Conveys "where am
+    /// I in the drill" at a glance without requiring the student to
+    /// read numbers.
+    private var repDots: some View {
+        HStack(spacing: 4) {
+            ForEach(0..<engine.reps.count, id: \.self) { i in
+                Circle()
+                    .fill(i < engine.completedRepIndex
+                          ? Color.accentColor
+                          : (i == engine.completedRepIndex
+                             ? Color.accentColor.opacity(0.45)
+                             : Color.white.opacity(0.12)))
+                    .frame(width: 6, height: 6)
+            }
+        }
+    }
+
+    // MARK: - Direction guidance
 
     private var directionGuidance: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Circle().fill(.red).frame(width: 7, height: 7)
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 7) {
+                Circle().fill(.red).frame(width: 8, height: 8)
                 Text("Move to the red file")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.primary)
             }
             directionKeys
         }
@@ -83,47 +111,57 @@ struct FinderDrillCoachingView: View {
 
     private var directionKeys: some View {
         let delta = engine.directionToTarget
-        return HStack(spacing: 6) {
-            keyCap("h", show: (delta?.dx ?? 0) < 0,
-                   count: max(-(delta?.dx ?? 0), 0))
-            keyCap("j", show: (delta?.dy ?? 0) > 0,
-                   count: max(delta?.dy ?? 0, 0))
-            keyCap("k", show: (delta?.dy ?? 0) < 0,
-                   count: max(-(delta?.dy ?? 0), 0))
-            keyCap("l", show: (delta?.dx ?? 0) > 0,
-                   count: max(delta?.dx ?? 0, 0))
+        return HStack(spacing: 8) {
+            directionKey("h", active: (delta?.dx ?? 0) < 0,
+                         count: max(-(delta?.dx ?? 0), 0))
+            directionKey("j", active: (delta?.dy ?? 0) > 0,
+                         count: max(delta?.dy ?? 0, 0))
+            directionKey("k", active: (delta?.dy ?? 0) < 0,
+                         count: max(-(delta?.dy ?? 0), 0))
+            directionKey("l", active: (delta?.dx ?? 0) > 0,
+                         count: max(delta?.dx ?? 0, 0))
             Spacer()
         }
     }
 
-    private func keyCap(_ key: String, show: Bool, count: Int) -> some View {
+    /// A keycap with an accent-colored halo when it's the next key
+    /// the student should press. Inactive keys fade back so the
+    /// active ones read as the primary instruction at a glance.
+    private func directionKey(_ key: String, active: Bool, count: Int) -> some View {
         HStack(spacing: 4) {
             KeyCapView(label: key, size: .regular)
-                .opacity(show ? 1.0 : 0.22)
-            if show && count > 1 {
+                .padding(active ? 3 : 0)
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(Color.accentColor.opacity(active ? 0.22 : 0))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(Color.accentColor.opacity(active ? 0.55 : 0),
+                                      lineWidth: 1)
+                )
+                .opacity(active ? 1.0 : 0.28)
+            if active && count > 1 {
                 Text("×\(count)")
-                    .font(.system(size: 11, weight: .medium, design: .rounded))
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11, weight: .semibold, design: .rounded))
+                    .foregroundStyle(Color.accentColor)
             }
         }
+        .animation(.easeOut(duration: 0.15), value: active)
     }
 
     // MARK: - Insert-mode guidance
 
-    /// Primary CTA + supporting context. Flat — no nested background
-    /// card. Tone shifts from calm (tertiary accent) to warning
-    /// (orange) after the student has fallen back into insert twice
-    /// in the same rep.
     private var insertModeGuidance: some View {
         let tint: Color = isInsertModeEscalated ? .orange : .secondary
-        return VStack(alignment: .leading, spacing: 6) {
-            HStack(spacing: 6) {
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
                 Text("Press")
                     .font(.system(size: 14))
                     .foregroundStyle(.secondary)
                 KeyCapView(label: "esc", size: .small)
                 Text("to switch to NORMAL mode")
-                    .font(.system(size: 14))
+                    .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.primary)
             }
             Text(isInsertModeEscalated
@@ -139,7 +177,7 @@ struct FinderDrillCoachingView: View {
 
     private var panelBackground: some View {
         RoundedRectangle(cornerRadius: 12, style: .continuous)
-            .fill(.black.opacity(0.85))
+            .fill(.black.opacity(0.88))
     }
 
     private var panelBorder: some View {
