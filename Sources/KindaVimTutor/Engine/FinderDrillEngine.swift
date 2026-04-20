@@ -68,6 +68,14 @@ final class FinderDrillEngine {
     private var timer: Timer?
     private var files: [URL] = []
     private var previousTargetURL: URL?
+    private var previousTargetIndex: Int?
+
+    /// Derive a folder's palette index from its name. Folders are
+    /// created as `folder01`..`folder12` — index is (number - 1).
+    private func indexForFolder(named name: String) -> Int? {
+        let digits = name.drop { !$0.isNumber }
+        return Int(digits).map { $0 - 1 }
+    }
 
     var currentRep: Rep? {
         guard completedRepIndex < reps.count else { return nil }
@@ -134,15 +142,17 @@ final class FinderDrillEngine {
         moveCount = 0
         elapsedTime = 0
 
-        // Move the red tag to the current target so the visual cue in
-        // Finder always matches the goal in the coaching panel.
+        // Swap the vivid "target" furry icon onto the goal folder so
+        // the student can spot it at a glance. Restore the previous
+        // rep's target to its original palette icon first.
         if let folder {
-            if let prev = previousTargetURL {
-                FinderDrillPrototype.tagURL(prev, with: nil)
+            if let prev = previousTargetURL, let prevIdx = previousTargetIndex {
+                FinderDrillPrototype.setTargetIcon(on: prev, restoringIndex: prevIdx)
             }
-            let targetURL = folder.appendingPathComponent(rep.target)
-            FinderDrillPrototype.tagURL(targetURL, with: "Red")
+            let targetURL = folder.appendingPathComponent(rep.target, isDirectory: true)
+            FinderDrillPrototype.setTargetIcon(on: targetURL, restoringIndex: nil)
             previousTargetURL = targetURL
+            previousTargetIndex = indexForFolder(named: rep.target)
         }
 
         // Kick off selection, then wait for it to actually land before

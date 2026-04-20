@@ -156,11 +156,11 @@ extension Curriculum {
         motionsIntroduced: ["h", "j", "k", "l"],
         finderDrill: FinderDrillSpec(
             title: "hjkl in the Finder",
-            subtitle: "Same four keys, a different surface. Navigate a grid of files using h/j/k/l and land the selection on each red target.",
+            subtitle: "Same four keys, a different surface. Navigate a grid of folders with h/j/k/l and land the selection on the bright one.",
             reps: [
-                .init(start: "file01.txt", target: "file06.txt"),
-                .init(start: "file12.txt", target: "file01.txt"),
-                .init(start: "file07.txt", target: "file04.txt"),
+                .init(start: "folder01", target: "folder06"),
+                .init(start: "folder12", target: "folder01"),
+                .init(start: "folder07", target: "folder04"),
             ]
         )
     )

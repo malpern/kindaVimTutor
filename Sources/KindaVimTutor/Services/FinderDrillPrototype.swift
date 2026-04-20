@@ -9,7 +9,7 @@ import Foundation
 /// with a hard timeout.
 ///
 /// Moving parts verified by this step:
-///   1. Materialize a tmp folder with N .txt files.
+///   1. Materialize a tmp folder with N subfolders + custom icons.
 ///   2. Tag one of them "Red" so Finder shows it in a different color.
 ///   3. Open the folder in Finder.
 ///   4. Read back the Finder window's `AXSelectedChildren` via the
@@ -42,7 +42,11 @@ enum FinderDrillPrototype {
 
         let target = files[files.count - 1]
         let start = files[0]
-        tagURL(target, with: "Red")
+        // No seed tag — the engine (FinderDrillEngine) re-tags the
+        // active rep's target at every rep start, so there's no need
+        // to flash a placeholder red dot during setup. Flashing one
+        // made the student see the red file "move" twice before the
+        // first rep even began.
 
         NSWorkspace.shared.open(folder)
         try? await Task.sleep(for: .milliseconds(700))
@@ -50,9 +54,6 @@ enum FinderDrillPrototype {
         try? await Task.sleep(for: .milliseconds(300))
         await MainActor.run { moveFinderWindowToLeft() }
         try? await Task.sleep(for: .milliseconds(200))
-        // Clear the seed tag — the engine will re-tag the active rep's
-        // target each time so the red dot always reflects the goal.
-        tagURL(target, with: nil)
 
         let readback = readFinderSelection() ?? "<no selection read>"
         log.info("finderDrill", "axSelection", fields: ["value": readback])
@@ -137,36 +138,94 @@ enum FinderDrillPrototype {
     // MARK: - Filesystem
 
     private static func makeTempFolder(count: Int) -> (URL, [URL])? {
-        let tmp = FileManager.default.temporaryDirectory
+        let fm = FileManager.default
+        let tmp = fm.temporaryDirectory
             .appendingPathComponent("kindaVimTutorFinder-\(UUID().uuidString.prefix(8))",
                                     isDirectory: true)
         do {
-            try FileManager.default.createDirectory(at: tmp,
-                                                    withIntermediateDirectories: true)
+            try fm.createDirectory(at: tmp, withIntermediateDirectories: true)
         } catch {
             return nil
         }
         var urls: [URL] = []
         for i in 0..<count {
-            let name = String(format: "file%02d.txt", i + 1)
-            let url = tmp.appendingPathComponent(name)
-            FileManager.default.createFile(atPath: url.path, contents: Data())
-            urls.append(url)
+            let name = String(format: "folder%02d", i + 1)
+            let sub = tmp.appendingPathComponent(name, isDirectory: true)
+            do {
+                try fm.createDirectory(at: sub, withIntermediateDirectories: false)
+                urls.append(sub)
+            } catch {
+                AppLogger.shared.info("finderDrill", "createFolderFailed",
+                                      fields: ["name": name, "err": "\(error)"])
+            }
         }
+        applyBaseIcons(to: urls)
         return (tmp, urls)
     }
 
-    /// Sets (or clears, when `tag == nil`) the given Finder tag on a
-    /// URL. Exposed internal so the engine can re-tag the active rep's
-    /// target between reps.
-    static func tagURL(_ url: URL, with tag: String?) {
-        do {
-            let value: NSArray = tag.map { [$0] as NSArray } ?? []
-            try (url as NSURL).setResourceValue(value, forKey: .tagNamesKey)
-        } catch {
-            AppLogger.shared.info("finderDrill", "tagFailed",
-                                  fields: ["err": "\(error)"])
+    // MARK: - Folder icons
+
+    /// Assigns each subfolder its own furry icon from the bundled
+    /// palette. Icons stick via `NSWorkspace.setIcon(_:forFile:)`,
+    /// which writes the icon as an extended attribute on the folder;
+    /// Finder picks them up on the next listing refresh.
+    private static func applyBaseIcons(to folders: [URL]) {
+        for (i, folder) in folders.enumerated() {
+            let key = baseIconKey(index: i)
+            guard let image = loadIconImage(named: key) else {
+                AppLogger.shared.info("finderDrill", "baseIconMissing",
+                                      fields: ["key": key])
+                continue
+            }
+            NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
         }
+    }
+
+    /// Swaps in the distinctive "target" icon on a specific folder.
+    /// Engine calls this at rep start. Pass nil to restore the base
+    /// icon (used when advancing off a prior rep's target).
+    static func setTargetIcon(on folder: URL, restoringIndex baseIndex: Int?) {
+        if let baseIndex {
+            let key = baseIconKey(index: baseIndex)
+            if let image = loadIconImage(named: key) {
+                NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
+            }
+            return
+        }
+        if let image = loadIconImage(named: "furry-target") {
+            NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
+        }
+    }
+
+    /// The 12 base color keys in stable order. Names matched to the
+    /// assets bundled under Resources/furry-folders.
+    private static let baseIconKeys: [String] = [
+        "furry-01-coral",
+        "furry-02-peach",
+        "furry-03-butter",
+        "furry-04-mint",
+        "furry-05-sky",
+        "furry-06-lavender",
+        "furry-07-rose",
+        "furry-08-teal",
+        "furry-09-sage",
+        "furry-10-cream",
+        "furry-11-denim",
+        "furry-12-taupe",
+    ]
+
+    static func baseIconKey(index: Int) -> String {
+        baseIconKeys[index % baseIconKeys.count]
+    }
+
+    private static func loadIconImage(named key: String) -> NSImage? {
+        // Bundled via .process("Resources"). SwiftPM preserves the
+        // subdirectory layout, so we look up under "furry-folders".
+        let url = Bundle.module.url(forResource: key, withExtension: "png",
+                                     subdirectory: "furry-folders")
+            ?? Bundle.module.url(forResource: key, withExtension: "png")
+        guard let url else { return nil }
+        return NSImage(contentsOf: url)
     }
 
     // MARK: - Layout

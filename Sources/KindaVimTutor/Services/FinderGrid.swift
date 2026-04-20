@@ -235,16 +235,17 @@ enum FinderGrid {
         AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &role)
         let roleStr = role as? String ?? ""
 
-        // Finder icons report as AXImage (rare) or AXStaticText, but
-        // the containing element is typically AXGroup. The reliable
-        // leaf signal is: element has a position + a non-empty title
-        // that ends in .txt (our known file extension) — or, more
-        // generally, has both a position and a title string.
+        // Finder icon leaves in icon view report as AXImage or
+        // similar with a title set to the item's display name. We
+        // filter to our drill's naming convention ("folder01" …
+        // "folder12") so unrelated Finder chrome elements don't
+        // pollute the grid.
         if roleStr != "AXWindow",
            let frame = frameOf(element),
            let name = titleOf(element),
            !name.isEmpty,
-           name.contains(".") // filter to filename-like titles
+           name.hasPrefix("folder"),
+           name.count == 8 // "folder" + 2 digits
         {
             results.append(Icon(name: name, frame: frame))
             return results // don't descend into an icon
