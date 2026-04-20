@@ -67,31 +67,14 @@ struct FinderDrillCoachingView: View {
                 Text(engine.title)
                     .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.primary)
-                Text("Exercise")
+                Text("Exercise \(min(engine.completedRepIndex + 1, engine.reps.count)) / \(engine.reps.count)")
                     .font(.system(size: 10, weight: .medium))
+                    .monospacedDigit()
                     .foregroundStyle(.tertiary)
                     .textCase(.uppercase)
                     .tracking(0.7)
             }
             Spacer()
-            repDots
-        }
-    }
-
-    /// Compact rep progress as filled/empty dots. Conveys "where am
-    /// I in the drill" at a glance without requiring the student to
-    /// read numbers.
-    private var repDots: some View {
-        HStack(spacing: 4) {
-            ForEach(0..<engine.reps.count, id: \.self) { i in
-                Circle()
-                    .fill(i < engine.completedRepIndex
-                          ? Color.accentColor
-                          : (i == engine.completedRepIndex
-                             ? Color.accentColor.opacity(0.45)
-                             : Color.white.opacity(0.12)))
-                    .frame(width: 6, height: 6)
-            }
         }
     }
 

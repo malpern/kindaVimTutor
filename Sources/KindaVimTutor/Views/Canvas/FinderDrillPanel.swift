@@ -39,6 +39,12 @@ final class FinderDrillPanel {
         let view = FinderDrillCoachingView(engine: engine, modeMonitor: modeMonitor)
         let hosting = NSHostingController(rootView: view)
         hosting.view.setFrameSize(NSSize(width: 360, height: 170))
+        // The hosting controller's backing NSView defaults to opaque
+        // with a system background color; that's what was painting the
+        // grey rectangular frame visible *behind* the SwiftUI rounded
+        // card. Clear it so only the card's own shape shows.
+        hosting.view.wantsLayer = true
+        hosting.view.layer?.backgroundColor = .clear
 
         let panel = NSPanel(
             contentRect: NSRect(x: 0, y: 0, width: 360, height: 170),
@@ -56,7 +62,11 @@ final class FinderDrillPanel {
         panel.contentViewController = hosting
         panel.backgroundColor = .clear
         panel.isOpaque = false
-        panel.hasShadow = true
+        // Let SwiftUI draw the shadow on the rounded content — the
+        // system-drawn NSWindow shadow would trace the rectangular
+        // window frame instead of the rounded card, producing the
+        // outline artifact we saw around the corners.
+        panel.hasShadow = false
 
         positionPanel(panel)
 
