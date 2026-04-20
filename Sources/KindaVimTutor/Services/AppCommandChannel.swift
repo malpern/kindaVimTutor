@@ -30,6 +30,7 @@ final class AppCommandChannel {
     private let isoFormatter: ISO8601DateFormatter
     private weak var appState: AppState?
     private weak var currentController: LessonStepController?
+    private let finderDrill = FinderDrillEngine()
 
     private init() {
         let logDir = AppLogger.shared.logDirectoryURL
@@ -116,6 +117,19 @@ final class AppCommandChannel {
         case "finder.reprobe":
             let s = FinderDrillPrototype.readFinderSelection() ?? "<none>"
             AppLogger.shared.info("finderDrill", "reprobe", fields: ["selection": s])
+        case "finder.run":
+            // Usage: finder.run file01.txt file06.txt,file02.txt file12.txt
+            // Each space-separated token is "start target" (comma-separated).
+            // Falls back to a default 3-rep sequence if no args.
+            let reps = parseReps(arg)
+            Task { @MainActor in
+                let ok = await finderDrill.start(reps: reps)
+                AppLogger.shared.info("finderDrill", "runStart",
+                                      fields: ["ok": ok ? "yes" : "no",
+                                               "reps": "\(reps.count)"])
+            }
+        case "finder.stop":
+            finderDrill.stop()
         case "finder.select":
             // Usage: finder.select file07.txt
             let ok = FinderGrid.selectFile(named: arg)
@@ -155,6 +169,24 @@ final class AppCommandChannel {
             }
             _ = responder // keep compiler quiet if unused
         }
+    }
+
+    /// Parses a rep spec string like "file01.txt,file06.txt file02.txt,file12.txt"
+    /// into an array of reps. Default falls back to a 3-rep drill with
+    /// corners of a standard 12-file grid.
+    private func parseReps(_ arg: String) -> [FinderDrillEngine.Rep] {
+        let tokens = arg.split(separator: " ").map(String.init)
+        let reps: [FinderDrillEngine.Rep] = tokens.compactMap { tok in
+            let parts = tok.split(separator: ",").map(String.init)
+            guard parts.count == 2 else { return nil }
+            return FinderDrillEngine.Rep(start: parts[0], target: parts[1])
+        }
+        if !reps.isEmpty { return reps }
+        return [
+            .init(start: "file01.txt", target: "file06.txt"),
+            .init(start: "file12.txt", target: "file01.txt"),
+            .init(start: "file07.txt", target: "file04.txt"),
+        ]
     }
 
     private func logFinderLayout(_ layout: FinderGrid.Layout?, tag: String) {

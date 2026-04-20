@@ -101,11 +101,17 @@ final class FinderSelectionObserver {
 
     // MARK: - C callback bridge
 
+    /// AX run-loop callbacks fire on whatever run loop we added the
+    /// source to — we added it to the main run loop, so we're already
+    /// on main here and can read synchronously. Hopping through
+    /// `Task { @MainActor }` introduces async delay that races against
+    /// the next notification, causing us to miss intermediate states
+    /// when the user moves quickly.
     private static let callback: AXObserverCallback = { _, _, _, refcon in
         guard let refcon else { return }
         let observer = Unmanaged<FinderSelectionObserver>
             .fromOpaque(refcon).takeUnretainedValue()
-        Task { @MainActor in
+        MainActor.assumeIsolated {
             observer.handleNotification()
         }
     }
