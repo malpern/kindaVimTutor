@@ -20,17 +20,6 @@ final class FinderDrillPanel {
 
     private var panel: NSPanel?
     private var activationObserver: NSObjectProtocol?
-    private var deactivationObserver: NSObjectProtocol?
-
-    /// Final results surfaced after the drill completes and the panel
-    /// has been dismissed — so the tutor window can show a summary.
-    private(set) var lastRunSummary: Summary?
-
-    struct Summary {
-        let reps: Int
-        let moves: Int
-        let time: TimeInterval
-    }
 
     func show(engine: FinderDrillEngine, modeMonitor: ModeMonitor) {
         if let panel {
@@ -108,15 +97,10 @@ final class FinderDrillPanel {
     }
 
     private func removeFinderActivationWatcher() {
-        let wc = NSWorkspace.shared.notificationCenter
         if let activationObserver {
-            wc.removeObserver(activationObserver)
-        }
-        if let deactivationObserver {
-            wc.removeObserver(deactivationObserver)
+            NSWorkspace.shared.notificationCenter.removeObserver(activationObserver)
         }
         activationObserver = nil
-        deactivationObserver = nil
     }
 
     func hide() {
@@ -152,14 +136,8 @@ final class FinderDrillPanel {
 
     /// Seamless end-of-drill: close the drill's Finder window, drop
     /// the floating panel, activate the tutor app, and fire confetti
-    /// from within the tutor window. Records a summary for any caller
-    /// that wants to show it later.
+    /// from within the tutor window.
     func finish(engine: FinderDrillEngine) {
-        lastRunSummary = Summary(
-            reps: engine.results.count,
-            moves: engine.totalMoves,
-            time: engine.totalTime
-        )
         closeDrillFinderWindows(folder: engine.folder)
         hide()
         // stop() deletes the tmp folder and tears down the observer;

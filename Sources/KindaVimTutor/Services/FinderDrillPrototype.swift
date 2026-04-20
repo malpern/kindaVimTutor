@@ -79,15 +79,10 @@ enum FinderDrillPrototype {
         "postcards", "snippets", "mixtapes"
     ]
 
-    private static let targetNamePool: [String] = [
-        "TREASURE", "GOAL", "PRIZE", "GOLD", "FINISH",
-        "WINNER", "BULLSEYE", "HOME", "VICTORY", "JACKPOT"
-    ]
-
     /// Returns `count` random lowercase names — one per grid slot.
-    /// No ALL-CAPS here; the engine renames the current rep's
-    /// target folder to an ALL-CAPS name at rep start and restores
-    /// it on advance, so only the active goal is SHOUTING.
+    /// The engine renames the current rep's target folder to
+    /// "TREASURE" at rep start and restores it on advance, so only
+    /// the active goal is SHOUTING.
     static func generateFolderNames(count: Int,
                                     targetIndices: Set<Int>) -> [String] {
         let shuffled = regularNamePool.shuffled()
@@ -97,14 +92,6 @@ enum FinderDrillPrototype {
             out.append(i < shuffled.count ? shuffled[i] : "folder\(i + 1)")
         }
         return out
-    }
-
-    /// Returns a random unused ALL-CAPS target name — callers pass
-    /// the set of names already used in the current drill to avoid
-    /// repeats across reps.
-    static func randomTargetName(excluding used: Set<String>) -> String {
-        let pool = targetNamePool.shuffled()
-        return pool.first(where: { !used.contains($0) }) ?? "TARGET"
     }
 
     /// Prompts for Accessibility if not trusted. Separate from `run()`
@@ -216,42 +203,12 @@ enum FinderDrillPrototype {
         return (tmp, urls)
     }
 
-    // MARK: - Folder icons
-
-    // MARK: - Target icon swap (per rep)
+    // MARK: - Target icon
 
     /// The key used for the closed-treasure-chest folder icon —
     /// applied to the current rep's target so it reads as "the
-    /// treasure" against the neutral-furry crowd. Sits in a
-    /// different Resources subdirectory than the furry folders.
+    /// treasure" against the neutral-furry crowd.
     static let targetIconKey = "chest-closed"
-
-    /// Retained for earlier per-rep-color iterations. Not used by
-    /// the current drill but left in place in case future drills
-    /// want vivid-colored targets back.
-    static let targetIconKeys: [String] = [
-        "furry-target-magenta",
-        "furry-target-gold",
-        "furry-target-cyan",
-        "furry-target-lime",
-        "furry-target-orange",
-        "furry-target-violet",
-    ]
-
-    /// Approximate display color for a target icon key. Used by the
-    /// coaching panel to tint the target name and accent dots to
-    /// match the folder's color.
-    static func approximateColor(forIconKey key: String) -> (r: Double, g: Double, b: Double) {
-        switch key {
-        case "furry-target-magenta": return (0.96, 0.10, 0.70)
-        case "furry-target-gold":    return (0.97, 0.76, 0.10)
-        case "furry-target-cyan":    return (0.10, 0.80, 0.92)
-        case "furry-target-lime":    return (0.55, 0.88, 0.18)
-        case "furry-target-orange":  return (0.99, 0.55, 0.10)
-        case "furry-target-violet":  return (0.60, 0.30, 0.96)
-        default:                      return (0.96, 0.10, 0.70)
-        }
-    }
 
     /// Rename `from` → `to` and apply `iconKey` in one pass. The
     /// rename triggers a Finder refresh that also forces the new
@@ -307,27 +264,6 @@ enum FinderDrillPrototype {
             [.modificationDate: Date()],
             ofItemAtPath: folder.deletingLastPathComponent().path
         )
-    }
-
-    /// The 12 base color keys in stable order. Names matched to the
-    /// assets bundled under Resources/furry-folders.
-    private static let baseIconKeys: [String] = [
-        "furry-01-coral",
-        "furry-02-peach",
-        "furry-03-butter",
-        "furry-04-mint",
-        "furry-05-sky",
-        "furry-06-lavender",
-        "furry-07-rose",
-        "furry-08-teal",
-        "furry-09-sage",
-        "furry-10-cream",
-        "furry-11-denim",
-        "furry-12-taupe",
-    ]
-
-    static func baseIconKey(index: Int) -> String {
-        baseIconKeys[index % baseIconKeys.count]
     }
 
     private static func loadIconImage(named key: String) -> NSImage? {

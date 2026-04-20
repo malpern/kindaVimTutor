@@ -80,9 +80,6 @@ final class FinderDrillEngine {
     /// The lowercase names each slot had at drill start. Used to
     /// restore a target folder's name when the rep advances.
     private var originalFolderNames: [String] = []
-    /// ALL-CAPS target names already used in this drill; prevents
-    /// picking the same word twice across reps.
-    private var usedTargetNames: Set<String> = []
 
     /// The icon key stamped on every rep's target. Today this is
     /// the closed-chest image for all reps; exposed as a property
@@ -145,7 +142,6 @@ final class FinderDrillEngine {
         )
         self.folderNames = names
         self.originalFolderNames = names
-        self.usedTargetNames = []
         self.previousTargetIndex = nil
 
         guard let prep = await FinderDrillPrototype.run(
