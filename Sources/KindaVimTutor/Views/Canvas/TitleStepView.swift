@@ -9,6 +9,7 @@ struct TitleStepView: View {
     @State private var showSubtitle = false
     @State private var showHint = false
     @State private var skipTypewriter = false
+    @State private var hintTask: Task<Void, Never>?
 
     private var animationID: String { "title.\(lesson.id)" }
 
@@ -85,9 +86,14 @@ struct TitleStepView: View {
                     showChapter = true
                 }
                 // Typewriter's completion callback triggers showSubtitle.
-                // Hint follows shortly after subtitle appears.
-                Task { @MainActor in
+                // Hint follows shortly after subtitle appears. Store
+                // the task so .onDisappear can cancel it — otherwise
+                // the sleep keeps running and writes to @State after
+                // the view is gone.
+                hintTask?.cancel()
+                hintTask = Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 900_000_000)
+                    guard !Task.isCancelled else { return }
                     withAnimation(.easeOut(duration: 0.3)) {
                         showHint = true
                     }
@@ -95,6 +101,8 @@ struct TitleStepView: View {
             }
         }
         .onDisappear {
+            hintTask?.cancel()
+            hintTask = nil
             showChapter = false
             showSubtitle = false
             showHint = false

@@ -7,6 +7,13 @@ import Foundation
 /// - Easy to read from a shell (plain text under a stable path).
 /// - Safe to share across threads (serial queue + atomic append).
 /// - Small, structured fields so automated harnesses can grep for events.
+/// `@unchecked Sendable` rationale: all mutable state — the file
+/// descriptors in `jsonlURL` / `textURL` and any write buffering
+/// — is serialized through the private `queue`. The encoder, ISO
+/// formatter, and URLs are initialized once and never replaced,
+/// and Foundation's JSONEncoder / ISO8601DateFormatter are
+/// documented as safe to call from multiple threads as long as
+/// nobody mutates their properties (we don't after init).
 final class AppLogger: @unchecked Sendable {
     enum Level: String, Codable, Sendable {
         case debug, info, warn, error

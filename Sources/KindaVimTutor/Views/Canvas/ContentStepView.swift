@@ -4,11 +4,6 @@ struct ContentStepView: View {
     let blocks: [ContentBlock]
     var revealStyle: RevealStyle = .typewriter
     var onAutoAdvance: (() -> Void)?
-    /// Called once the heading has finished typing and all body blocks have
-    /// faded in. The canvas uses this to time the appearance of its shared
-    /// "press to continue" CTA — we only show the chip once reading material
-    /// has settled.
-    var onContentReady: (() -> Void)?
 
     enum RevealStyle {
         /// Typewriter the heading; stagger body blocks in with a 0.08s
@@ -23,7 +18,7 @@ struct ContentStepView: View {
 
     @State private var headingDone = false
     @State private var visibleBlockCount = 0
-    @State private var didNotifyReady = false
+    @State private var revealTasks: [Task<Void, Never>] = []
 
     private var headingText: String? {
         if case .heading(let text) = blocks.first { return text }
@@ -53,17 +48,8 @@ struct ContentStepView: View {
         .onAppear {
             switch revealStyle {
             case .instant:
-                // Show everything at once. Fire onContentReady so the
-                // canvas can drop in the "to continue" hint.
                 visibleBlockCount = bodyBlocks.count
                 headingDone = true
-                if !didNotifyReady {
-                    didNotifyReady = true
-                    Task { @MainActor in
-                        try? await Task.sleep(for: .seconds(0.12))
-                        onContentReady?()
-                    }
-                }
             case .typewriter:
                 // If there's a heading, the TypewriterText's completion
                 // callback triggers revealBodyBlocks(). If there isn't,
@@ -77,9 +63,10 @@ struct ContentStepView: View {
             }
         }
         .onDisappear {
+            for t in revealTasks { t.cancel() }
+            revealTasks = []
             headingDone = false
             visibleBlockCount = 0
-            didNotifyReady = false
         }
     }
 
@@ -175,21 +162,18 @@ struct ContentStepView: View {
         // Scope the animation to a single transaction driven by an
         // animation() modifier on the child, so layout animation cannot
         // cascade to sibling views outside the ContentStepView.
+        // Track each stagger task so .onDisappear can cancel them —
+        // a task firing after the view is gone would write to dead
+        // @State and trigger a SwiftUI warning.
+        for t in revealTasks { t.cancel() }
+        revealTasks = []
         for i in 0..<bodyBlocks.count {
-            Task { @MainActor in
+            let task = Task { @MainActor in
                 try? await Task.sleep(for: .seconds(Double(i) * 0.08))
+                guard !Task.isCancelled else { return }
                 visibleBlockCount = i + 1
             }
-        }
-
-        // Fire onContentReady after the last block has had a moment to settle.
-        // 0.4s animation + (count-1)*0.08s stagger + small buffer.
-        let settleDelay = 0.4 + Double(max(bodyBlocks.count - 1, 0)) * 0.08 + 0.15
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(settleDelay))
-            guard !didNotifyReady else { return }
-            didNotifyReady = true
-            onContentReady?()
+            revealTasks.append(task)
         }
     }
 
@@ -280,6 +264,18 @@ struct ContentStepView: View {
         case .modeIndicatorSpotlight:
             ModeIndicatorSpotlightView()
                 .frame(minHeight: 320)
+
+        case .homeRow(let highlighted):
+            HomeRowView(highlighted: highlighted)
+                .padding(.vertical, 4)
+
+        case .grammarGrid:
+            GrammarGridView()
+                .padding(.vertical, 4)
+
+        case .findVsTill:
+            FindVsTillView()
+                .padding(.vertical, 4)
 
         case .linkTip(let symbol, let accent, let label, let url):
             linkTipView(symbol: symbol, accent: accent, label: label, url: url)
