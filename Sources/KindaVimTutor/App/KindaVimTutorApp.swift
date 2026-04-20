@@ -109,7 +109,16 @@ private struct AppMenuCommands: Commands {
             Divider()
             Button("Run Finder Drill Prototype") {
                 Task {
-                    if let result = await FinderDrillPrototype.run() {
+                    // Quick smoke-test with a default name list and
+                    // a single target at the last slot.
+                    let count = 12
+                    let targets: Set<Int> = [count - 1]
+                    let names = FinderDrillPrototype.generateFolderNames(
+                        count: count, targetIndices: targets
+                    )
+                    if let result = await FinderDrillPrototype.run(
+                        names: names, targetIndices: targets
+                    ) {
                         AppLogger.shared.info("finderDrill", "result", fields: [
                             "folder": result.folder.path,
                             "target": result.target.lastPathComponent,

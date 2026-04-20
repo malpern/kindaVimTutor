@@ -26,27 +26,27 @@ enum FinderDrillPrototype {
     }
 
     @discardableResult
-    static func run(rows: Int = 3, cols: Int = 4) async -> Result? {
+    static func run(names: [String],
+                    targetIndices: Set<Int>,
+                    rows: Int = 3,
+                    cols: Int = 4) async -> Result? {
         let log = AppLogger.shared
         log.info("finderDrill", "start", fields: ["rows": "\(rows)", "cols": "\(cols)"])
 
-        // Sweep any leftover drill state from prior runs so the new
-        // drill is the only one onscreen and on disk.
         await MainActor.run { closeLeftoverDrillWindows() }
         removeLeftoverDrillFolders()
 
-        guard let (folder, files) = makeTempFolder(count: rows * cols) else {
+        guard let (folder, files) = makeTempFolder(names: names,
+                                                    targetIndices: targetIndices)
+        else {
             log.info("finderDrill", "tempFolderFailed", fields: [:])
             return nil
         }
 
-        let target = files[files.count - 1]
-        let start = files[0]
-        // No seed tag — the engine (FinderDrillEngine) re-tags the
-        // active rep's target at every rep start, so there's no need
-        // to flash a placeholder red dot during setup. Flashing one
-        // made the student see the red file "move" twice before the
-        // first rep even began.
+        let target = files.first(where: { targetIndices.contains(
+            files.firstIndex(of: $0) ?? -1
+        )}) ?? files.last!
+        let start = files.first!
 
         NSWorkspace.shared.open(folder)
         try? await Task.sleep(for: .milliseconds(700))
@@ -65,6 +65,44 @@ enum FinderDrillPrototype {
             start: start,
             selectionReadback: readback
         )
+    }
+
+    // MARK: - Random naming
+
+    private static let regularNamePool: [String] = [
+        "notes", "drafts", "photos", "music", "docs", "ideas",
+        "taxes", "recipes", "books", "plans", "scraps", "journal",
+        "letters", "sketches", "receipts", "memes", "bookmarks",
+        "ephemera", "clippings", "fragments", "backups", "misc",
+        "postcards", "snippets", "mixtapes"
+    ]
+
+    private static let targetNamePool: [String] = [
+        "TREASURE", "GOAL", "PRIZE", "GOLD", "FINISH",
+        "WINNER", "BULLSEYE", "HOME", "VICTORY", "JACKPOT"
+    ]
+
+    /// Returns `count` names, one per grid slot. Slots whose indices
+    /// are in `targetIndices` get an ALL-CAPS target name. The rest
+    /// get distinct lowercase names picked from the regular pool.
+    /// Picks are stable only within a single call — each drill run
+    /// gets a fresh shuffle.
+    static func generateFolderNames(count: Int,
+                                    targetIndices: Set<Int>) -> [String] {
+        let regulars = regularNamePool.shuffled()
+        let targets = targetNamePool.shuffled()
+        var regularIter = regulars.makeIterator()
+        var targetIter = targets.makeIterator()
+        var assigned: [String] = []
+        assigned.reserveCapacity(count)
+        for i in 0..<count {
+            if targetIndices.contains(i) {
+                assigned.append(targetIter.next() ?? "TARGET")
+            } else {
+                assigned.append(regularIter.next() ?? "folder\(i + 1)")
+            }
+        }
+        return assigned
     }
 
     /// Prompts for Accessibility if not trusted. Separate from `run()`
@@ -137,7 +175,10 @@ enum FinderDrillPrototype {
 
     // MARK: - Filesystem
 
-    private static func makeTempFolder(count: Int) -> (URL, [URL])? {
+    private static func makeTempFolder(names: [String],
+                                        targetIndices: Set<Int>)
+        -> (URL, [URL])?
+    {
         let fm = FileManager.default
         let tmp = fm.temporaryDirectory
             .appendingPathComponent("kindaVimTutorFinder-\(UUID().uuidString.prefix(8))",
@@ -148,8 +189,7 @@ enum FinderDrillPrototype {
             return nil
         }
         var urls: [URL] = []
-        for i in 0..<count {
-            let name = String(format: "folder%02d", i + 1)
+        for (i, name) in names.enumerated() {
             let sub = tmp.appendingPathComponent(name, isDirectory: true)
             do {
                 try fm.createDirectory(at: sub, withIntermediateDirectories: false)
@@ -158,44 +198,26 @@ enum FinderDrillPrototype {
                 AppLogger.shared.info("finderDrill", "createFolderFailed",
                                       fields: ["name": name, "err": "\(error)"])
             }
+            // Assign icon: vivid target for designated slots, palette
+            // color for the rest (cycling through the 12-color set).
+            let iconKey: String
+            if targetIndices.contains(i) {
+                iconKey = "furry-target"
+            } else {
+                iconKey = baseIconKey(index: i)
+            }
+            if let image = loadIconImage(named: iconKey) {
+                NSWorkspace.shared.setIcon(image, forFile: sub.path, options: [])
+            }
         }
-        applyBaseIcons(to: urls)
         return (tmp, urls)
     }
 
     // MARK: - Folder icons
 
-    /// Assigns each subfolder its own furry icon from the bundled
-    /// palette. Icons stick via `NSWorkspace.setIcon(_:forFile:)`,
-    /// which writes the icon as an extended attribute on the folder;
-    /// Finder picks them up on the next listing refresh.
-    private static func applyBaseIcons(to folders: [URL]) {
-        for (i, folder) in folders.enumerated() {
-            let key = baseIconKey(index: i)
-            guard let image = loadIconImage(named: key) else {
-                AppLogger.shared.info("finderDrill", "baseIconMissing",
-                                      fields: ["key": key])
-                continue
-            }
-            NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
-        }
-    }
-
-    /// Swaps in the distinctive "target" icon on a specific folder.
-    /// Engine calls this at rep start. Pass nil to restore the base
-    /// icon (used when advancing off a prior rep's target).
-    static func setTargetIcon(on folder: URL, restoringIndex baseIndex: Int?) {
-        if let baseIndex {
-            let key = baseIconKey(index: baseIndex)
-            if let image = loadIconImage(named: key) {
-                NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
-            }
-            return
-        }
-        if let image = loadIconImage(named: "furry-target") {
-            NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
-        }
-    }
+    // Icons are assigned in makeTempFolder based on targetIndices.
+    // No per-rep swap helper needed — all target folders stay
+    // vivid for the whole drill.
 
     /// The 12 base color keys in stable order. Names matched to the
     /// assets bundled under Resources/furry-folders.

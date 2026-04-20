@@ -145,12 +145,17 @@ struct FinderDrillCoachingView: View {
     private var directionGuidance: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 7) {
-                Circle().fill(.red).frame(width: 8, height: 8)
-                Text(engine.currentRepInstruction)
-                    .font(.system(size: 14, weight: .medium))
+                Circle()
+                    .fill(Color(red: 0.96, green: 0.1, blue: 0.7))
+                    .frame(width: 8, height: 8)
+                (Text("Move to ")
                     .foregroundStyle(.primary)
-                    .id("repInstruction-\(engine.completedRepIndex)")
-                    .transition(.opacity.combined(with: .move(edge: .trailing)))
+                 + Text(engine.currentTargetName)
+                    .font(.system(size: 14, weight: .bold, design: .monospaced))
+                    .foregroundColor(Color(red: 0.96, green: 0.1, blue: 0.7))
+                )
+                .font(.system(size: 14, weight: .medium))
+                .id("repInstruction-\(engine.completedRepIndex)")
             }
             directionKeys
         }

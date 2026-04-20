@@ -156,11 +156,15 @@ extension Curriculum {
         motionsIntroduced: ["h", "j", "k", "l"],
         finderDrill: FinderDrillSpec(
             title: "hjkl in the Finder",
-            subtitle: "Same four keys, a different surface. Navigate a grid of folders with h/j/k/l and land the selection on the bright one.",
+            subtitle: "Same four keys, a different surface. Navigate to the bright ALL-CAPS folder using h/j/k/l.",
+            // All reps converge on the same target (index 11 — a
+            // distinct position in the grid), starting from varied
+            // corners. Indices refer to slots in the folder list;
+            // names are randomized per run.
             reps: [
-                .init(start: "folder01", target: "folder06"),
-                .init(start: "folder12", target: "folder01"),
-                .init(start: "folder07", target: "folder04"),
+                .init(startIndex: 0,  targetIndex: 11),
+                .init(startIndex: 6,  targetIndex: 11),
+                .init(startIndex: 5,  targetIndex: 11),
             ]
         )
     )

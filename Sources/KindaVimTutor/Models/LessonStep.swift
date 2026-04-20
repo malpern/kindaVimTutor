@@ -70,11 +70,15 @@ enum LessonStep: Identifiable {
 }
 
 /// Description of a Finder-navigation drill as authored in the
-/// curriculum. Converts to a FinderDrillEngine.Rep list at run time.
+/// curriculum. Reps refer to *grid positions*, not filenames —
+/// names are randomized at run time so each drill feels fresh and
+/// students can't memorize by label. The designated target folder
+/// gets an ALL-CAPS name (e.g. "TREASURE") and a dramatic
+/// off-palette icon color so it reads at a glance.
 struct FinderDrillSpec: Hashable, Sendable {
     struct Rep: Hashable, Sendable {
-        let start: String
-        let target: String
+        let startIndex: Int
+        let targetIndex: Int
     }
     let title: String
     let subtitle: String

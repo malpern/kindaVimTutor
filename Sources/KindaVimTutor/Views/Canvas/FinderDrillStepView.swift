@@ -140,7 +140,7 @@ struct FinderDrillStepView: View {
                         Circle().fill(.red).frame(width: 8, height: 8)
                         Text(engine.currentRepInstruction)
                             .font(.system(size: 16, weight: .medium))
-                            .id("inProgressInstruction-\(engine.completedRepIndex)-\(rep.target)")
+                            .id("inProgressInstruction-\(engine.completedRepIndex)-\(rep.targetIndex)")
                             .transition(.opacity)
                     }
                 }
@@ -296,7 +296,10 @@ struct FinderDrillStepView: View {
 
     private func startDrill() async {
         hasStarted = true
-        let reps = spec.reps.map { FinderDrillEngine.Rep(start: $0.start, target: $0.target) }
+        let reps = spec.reps.map {
+            FinderDrillEngine.Rep(startIndex: $0.startIndex,
+                                  targetIndex: $0.targetIndex)
+        }
         engine.onDrillCompleted = {
             FinderDrillPanel.shared.finish(engine: engine)
         }

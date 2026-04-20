@@ -113,7 +113,11 @@ final class AppCommandChannel {
         case "key":
             sendNamedKey(arg)
         case "finder.prototype":
-            Task { await FinderDrillPrototype.run() }
+            // Quick smoke-test: fire a default 3-rep drill. The engine
+            // generates names and targetIndices so we don't have to.
+            Task { @MainActor in
+                _ = await finderDrill.start(reps: parseReps(""))
+            }
         case "finder.reprobe":
             let s = FinderDrillPrototype.readFinderSelection() ?? "<none>"
             AppLogger.shared.info("finderDrill", "reprobe", fields: ["selection": s])
@@ -180,21 +184,21 @@ final class AppCommandChannel {
         }
     }
 
-    /// Parses a rep spec string like "file01.txt,file06.txt file02.txt,file12.txt"
-    /// into an array of reps. Default falls back to a 3-rep drill with
-    /// corners of a standard 12-file grid.
+    /// Parses a rep spec string like "0,11 6,11 5,11" into an array
+    /// of (startIndex,targetIndex) reps. Default falls back to a
+    /// 3-rep drill converging on index 11.
     private func parseReps(_ arg: String) -> [FinderDrillEngine.Rep] {
         let tokens = arg.split(separator: " ").map(String.init)
         let reps: [FinderDrillEngine.Rep] = tokens.compactMap { tok in
-            let parts = tok.split(separator: ",").map(String.init)
+            let parts = tok.split(separator: ",").compactMap { Int($0) }
             guard parts.count == 2 else { return nil }
-            return FinderDrillEngine.Rep(start: parts[0], target: parts[1])
+            return FinderDrillEngine.Rep(startIndex: parts[0], targetIndex: parts[1])
         }
         if !reps.isEmpty { return reps }
         return [
-            .init(start: "folder01", target: "folder06"),
-            .init(start: "folder12", target: "folder01"),
-            .init(start: "folder07", target: "folder04"),
+            .init(startIndex: 0,  targetIndex: 11),
+            .init(startIndex: 6,  targetIndex: 11),
+            .init(startIndex: 5,  targetIndex: 11),
         ]
     }
 
