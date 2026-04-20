@@ -274,11 +274,19 @@ enum FinderDrillPrototype {
                                 "folder": folder.lastPathComponent,
                                 "ok": ok ? "yes" : "no"
                               ])
-        // Finder caches icons aggressively. Nudge the listing by
-        // touching the folder's parent mtime.
-        let parent = folder.deletingLastPathComponent()
+        // Finder caches icons aggressively — especially after a
+        // rename, where it latches onto the default system folder
+        // icon and ignores the xattr we just wrote. Force a visible
+        // refresh by toggling the custom-icon bit off + back on,
+        // and touching the folder's mtime so Finder re-reads it.
+        NSWorkspace.shared.setIcon(nil, forFile: folder.path, options: [])
+        NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
         try? FileManager.default.setAttributes(
-            [.modificationDate: Date()], ofItemAtPath: parent.path
+            [.modificationDate: Date()], ofItemAtPath: folder.path
+        )
+        try? FileManager.default.setAttributes(
+            [.modificationDate: Date()],
+            ofItemAtPath: folder.deletingLastPathComponent().path
         )
     }
 
