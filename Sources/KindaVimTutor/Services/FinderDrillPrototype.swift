@@ -43,6 +43,9 @@ enum FinderDrillPrototype {
         try? await Task.sleep(for: .milliseconds(700))
         activateFinderAndSwitchToIconView()
         try? await Task.sleep(for: .milliseconds(300))
+        // Clear the seed tag — the engine will re-tag the active rep's
+        // target each time so the red dot always reflects the goal.
+        tagURL(target, with: nil)
 
         let readback = readFinderSelection() ?? "<no selection read>"
         log.info("finderDrill", "axSelection", fields: ["value": readback])
@@ -94,10 +97,13 @@ enum FinderDrillPrototype {
         return (tmp, urls)
     }
 
-    private static func tagURL(_ url: URL, with tag: String) {
+    /// Sets (or clears, when `tag == nil`) the given Finder tag on a
+    /// URL. Exposed internal so the engine can re-tag the active rep's
+    /// target between reps.
+    static func tagURL(_ url: URL, with tag: String?) {
         do {
-            try (url as NSURL).setResourceValue([tag] as NSArray,
-                                                forKey: .tagNamesKey)
+            let value: NSArray = tag.map { [$0] as NSArray } ?? []
+            try (url as NSURL).setResourceValue(value, forKey: .tagNamesKey)
         } catch {
             AppLogger.shared.info("finderDrill", "tagFailed",
                                   fields: ["err": "\(error)"])

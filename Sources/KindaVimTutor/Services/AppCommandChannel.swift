@@ -118,18 +118,27 @@ final class AppCommandChannel {
             let s = FinderDrillPrototype.readFinderSelection() ?? "<none>"
             AppLogger.shared.info("finderDrill", "reprobe", fields: ["selection": s])
         case "finder.run":
-            // Usage: finder.run file01.txt file06.txt,file02.txt file12.txt
-            // Each space-separated token is "start target" (comma-separated).
+            // Usage: finder.run file01.txt,file06.txt file02.txt,file12.txt
+            // Each space-separated token is "start,target".
             // Falls back to a default 3-rep sequence if no args.
             let reps = parseReps(arg)
             Task { @MainActor in
+                finderDrill.onDrillCompleted = { [weak finderDrill] in
+                    guard let finderDrill else { return }
+                    FinderDrillPanel.shared.finish(engine: finderDrill)
+                }
                 let ok = await finderDrill.start(reps: reps)
+                if ok, let monitor = self.appState?.modeMonitor {
+                    FinderDrillPanel.shared.show(engine: finderDrill,
+                                                 modeMonitor: monitor)
+                }
                 AppLogger.shared.info("finderDrill", "runStart",
                                       fields: ["ok": ok ? "yes" : "no",
                                                "reps": "\(reps.count)"])
             }
         case "finder.stop":
             finderDrill.stop()
+            FinderDrillPanel.shared.hide()
         case "finder.select":
             // Usage: finder.select file07.txt
             let ok = FinderGrid.selectFile(named: arg)

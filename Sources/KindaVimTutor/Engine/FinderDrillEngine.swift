@@ -17,6 +17,11 @@ final class FinderDrillEngine {
     enum State: Equatable {
         case idle
         case preparing
+        /// Waiting for Finder to land on the rep's start file before
+        /// we begin counting moves + time. Protects against the
+        /// transient observer fires between "we asked to select the
+        /// start" and "Finder actually shows the start selected".
+        case seeding
         case active
         case repCompleted
         case drillCompleted
@@ -48,10 +53,17 @@ final class FinderDrillEngine {
     /// pre-state so rep-start self-selection isn't scored as a move.
     private(set) var currentSelection: String?
 
+    /// Called once when the drill transitions to `.drillCompleted`.
+    /// Lets callers run wrap-up UX (close Finder windows, fire
+    /// confetti, return focus to the tutor) without the engine having
+    /// to know about any of it.
+    var onDrillCompleted: (() -> Void)?
+
     private let observer = FinderSelectionObserver()
     private var startTime: Date?
     private var timer: Timer?
     private var files: [URL] = []
+    private var previousTargetURL: URL?
 
     var currentRep: Rep? {
         guard completedRepIndex < reps.count else { return nil }
@@ -112,12 +124,41 @@ final class FinderDrillEngine {
         moveCount = 0
         elapsedTime = 0
 
-        // Self-selecting the start file will fire the observer once.
-        // We want to skip that as a "move", so set currentSelection
-        // BEFORE the selection lands — the dedup check will absorb it.
-        currentSelection = rep.start
-        _ = FinderGrid.selectFile(named: rep.start)
+        // Move the red tag to the current target so the visual cue in
+        // Finder always matches the goal in the coaching panel.
+        if let folder {
+            if let prev = previousTargetURL {
+                FinderDrillPrototype.tagURL(prev, with: nil)
+            }
+            let targetURL = folder.appendingPathComponent(rep.target)
+            FinderDrillPrototype.tagURL(targetURL, with: "Red")
+            previousTargetURL = targetURL
+        }
 
+        // Kick off selection, then wait for it to actually land before
+        // starting the timer + move counting. Avoids counting the
+        // transition from whatever-was-selected-before into the
+        // start file as a "move".
+        state = .seeding
+        _ = FinderGrid.selectFile(named: rep.start)
+        AppLogger.shared.info("finderDrill", "repStart", fields: [
+            "index": "\(completedRepIndex)",
+            "start": rep.start,
+            "target": rep.target
+        ])
+        // If Finder already has the start selected (previous rep's
+        // target happened to match), the observer won't fire and
+        // we'd be stuck in .seeding. Check now and advance.
+        if FinderDrillPrototype.readFinderSelection() == rep.start {
+            currentSelection = rep.start
+            activateRep()
+        }
+    }
+
+    /// Called when we observe the student actually at the start file.
+    /// Transitions the rep from `.seeding` into `.active` and starts
+    /// the clock.
+    private func activateRep() {
         state = .active
         startTime = Date()
         timer?.invalidate()
@@ -127,17 +168,22 @@ final class FinderDrillEngine {
                 self.elapsedTime = Date().timeIntervalSince(t)
             }
         }
-        AppLogger.shared.info("finderDrill", "repStart", fields: [
-            "index": "\(completedRepIndex)",
-            "start": rep.start,
-            "target": rep.target
-        ])
     }
 
     private func selectionDidChange(to selection: String?) {
+        guard let selection else { return }
+        // Seeding: swallow everything until we land on the start file,
+        // then flip to active without recording any move.
+        if state == .seeding {
+            currentSelection = selection
+            if let rep = currentRep, selection == rep.start {
+                activateRep()
+            }
+            return
+        }
         guard state == .active else { return }
         // Dedupe: same-name fires (observer redundancy) don't count.
-        guard let selection, selection != currentSelection else { return }
+        guard selection != currentSelection else { return }
         currentSelection = selection
         moveCount += 1
 
@@ -186,5 +232,30 @@ final class FinderDrillEngine {
             "moves": "\(totalMoves)",
             "time": String(format: "%.2f", totalTime)
         ])
+        onDrillCompleted?()
+    }
+
+    /// Aggregate across all completed reps — for the ring progress +
+    /// metrics readouts in the coaching panel (matches the tutor's
+    /// left-rail DrillSidebarSection).
+    var totalMoves: Int { results.reduce(0) { $0 + $1.moves } }
+    var totalTime: TimeInterval { results.reduce(0) { $0 + $1.timeSeconds } }
+    var drillProgress: Double {
+        guard !reps.isEmpty else { return 0 }
+        return Double(completedRepIndex) / Double(reps.count)
+    }
+
+    /// The grid delta from the student's current selection to the
+    /// target, in (rightward, downward) cells. Positive dx = press l,
+    /// negative dx = press h; positive dy = press j, negative dy =
+    /// press k. Nil if we can't resolve either cell in Finder's AX
+    /// tree (window not frontmost, etc.).
+    var directionToTarget: (dx: Int, dy: Int)? {
+        guard let rep = currentRep,
+              let selection = currentSelection,
+              let layout = FinderGrid.readLayout(),
+              let from = layout.cell(named: selection),
+              let to = layout.cell(named: rep.target) else { return nil }
+        return (to.col - from.col, to.row - from.row)
     }
 }
