@@ -221,10 +221,10 @@ final class FinderDrillEngine {
             let currentURL = folder.appendingPathComponent(
                 folderNames[rep.targetIndex], isDirectory: true
             )
-            let targetName = FinderDrillPrototype.randomTargetName(
-                excluding: usedTargetNames
-            )
-            usedTargetNames.insert(targetName)
+            // The target always has the same label — TREASURE — so
+            // the narrative stays consistent across reps (the color
+            // and position change, but the goal name doesn't).
+            let targetName = "TREASURE"
             if let renamed = FinderDrillPrototype.renameAndSetIcon(
                 from: currentURL, to: targetName,
                 iconKey: currentTargetIconKey
