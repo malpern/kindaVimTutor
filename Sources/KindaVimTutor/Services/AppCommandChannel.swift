@@ -143,6 +143,31 @@ final class AppCommandChannel {
         case "finder.stop":
             finderDrill.stop()
             FinderDrillPanel.shared.hide()
+        case "notes.probe":
+            Task { @MainActor in
+                let surface = NotesSurface()
+                let status = await surface.isUsable()
+                AppLogger.shared.info("extDrill", "notesUsability",
+                                      fields: ["status": "\(status)"])
+                guard status == .ready else { return }
+                do {
+                    let prepared = try await surface.prepare(
+                        body: "- practice line 1\n- practice line 2\n- practice line 3"
+                    )
+                    AppLogger.shared.info("extDrill", "notesPrepared",
+                                          fields: ["id": prepared.documentIdentifier])
+                    // Leave note visible for a few seconds, then delete.
+                    try? await Task.sleep(for: .seconds(4))
+                    await surface.cleanup(prepared)
+                    AppLogger.shared.info("extDrill", "notesCleaned",
+                                          fields: ["id": prepared.documentIdentifier])
+                } catch {
+                    AppLogger.shared.info("extDrill", "notesProbeError",
+                                          fields: ["err": "\(error)"])
+                }
+            }
+        case "notes.sweep":
+            Task { await NotesSurface().sweepOrphans() }
         case "finder.select":
             // Usage: finder.select file07.txt
             Task {
