@@ -44,7 +44,30 @@ if [[ -n "${RELEASE_ARCHES}" ]]; then
 fi
 
 log "==> package app"
-SIGNING_MODE=adhoc ARCHES="${ARCHES_VALUE}" "${ROOT_DIR}/Scripts/package_app.sh" release
+# Sign with a real, stable code-signing identity when one is available
+# in the developer's Keychain. Ad-hoc signatures produce a fresh cdhash
+# on every build, which causes macOS TCC to silently revoke privacy
+# grants (Accessibility, Input Monitoring, Automation) — forcing a
+# re-grant after every edit-compile-run cycle. A stable identity keeps
+# the grant intact.
+#
+# Preference order:
+#   1. $APP_IDENTITY if explicitly set (caller knows best).
+#   2. A "Developer ID Application" identity from the login Keychain.
+#   3. Fall back to ad-hoc.
+if [[ -z "${APP_IDENTITY:-}" ]]; then
+  APP_IDENTITY=$(security find-identity -v -p codesigning 2>/dev/null \
+    | awk -F'"' '/Developer ID Application/ {print $2; exit}')
+fi
+if [[ -n "${APP_IDENTITY}" ]]; then
+  log "==> signing with identity: ${APP_IDENTITY}"
+  APP_IDENTITY="${APP_IDENTITY}" ARCHES="${ARCHES_VALUE}" \
+    "${ROOT_DIR}/Scripts/package_app.sh" release
+else
+  log "==> no signing identity found; falling back to ad-hoc"
+  SIGNING_MODE=adhoc ARCHES="${ARCHES_VALUE}" \
+    "${ROOT_DIR}/Scripts/package_app.sh" release
+fi
 
 log "==> launch app"
 if ! open "${APP_BUNDLE}"; then

@@ -111,6 +111,22 @@ final class AppCommandChannel {
             sendKeystrokes(arg)
         case "key":
             sendNamedKey(arg)
+        case "finder.prototype":
+            Task { await FinderDrillPrototype.run() }
+        case "finder.reprobe":
+            let s = FinderDrillPrototype.readFinderSelection() ?? "<none>"
+            AppLogger.shared.info("finderDrill", "reprobe", fields: ["selection": s])
+        case "finder.select":
+            // Usage: finder.select file07.txt
+            let ok = FinderGrid.selectFile(named: arg)
+            AppLogger.shared.info("finderDrill", "selectResult",
+                                  fields: ["name": arg, "ok": ok ? "yes" : "no"])
+        case "finder.grid":
+            FinderGrid.resizeFocusedFinderWindow(to: CGSize(width: 640, height: 440))
+            Task { @MainActor in
+                try? await Task.sleep(for: .milliseconds(300))
+                logFinderLayout(FinderGrid.readLayout(), tag: "gridCell")
+            }
         default:
             AppLogger.shared.warn("channel", "unknown command", fields: ["cmd": command])
         }
@@ -138,6 +154,25 @@ final class AppCommandChannel {
                 window.sendEvent(event)
             }
             _ = responder // keep compiler quiet if unused
+        }
+    }
+
+    private func logFinderLayout(_ layout: FinderGrid.Layout?, tag: String) {
+        guard let layout else {
+            AppLogger.shared.info("finderDrill", "gridEmpty", fields: [:])
+            return
+        }
+        AppLogger.shared.info("finderDrill", "gridSize", fields: [
+            "rows": "\(layout.rowCount)",
+            "cols": "\(layout.colCount)",
+            "filled": "\(layout.filled.count)"
+        ])
+        for cell in layout.filled.sorted(by: { ($0.row, $0.col) < ($1.row, $1.col) }) {
+            AppLogger.shared.info("finderDrill", tag, fields: [
+                "name": cell.name,
+                "row": "\(cell.row)",
+                "col": "\(cell.col)"
+            ])
         }
     }
 
