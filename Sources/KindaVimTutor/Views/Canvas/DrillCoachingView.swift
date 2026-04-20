@@ -1,17 +1,9 @@
 import SwiftUI
 
-/// Post-drill coaching panel. Designed around progressive disclosure:
-///
-/// - **Default**: a single summary line that carries the gamification
-///   hit ("★ New best · 5 keystrokes · 1.4s") plus Continue / Retry
-///   buttons and a quiet Details toggle.
-/// - **Expanded** (one click): the full tier panel — your attempt,
-///   personal best, chapter target, and a locked teaser for any
-///   future-chapter technique that would shave keystrokes here.
-///
-/// Session-remembered auto-expand: once the student opens Details on
-/// any drill in a session, subsequent drills open pre-expanded. The
-/// preference resets on app relaunch so the default stays simple.
+/// Post-drill coaching panel. Shows the full picture at once:
+/// achievement headline, a stacked comparison of your attempt vs
+/// personal best vs chapter target, any future-lesson teaser, and the
+/// Continue / Retry actions — all with visible keyboard affordances.
 struct DrillCoachingView: View {
     let exercise: Exercise
     let lastKeystrokes: Int
@@ -24,18 +16,9 @@ struct DrillCoachingView: View {
     let futureLessonUnlocked: Bool
     let onContinue: () -> Void
     let onRetry: () -> Void
-    @Binding var autoExpandDetails: Bool
-
-    @State private var showDetails: Bool = false
-
-    // MARK: - Achievement classification
 
     private enum Achievement {
-        case first
-        case newBest
-        case beatTarget
-        case hitTarget
-        case completed
+        case first, newBest, beatTarget, hitTarget, completed
     }
 
     private var achievement: Achievement {
@@ -45,7 +28,6 @@ struct DrillCoachingView: View {
             if lastKeystrokes == pb.keystrokeCount && lastTime < pb.timeSeconds { return true }
             return false
         }()
-
         if personalBest == nil { return .first }
         if beatPB { return .newBest }
         if let target = chapterTarget {
@@ -55,22 +37,22 @@ struct DrillCoachingView: View {
         return .completed
     }
 
-    // MARK: - Body
-
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            summaryLine
+        VStack(alignment: .leading, spacing: 16) {
+            headline
                 .id("summary-\(lastKeystrokes)-\(lastTime)")
                 .transition(.scale(scale: 0.92).combined(with: .opacity))
 
-            if showDetails {
-                detailsPanel
-                    .transition(.opacity.combined(with: .move(edge: .top)))
+            comparisonPanel
+
+            if let opt = exercise.futureOptimization {
+                Divider().opacity(0.4)
+                futureOptimizationRow(opt)
             }
 
             actionRow
         }
-        .padding(18)
+        .padding(20)
         .frame(maxWidth: 560)
         .background {
             RoundedRectangle(cornerRadius: 14, style: .continuous)
@@ -81,90 +63,90 @@ struct DrillCoachingView: View {
                 .strokeBorder(summaryAccent.opacity(0.35), lineWidth: 0.75)
         }
         .shadow(color: .black.opacity(0.25), radius: 12, y: 4)
-        .onAppear {
-            // Honor the session-remembered preference.
-            showDetails = autoExpandDetails
-        }
-        .animation(.easeInOut(duration: 0.22), value: showDetails)
     }
 
-    // MARK: - Subviews
+    // MARK: - Headline
 
-    private var summaryLine: some View {
-        HStack(spacing: 10) {
+    private var headline: some View {
+        HStack(spacing: 12) {
             Image(systemName: summaryIconName)
-                .font(.system(size: 18, weight: .semibold))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(summaryAccent)
             Text(summaryTitle)
-                .font(.system(size: 17, weight: .semibold))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.primary)
-            Text("·")
-                .foregroundStyle(.tertiary)
-            Text("\(lastKeystrokes) keystrokes")
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
-            Text("·")
-                .foregroundStyle(.tertiary)
-            Text(formatTime(lastTime))
-                .font(.system(size: 15, weight: .regular, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(.secondary)
             Spacer()
         }
     }
 
-    private var detailsPanel: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Divider()
-                .padding(.vertical, 2)
+    // MARK: - Comparison
 
+    private var comparisonPanel: some View {
+        VStack(spacing: 6) {
             tierRow(
                 label: "Your attempt",
-                value: "\(lastKeystrokes) keystrokes · \(formatTime(lastTime))",
-                highlight: achievement == .newBest || achievement == .beatTarget
+                keystrokes: lastKeystrokes,
+                time: lastTime,
+                highlight: achievement == .newBest || achievement == .beatTarget,
+                isPrimary: true
             )
-
             if let pb = personalBest {
                 tierRow(
                     label: "Personal best",
-                    value: "\(pb.keystrokeCount) keystrokes · \(formatTime(pb.timeSeconds))",
-                    highlight: false
+                    keystrokes: pb.keystrokeCount,
+                    time: pb.timeSeconds,
+                    highlight: false,
+                    isPrimary: false
                 )
             }
-
             if let target = chapterTarget {
                 tierRow(
                     label: "Chapter target",
-                    value: "\(target) keystrokes",
-                    highlight: achievement == .hitTarget || achievement == .beatTarget
+                    keystrokes: target,
+                    time: nil,
+                    highlight: achievement == .hitTarget || achievement == .beatTarget,
+                    isPrimary: false
                 )
             }
-
-            if let opt = exercise.futureOptimization {
-                Divider().padding(.vertical, 2)
-                futureOptimizationRow(opt)
-            }
         }
     }
 
-    private func tierRow(label: String, value: String, highlight: Bool) -> some View {
-        HStack {
+    private func tierRow(label: String, keystrokes: Int, time: TimeInterval?,
+                         highlight: Bool, isPrimary: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline) {
             Text(label)
                 .font(.system(size: 13))
-                .foregroundStyle(highlight ? .primary : .secondary)
+                .foregroundStyle(isPrimary ? .primary : .secondary)
             Spacer()
-            Text(value)
-                .font(.system(size: 13, design: .rounded))
-                .monospacedDigit()
-                .foregroundStyle(highlight ? .green : .primary.opacity(0.85))
+            HStack(spacing: 10) {
+                Text("\(keystrokes) keystrokes")
+                    .font(.system(size: isPrimary ? 15 : 13,
+                                  weight: isPrimary ? .semibold : .regular,
+                                  design: .rounded))
+                    .monospacedDigit()
+                    .foregroundStyle(highlight ? AnyShapeStyle(Color.green)
+                                               : AnyShapeStyle(HierarchicalShapeStyle.primary))
+                if let time {
+                    Text("·")
+                        .foregroundStyle(.tertiary)
+                    Text(formatTime(time))
+                        .font(.system(size: isPrimary ? 15 : 13,
+                                      weight: isPrimary ? .semibold : .regular,
+                                      design: .rounded))
+                        .monospacedDigit()
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
+        .padding(.vertical, 3)
     }
+
+    // MARK: - Future optimization teaser
 
     private func futureOptimizationRow(_ opt: Exercise.FutureOptimization) -> some View {
         HStack(spacing: 8) {
             Image(systemName: futureLessonUnlocked ? "bolt.fill" : "bolt")
-                .font(.system(size: 12, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(futureLessonUnlocked
                                  ? AnyShapeStyle(Color.orange)
                                  : AnyShapeStyle(HierarchicalShapeStyle.tertiary))
@@ -179,43 +161,33 @@ struct DrillCoachingView: View {
             }
             Spacer()
         }
-        .padding(.top, 2)
     }
+
+    // MARK: - Actions
 
     private var actionRow: some View {
         HStack(spacing: 10) {
             Button(action: onContinue) {
-                Text("Continue")
-                    .font(.system(size: 13, weight: .medium))
+                HStack(spacing: 6) {
+                    Text("Continue")
+                        .font(.system(size: 13, weight: .medium))
+                    KeyCapView(label: "⏎", size: .small)
+                }
             }
             .buttonStyle(.borderedProminent)
             .keyboardShortcut(.defaultAction)
 
             Button(action: onRetry) {
-                Text("Retry")
-                    .font(.system(size: 13))
+                HStack(spacing: 6) {
+                    Text("Retry")
+                        .font(.system(size: 13))
+                    KeyCapView(label: "R", size: .small)
+                }
             }
             .buttonStyle(.bordered)
+            .keyboardShortcut("r", modifiers: [])
 
             Spacer()
-
-            Button {
-                let newState = !showDetails
-                showDetails = newState
-                // Once the student opens Details on any drill this
-                // session, remember that preference for the rest of
-                // the session so subsequent drills open expanded.
-                if newState { autoExpandDetails = true }
-            } label: {
-                HStack(spacing: 4) {
-                    Text(showDetails ? "Hide details" : "Details")
-                        .font(.system(size: 12))
-                    Image(systemName: showDetails ? "chevron.up" : "chevron.down")
-                        .font(.system(size: 10, weight: .semibold))
-                }
-                .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
         }
     }
 
@@ -250,9 +222,7 @@ struct DrillCoachingView: View {
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {
-        if seconds < 10 {
-            return String(format: "%.2fs", seconds)
-        }
+        if seconds < 10 { return String(format: "%.2fs", seconds) }
         return String(format: "%.1fs", seconds)
     }
 }

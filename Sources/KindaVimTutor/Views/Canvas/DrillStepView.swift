@@ -13,7 +13,6 @@ struct DrillStepView: View {
     @State private var lastEditorText: String = ""
     @State private var showWrongModeHint = false
     @State private var wrongModeHideTask: Task<Void, Never>?
-    @State private var coachingPrefs = DrillCoachingPreferences.shared
 
     var isDrillComplete: Bool { engine.isDrillComplete }
 
@@ -115,11 +114,7 @@ struct DrillStepView: View {
                         chapterTarget: engine.lastRepTarget,
                         futureLessonUnlocked: isFutureLessonUnlocked(),
                         onContinue: { onAdvance?() },
-                        onRetry: { engine.resetDrill() },
-                        autoExpandDetails: Binding(
-                            get: { coachingPrefs.autoExpandDetails },
-                            set: { coachingPrefs.autoExpandDetails = $0 }
-                        )
+                        onRetry: { engine.resetDrill() }
                     )
                     .transition(.opacity.combined(with: .move(edge: .bottom)))
                 }
@@ -147,6 +142,11 @@ struct DrillStepView: View {
         .onChange(of: engine.isDrillComplete) {
             updateInspector()
             if engine.isDrillComplete {
+                // Release focus so the post-drill panel's keyboard
+                // shortcuts (Return / R / D) and window-level `]`/`[`
+                // advance keys route correctly instead of falling into
+                // the editor.
+                isEditorFocused = false
                 let result = ExerciseResult(
                     exerciseId: exercise.id,
                     completedAt: Date(),

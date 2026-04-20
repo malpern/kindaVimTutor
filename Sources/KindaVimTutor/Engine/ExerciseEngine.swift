@@ -47,6 +47,17 @@ final class ExerciseEngine {
     private var timer: Timer?
     private var keyMonitor: Any?
 
+    // Fallback keystroke accounting for when kindaVim consumes a
+    // keypress globally (via CGEventTap / AX) and synthesizes the
+    // cursor/text mutation directly — in that case no NSEvent reaches
+    // the app's local monitor, so the NSEvent-based counter misses it.
+    // We reconstruct the missing keystroke from the observed editor
+    // state change: if text+cursor changed but keystrokeCount didn't
+    // grow since the last change, count one.
+    private var lastObservedText: String?
+    private var lastObservedCursor: Int?
+    private var keystrokesAtLastChange: Int = 0
+
     var isDrillComplete: Bool { state == .drillCompleted }
     var isRepCompleted: Bool { state == .repCompleted }
     var isActive: Bool { state == .active }
@@ -92,13 +103,32 @@ final class ExerciseEngine {
     func textDidChange(currentText: String, cursorPosition: Int) {
         guard state == .active else { return }
         recordEvent(.textChanged, text: currentText, cursorPosition: cursorPosition)
+        reconcileKeystroke(text: currentText, cursor: cursorPosition)
         validate(currentText: currentText, cursorPosition: cursorPosition)
     }
 
     func selectionDidChange(currentText: String, cursorPosition: Int) {
         guard state == .active, currentVariation != nil else { return }
         recordEvent(.cursorMoved, text: currentText, cursorPosition: cursorPosition)
+        reconcileKeystroke(text: currentText, cursor: cursorPosition)
         validate(currentText: currentText, cursorPosition: cursorPosition)
+    }
+
+    /// If the editor state changed but no NSEvent-backed keystroke
+    /// was recorded for it (kindaVim swallowed the key globally),
+    /// credit the student with one.
+    private func reconcileKeystroke(text: String, cursor: Int) {
+        defer {
+            lastObservedText = text
+            lastObservedCursor = cursor
+            keystrokesAtLastChange = keystrokeCount
+        }
+        guard lastObservedText != nil else { return } // seeded, no prior state
+        let changed = text != lastObservedText || cursor != lastObservedCursor
+        guard changed else { return }
+        if keystrokeCount == keystrokesAtLastChange {
+            keystrokeCount += 1
+        }
     }
 
     /// Increment the keystroke counter for the current rep. Called
@@ -129,7 +159,11 @@ final class ExerciseEngine {
                 || event.modifierFlags.contains(.option) {
                 return event
             }
-            Task { @MainActor in
+            // Local NSEvent monitors fire synchronously on the main
+            // thread. Increment inline — queuing through `Task { @MainActor }`
+            // lets the rep's own validation complete first (flipping
+            // state off `.active`), and the deferred count is dropped.
+            MainActor.assumeIsolated {
                 self?.recordKeystroke()
             }
             return event
@@ -175,6 +209,9 @@ final class ExerciseEngine {
         keystrokeCount = 0
         elapsedTime = 0
         startTime = Date()
+        lastObservedText = variation.initialText
+        lastObservedCursor = variation.initialCursorPosition
+        keystrokesAtLastChange = 0
 
         let repTimestamp = drillStartTime.map { Date().timeIntervalSince($0) } ?? 0
 
