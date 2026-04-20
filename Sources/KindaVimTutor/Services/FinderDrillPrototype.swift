@@ -79,27 +79,27 @@ enum FinderDrillPrototype {
         "WINNER", "BULLSEYE", "HOME", "VICTORY", "JACKPOT"
     ]
 
-    /// Returns `count` names, one per grid slot. Slots whose indices
-    /// are in `targetIndices` get an ALL-CAPS target name. The rest
-    /// get distinct lowercase names picked from the regular pool.
-    /// Picks are stable only within a single call — each drill run
-    /// gets a fresh shuffle.
+    /// Returns `count` random lowercase names — one per grid slot.
+    /// No ALL-CAPS here; the engine renames the current rep's
+    /// target folder to an ALL-CAPS name at rep start and restores
+    /// it on advance, so only the active goal is SHOUTING.
     static func generateFolderNames(count: Int,
                                     targetIndices: Set<Int>) -> [String] {
-        let regulars = regularNamePool.shuffled()
-        let targets = targetNamePool.shuffled()
-        var regularIter = regulars.makeIterator()
-        var targetIter = targets.makeIterator()
-        var assigned: [String] = []
-        assigned.reserveCapacity(count)
+        let shuffled = regularNamePool.shuffled()
+        var out: [String] = []
+        out.reserveCapacity(count)
         for i in 0..<count {
-            if targetIndices.contains(i) {
-                assigned.append(targetIter.next() ?? "TARGET")
-            } else {
-                assigned.append(regularIter.next() ?? "folder\(i + 1)")
-            }
+            out.append(i < shuffled.count ? shuffled[i] : "folder\(i + 1)")
         }
-        return assigned
+        return out
+    }
+
+    /// Returns a random unused ALL-CAPS target name — callers pass
+    /// the set of names already used in the current drill to avoid
+    /// repeats across reps.
+    static func randomTargetName(excluding used: Set<String>) -> String {
+        let pool = targetNamePool.shuffled()
+        return pool.first(where: { !used.contains($0) }) ?? "TARGET"
     }
 
     /// Prompts for Accessibility if not trusted. Separate from `run()`
@@ -234,13 +234,52 @@ enum FinderDrillPrototype {
         }
     }
 
+    /// Rename `from` → `to` and apply `iconKey` in one pass. The
+    /// rename triggers a Finder refresh that also forces the new
+    /// icon to show without an aggressive cache flush. Returns the
+    /// new URL, or nil on failure.
+    @discardableResult
+    static func renameAndSetIcon(from: URL, to newName: String, iconKey: String) -> URL? {
+        let parent = from.deletingLastPathComponent()
+        let newURL = parent.appendingPathComponent(newName, isDirectory: true)
+        if from != newURL {
+            do {
+                try FileManager.default.moveItem(at: from, to: newURL)
+            } catch {
+                AppLogger.shared.info("finderDrill", "renameFailed", fields: [
+                    "from": from.lastPathComponent,
+                    "to": newName,
+                    "err": "\(error)"
+                ])
+                return nil
+            }
+        }
+        setTargetIcon(on: newURL, key: iconKey)
+        return newURL
+    }
+
     /// Applies the given vivid icon to `folder`. Pass `nil` to
-    /// restore the neutral icon (used when advancing off a prior
-    /// rep's target).
+    /// restore the neutral icon.
     static func setTargetIcon(on folder: URL, key: String?) {
         let loadKey = key ?? "furry-neutral"
-        guard let image = loadIconImage(named: loadKey) else { return }
-        NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
+        guard let image = loadIconImage(named: loadKey) else {
+            AppLogger.shared.info("finderDrill", "iconLoadFailed",
+                                  fields: ["key": loadKey])
+            return
+        }
+        let ok = NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
+        AppLogger.shared.info("finderDrill", "iconSet",
+                              fields: [
+                                "key": loadKey,
+                                "folder": folder.lastPathComponent,
+                                "ok": ok ? "yes" : "no"
+                              ])
+        // Finder caches icons aggressively. Nudge the listing by
+        // touching the folder's parent mtime.
+        let parent = folder.deletingLastPathComponent()
+        try? FileManager.default.setAttributes(
+            [.modificationDate: Date()], ofItemAtPath: parent.path
+        )
     }
 
     /// The 12 base color keys in stable order. Names matched to the

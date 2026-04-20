@@ -69,6 +69,13 @@ final class FinderDrillEngine {
     private var timer: Timer?
     private var files: [URL] = []
     private var previousTargetURL: URL?
+    private var previousTargetIndex: Int?
+    /// The lowercase names each slot had at drill start. Used to
+    /// restore a target folder's name when the rep advances.
+    private var originalFolderNames: [String] = []
+    /// ALL-CAPS target names already used in this drill; prevents
+    /// picking the same word twice across reps.
+    private var usedTargetNames: Set<String> = []
 
     /// Deterministic but per-run shuffle of the vivid target palette,
     /// one key per rep. If more reps than palette entries, wraps.
@@ -143,6 +150,9 @@ final class FinderDrillEngine {
             targetIndices: targetIndices
         )
         self.folderNames = names
+        self.originalFolderNames = names
+        self.usedTargetNames = []
+        self.previousTargetIndex = nil
         self.repTargetIconKeys = assignedTargetIconKeys(repCount: reps.count)
 
         guard let prep = await FinderDrillPrototype.run(
@@ -188,20 +198,39 @@ final class FinderDrillEngine {
         moveCount = 0
         elapsedTime = 0
 
-        // Restore the previous rep's target to the neutral icon,
-        // then stamp this rep's vivid color onto its goal folder.
-        if let folder {
-            if let prev = previousTargetURL {
-                FinderDrillPrototype.setTargetIcon(on: prev, key: nil)
+        // Between reps: rename the previous target back to its
+        // original lowercase name + restore the neutral icon, then
+        // rename THIS rep's target to a fresh ALL-CAPS label and
+        // stamp the vivid icon. Renaming-plus-setIcon forces a
+        // Finder refresh so the new color actually shows.
+        if let folder, folderNames.indices.contains(rep.targetIndex) {
+            if let prev = previousTargetIndex,
+               originalFolderNames.indices.contains(prev),
+               folderNames.indices.contains(prev) {
+                let prevURL = folder.appendingPathComponent(
+                    folderNames[prev], isDirectory: true
+                )
+                let original = originalFolderNames[prev]
+                if let restored = FinderDrillPrototype.renameAndSetIcon(
+                    from: prevURL, to: original, iconKey: "furry-neutral"
+                ) {
+                    folderNames[prev] = restored.lastPathComponent
+                }
             }
-            if folderNames.indices.contains(rep.targetIndex) {
-                let targetURL = folder.appendingPathComponent(
-                    folderNames[rep.targetIndex], isDirectory: true
-                )
-                FinderDrillPrototype.setTargetIcon(
-                    on: targetURL, key: currentTargetIconKey
-                )
-                previousTargetURL = targetURL
+
+            let currentURL = folder.appendingPathComponent(
+                folderNames[rep.targetIndex], isDirectory: true
+            )
+            let targetName = FinderDrillPrototype.randomTargetName(
+                excluding: usedTargetNames
+            )
+            usedTargetNames.insert(targetName)
+            if let renamed = FinderDrillPrototype.renameAndSetIcon(
+                from: currentURL, to: targetName,
+                iconKey: currentTargetIconKey
+            ) {
+                folderNames[rep.targetIndex] = renamed.lastPathComponent
+                previousTargetIndex = rep.targetIndex
             }
         }
 
