@@ -12,6 +12,12 @@ struct FinderDrillStepView: View {
 
     @State private var engine = FinderDrillEngine()
     @State private var hasStarted = false
+    /// Remaining seconds before we auto-advance from the summary
+    /// screen. Nil when no countdown is active (drill not complete
+    /// yet, or user cancelled by hitting Retry).
+    @State private var autoAdvanceRemaining: Double?
+    @State private var autoAdvanceTask: Task<Void, Never>?
+    private let autoAdvanceDuration: Double = 2.5
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -251,33 +257,107 @@ struct FinderDrillStepView: View {
                 metric(label: "Time", value: String(format: "%.1fs", time))
             }
             HStack(spacing: 10) {
-                Button {
-                    onAdvance?()
-                } label: {
-                    HStack(spacing: 8) {
-                        Text("Continue")
-                            .font(.system(size: 14, weight: .medium))
-                        KeyCapView(label: "⏎", size: .small)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                }
-                .buttonStyle(.borderedProminent)
-                .keyboardShortcut(.defaultAction)
+                continueButton
+                retryButton
+                autoAdvanceLabel
+            }
+            autoAdvanceProgressBar
+        }
+        .onAppear { startAutoAdvance() }
+    }
 
-                Button {
-                    Task { await startDrill() }
-                } label: {
-                    HStack(spacing: 6) {
-                        Text("Retry")
-                            .font(.system(size: 13))
-                        KeyCapView(label: "R", size: .small)
-                    }
-                }
-                .buttonStyle(.bordered)
-                .keyboardShortcut("r", modifiers: [])
+    private var continueButton: some View {
+        Button {
+            cancelAutoAdvance()
+            onAdvance?()
+        } label: {
+            HStack(spacing: 8) {
+                Text("Continue")
+                    .font(.system(size: 14, weight: .medium))
+                KeyCapView(label: "⏎", size: .small)
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+        }
+        .buttonStyle(.borderedProminent)
+        .keyboardShortcut(.defaultAction)
+    }
+
+    private var retryButton: some View {
+        Button {
+            cancelAutoAdvance()
+            Task { await startDrill() }
+        } label: {
+            HStack(spacing: 6) {
+                Text("Retry")
+                    .font(.system(size: 13))
+                KeyCapView(label: "R", size: .small)
             }
         }
+        .buttonStyle(.bordered)
+        .keyboardShortcut("r", modifiers: [])
+    }
+
+    /// Small text next to the buttons that counts the auto-advance
+    /// down. Disappears when the student cancels by hitting Retry.
+    @ViewBuilder
+    private var autoAdvanceLabel: some View {
+        if let remaining = autoAdvanceRemaining {
+            Text("Continuing in \(String(format: "%.1f", remaining))s…")
+                .font(.system(size: 11))
+                .foregroundStyle(.tertiary)
+                .monospacedDigit()
+                .transition(.opacity)
+        }
+    }
+
+    /// Thin horizontal progress bar under the buttons that drains
+    /// as the auto-advance timer elapses — gives the countdown a
+    /// visual anchor separate from the text.
+    @ViewBuilder
+    private var autoAdvanceProgressBar: some View {
+        if let remaining = autoAdvanceRemaining {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(Color.white.opacity(0.08))
+                    Capsule()
+                        .fill(Color.accentColor.opacity(0.6))
+                        .frame(
+                            width: geo.size.width
+                                * (remaining / autoAdvanceDuration)
+                        )
+                }
+            }
+            .frame(height: 3)
+            .frame(maxWidth: 260)
+            .animation(.linear(duration: 0.05), value: remaining)
+        }
+    }
+
+    // MARK: - Auto-advance countdown
+
+    private func startAutoAdvance() {
+        cancelAutoAdvance()
+        autoAdvanceRemaining = autoAdvanceDuration
+        autoAdvanceTask = Task { @MainActor in
+            let step = 0.05
+            var remaining = autoAdvanceDuration
+            while remaining > 0 {
+                try? await Task.sleep(for: .milliseconds(50))
+                if Task.isCancelled { return }
+                remaining -= step
+                autoAdvanceRemaining = max(0, remaining)
+            }
+            autoAdvanceRemaining = nil
+            onAdvance?()
+        }
+    }
+
+    private func cancelAutoAdvance() {
+        autoAdvanceTask?.cancel()
+        autoAdvanceTask = nil
+        autoAdvanceRemaining = nil
     }
 
     private func metric(label: String, value: String) -> some View {
