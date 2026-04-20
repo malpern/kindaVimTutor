@@ -19,6 +19,8 @@ final class FinderDrillPanel {
     static let shared = FinderDrillPanel()
 
     private var panel: NSPanel?
+    private var activationObserver: NSObjectProtocol?
+    private var deactivationObserver: NSObjectProtocol?
 
     /// Final results surfaced after the drill completes and the panel
     /// has been dismissed — so the tutor window can show a summary.
@@ -72,9 +74,53 @@ final class FinderDrillPanel {
 
         panel.orderFrontRegardless()
         self.panel = panel
+        installFinderActivationWatcher()
+    }
+
+    /// Keep the panel visible only while Finder is the frontmost app.
+    /// When the student alt-tabs to another window — chat, browser —
+    /// the floating panel would otherwise sit on top and nag them.
+    /// Observes NSWorkspace and toggles panel visibility accordingly.
+    private func installFinderActivationWatcher() {
+        let wc = NSWorkspace.shared.notificationCenter
+        let finderId = "com.apple.finder"
+
+        activationObserver = wc.addObserver(
+            forName: NSWorkspace.didActivateApplicationNotification,
+            object: nil, queue: .main
+        ) { [weak self] note in
+            let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
+            MainActor.assumeIsolated {
+                if app?.bundleIdentifier == finderId {
+                    self?.panel?.orderFrontRegardless()
+                } else {
+                    self?.panel?.orderOut(nil)
+                }
+            }
+        }
+        // Don't wait for a notification — sync to the current
+        // frontmost app on install so we don't flash the panel
+        // incorrectly if we were launched with Finder not in front.
+        let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
+        if frontmost != finderId {
+            panel?.orderOut(nil)
+        }
+    }
+
+    private func removeFinderActivationWatcher() {
+        let wc = NSWorkspace.shared.notificationCenter
+        if let activationObserver {
+            wc.removeObserver(activationObserver)
+        }
+        if let deactivationObserver {
+            wc.removeObserver(deactivationObserver)
+        }
+        activationObserver = nil
+        deactivationObserver = nil
     }
 
     func hide() {
+        removeFinderActivationWatcher()
         panel?.orderOut(nil)
         panel = nil
     }

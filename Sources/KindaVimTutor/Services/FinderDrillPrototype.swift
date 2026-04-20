@@ -30,6 +30,11 @@ enum FinderDrillPrototype {
         let log = AppLogger.shared
         log.info("finderDrill", "start", fields: ["rows": "\(rows)", "cols": "\(cols)"])
 
+        // Sweep any leftover drill state from prior runs so the new
+        // drill is the only one onscreen and on disk.
+        await MainActor.run { closeLeftoverDrillWindows() }
+        removeLeftoverDrillFolders()
+
         guard let (folder, files) = makeTempFolder(count: rows * cols) else {
             log.info("finderDrill", "tempFolderFailed", fields: [:])
             return nil
@@ -75,6 +80,58 @@ enum FinderDrillPrototype {
 
     static func cleanUp(_ folder: URL) {
         try? FileManager.default.removeItem(at: folder)
+    }
+
+    // MARK: - Singleton enforcement
+
+    /// Close any Finder windows whose title starts with our tmp
+    /// folder prefix. Uses AX only (no AppleScript / Automation
+    /// permission).
+    @MainActor
+    private static func closeLeftoverDrillWindows() {
+        guard let finder = NSRunningApplication.runningApplications(
+            withBundleIdentifier: "com.apple.finder"
+        ).first else { return }
+        let app = AXUIElementCreateApplication(finder.processIdentifier)
+        var windowsRef: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            app, kAXWindowsAttribute as CFString, &windowsRef
+        ) == .success,
+              let windows = windowsRef as? [AXUIElement] else { return }
+
+        for window in windows {
+            var titleRef: CFTypeRef?
+            AXUIElementCopyAttributeValue(window, kAXTitleAttribute as CFString, &titleRef)
+            var docRef: CFTypeRef?
+            AXUIElementCopyAttributeValue(window, kAXDocumentAttribute as CFString, &docRef)
+            let title = (titleRef as? String) ?? ""
+            let doc = (docRef as? String) ?? ""
+            guard title.contains("kindaVimTutorFinder") ||
+                  doc.contains("kindaVimTutorFinder") else { continue }
+            var closeRef: CFTypeRef?
+            if AXUIElementCopyAttributeValue(
+                window, kAXCloseButtonAttribute as CFString, &closeRef
+            ) == .success, let closeRef {
+                AXUIElementPerformAction(
+                    closeRef as! AXUIElement, kAXPressAction as CFString
+                )
+            }
+        }
+    }
+
+    /// Delete any leftover `kindaVimTutorFinder-*` directories in the
+    /// temporary directory. Covers prior runs that crashed or were
+    /// killed before the end-of-drill cleanup ran.
+    private static func removeLeftoverDrillFolders() {
+        let fm = FileManager.default
+        let tmp = fm.temporaryDirectory
+        guard let entries = try? fm.contentsOfDirectory(
+            at: tmp, includingPropertiesForKeys: nil
+        ) else { return }
+        for url in entries
+            where url.lastPathComponent.hasPrefix("kindaVimTutorFinder-") {
+            try? fm.removeItem(at: url)
+        }
     }
 
     // MARK: - Filesystem

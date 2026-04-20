@@ -268,4 +268,30 @@ final class FinderDrillEngine {
               let to = layout.cell(named: rep.target) else { return nil }
         return (to.col - from.col, to.row - from.row)
     }
+
+    /// Rep-specific instruction line — "Across the top row", "Back
+    /// home", etc. Auto-derived from the start→target geometry so the
+    /// coaching panel title shifts per rep without the caller needing
+    /// to hand-write labels. Falls back to a generic string if the
+    /// grid isn't resolvable yet.
+    var currentRepInstruction: String {
+        guard let rep = currentRep,
+              let layout = FinderGrid.readLayout(),
+              let from = layout.cell(named: rep.start),
+              let to = layout.cell(named: rep.target) else {
+            return "Find the red file"
+        }
+        let dx = to.col - from.col
+        let dy = to.row - from.row
+        switch (dx.signum(), dy.signum()) {
+        case (0, 0):   return "You're already there"
+        case (_, 0):   return dx > 0 ? "Move right across the row" : "Move left across the row"
+        case (0, _):   return dy > 0 ? "Move down the column" : "Move up the column"
+        case (1, 1):   return "Move down and to the right"
+        case (1, -1):  return "Move up and to the right"
+        case (-1, 1):  return "Move down and to the left"
+        case (-1, -1): return "Move up and to the left"
+        default:       return "Find the red file"
+        }
+    }
 }

@@ -44,11 +44,39 @@ struct FinderDrillCoachingView: View {
     private var card: some View {
         VStack(alignment: .leading, spacing: 16) {
             titleRow
-            if showsInsertModePrompt {
+            if engine.state == .repCompleted {
+                successFlash.transition(.opacity)
+            } else if showsInsertModePrompt {
                 insertModeGuidance.transition(.opacity)
             } else {
                 directionGuidance.transition(.opacity)
             }
+        }
+        .animation(.easeInOut(duration: 0.22), value: engine.state)
+    }
+
+    // MARK: - Success flash
+
+    /// Shown briefly on rep completion, before the next rep begins.
+    /// A soft green checkmark + "Got it" — enough to feel rewarded
+    /// without breaking the rhythm of the drill.
+    private var successFlash: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 22, weight: .semibold))
+                .foregroundStyle(.green)
+                .symbolEffect(.bounce, value: engine.completedRepIndex)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Got it")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Text(engine.completedRepIndex >= engine.reps.count
+                     ? "Drill complete"
+                     : "Next rep starting…")
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
         }
     }
 
@@ -82,14 +110,17 @@ struct FinderDrillCoachingView: View {
 
     private var directionGuidance: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 7) {
+            HStack(alignment: .firstTextBaseline, spacing: 7) {
                 Circle().fill(.red).frame(width: 8, height: 8)
-                Text("Move to the red file")
+                Text(engine.currentRepInstruction)
                     .font(.system(size: 14, weight: .medium))
                     .foregroundStyle(.primary)
+                    .id("repInstruction-\(engine.completedRepIndex)")
+                    .transition(.opacity.combined(with: .move(edge: .trailing)))
             }
             directionKeys
         }
+        .animation(.easeOut(duration: 0.22), value: engine.completedRepIndex)
     }
 
     private var directionKeys: some View {
