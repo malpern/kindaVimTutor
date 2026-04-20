@@ -13,8 +13,8 @@ struct StepCanvasView: View {
     @State private var controller = LessonStepController()
     @State private var isEditorFocused = false
     @State private var keyMonitor: Any?
-    @State private var contentReady = false
     @State private var modeStepComplete = false
+    @State private var previousStepIsSpotlight = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -35,12 +35,7 @@ struct StepCanvasView: View {
                             ContentStepView(
                                 blocks: blocks,
                                 revealStyle: contentId.hasSuffix(".c0") ? .instant : .typewriter,
-                                onAutoAdvance: advanceForward,
-                                onContentReady: {
-                                    withAnimation(.easeIn(duration: 0.35)) {
-                                        contentReady = true
-                                    }
-                                }
+                                onAutoAdvance: advanceForward
                             )
 
                         case .drill(let exercise, let exerciseNumber):
@@ -68,6 +63,13 @@ struct StepCanvasView: View {
                                     onJumpToLesson: { id in onJumpToLesson?(id) }
                                 )
                             }
+
+                        case .finderDrill(_, let spec):
+                            FinderDrillStepView(
+                                spec: spec,
+                                modeMonitor: modeMonitor,
+                                onAdvance: { advanceForward() }
+                            )
                         }
                     }
                     .id(step.id)
@@ -107,10 +109,11 @@ struct StepCanvasView: View {
             isEditorFocused = false
             AppCommandChannel.shared.registerController(controller)
         }
-        .onChange(of: controller.currentStepIndex) {
+        .onChange(of: controller.currentStepIndex) { oldIndex, _ in
             AppCommandChannel.shared.notifyStateChanged()
-            contentReady = false
             modeStepComplete = false
+            let oldStep = controller.steps.indices.contains(oldIndex) ? controller.steps[oldIndex] : nil
+            previousStepIsSpotlight = Self.stepIsSpotlight(oldStep)
         }
         .onDisappear {
             AppCommandChannel.shared.registerController(nil)
@@ -180,21 +183,28 @@ struct StepCanvasView: View {
         }
     }
 
-    /// Whether to render the canvas-level "press to continue" CTA. Title steps
-    /// have their own animated hint; content steps show it only once the
-    /// heading and body blocks have finished animating in; drill steps show
-    /// it only after the exercise is complete.
+    /// Whether to render the canvas-level "press to continue" CTA. Title
+    /// steps have their own animated hint. Content steps show it
+    /// immediately — the hint is unobtrusive, and gating on a
+    /// ContentStepView callback has repeatedly caused the chip to go
+    /// missing when the animation race didn't play out. Drill and
+    /// mode-sequence steps gate on completion since advancing early
+    /// would skip the interaction the student is supposed to do.
     private var shouldShowCanvasAdvanceHint: Bool {
         guard let step = controller.currentStep else { return false }
         switch step {
         case .title:
             return false
         case .content:
-            return contentReady
+            return true
         case .drill:
             return inspectorState.isDrillComplete
         case .modeSequence:
             return modeStepComplete
+        case .finderDrill:
+            // FinderDrillStepView has its own internal Continue
+            // button on completion; no canvas-level hint needed.
+            return false
         }
     }
 
@@ -243,6 +253,8 @@ struct StepCanvasView: View {
             stepKind = "drill"; stepId = exercise.id
         case .modeSequence(let id, _):
             stepKind = "modeseq"; stepId = id
+        case .finderDrill(let id, _):
+            stepKind = "finderdrill"; stepId = id
         case .none:
             stepKind = "none"; stepId = ""
         }
@@ -251,9 +263,22 @@ struct StepCanvasView: View {
 
     private var stepTransition: AnyTransition {
         let forward = controller.navigationDirection == .forward
+        let currentIsSpotlight = Self.stepIsSpotlight(controller.currentStep)
         return .asymmetric(
-            insertion: .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
-            removal: .move(edge: forward ? .leading : .trailing).combined(with: .opacity)
+            insertion: currentIsSpotlight
+                ? .opacity
+                : .move(edge: forward ? .trailing : .leading).combined(with: .opacity),
+            removal: previousStepIsSpotlight
+                ? .opacity
+                : .move(edge: forward ? .leading : .trailing).combined(with: .opacity)
         )
+    }
+
+    /// A step is "spotlight" when its only real content is the
+    /// mode-indicator spotlight block — in that case we fade the
+    /// whole page rather than sliding so the arrow doesn't drag.
+    private static func stepIsSpotlight(_ step: LessonStep?) -> Bool {
+        guard let step, case .content(_, let blocks) = step else { return false }
+        return blocks.contains { if case .modeIndicatorSpotlight = $0 { true } else { false } }
     }
 }

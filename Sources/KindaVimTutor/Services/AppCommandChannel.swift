@@ -239,6 +239,7 @@ final class AppCommandChannel {
         case .content(let id, _): kind = "content"; stepId = id
         case .drill(let exercise, _): kind = "drill"; stepId = exercise.id
         case .modeSequence(let id, _): kind = "modeseq"; stepId = id
+        case .finderDrill(let id, _): kind = "finderdrill"; stepId = id
         case .none: kind = "none"; stepId = ""
         }
         let state = State(

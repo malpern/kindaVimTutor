@@ -5,6 +5,7 @@ enum LessonStep: Identifiable {
     case content(id: String, blocks: [ContentBlock])
     case drill(exercise: Exercise, exerciseNumber: Int)
     case modeSequence(id: String, step: InteractiveStep)
+    case finderDrill(id: String, spec: FinderDrillSpec)
 
     var id: String {
         switch self {
@@ -12,6 +13,7 @@ enum LessonStep: Identifiable {
         case .content(let id, _): "content-\(id)"
         case .drill(let exercise, _): "drill-\(exercise.id)"
         case .modeSequence(let id, _): "modeseq-\(id)"
+        case .finderDrill(let id, _): "finderdrill-\(id)"
         }
     }
 
@@ -56,6 +58,25 @@ enum LessonStep: Identifiable {
             result.append(.drill(exercise: exercise, exerciseNumber: index + 1))
         }
 
+        // 5. Finder drill (if any). Comes after the editor drills —
+        // the student practices in the editor first, then in the
+        // system Finder.
+        if let spec = lesson.finderDrill {
+            result.append(.finderDrill(id: lesson.id, spec: spec))
+        }
+
         return result
     }
+}
+
+/// Description of a Finder-navigation drill as authored in the
+/// curriculum. Converts to a FinderDrillEngine.Rep list at run time.
+struct FinderDrillSpec: Hashable, Sendable {
+    struct Rep: Hashable, Sendable {
+        let start: String
+        let target: String
+    }
+    let title: String
+    let subtitle: String
+    let reps: [Rep]
 }

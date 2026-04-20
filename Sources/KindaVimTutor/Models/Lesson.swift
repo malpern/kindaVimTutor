@@ -15,10 +15,16 @@ struct Lesson: Identifiable, Hashable, Sendable {
     /// Used for exercises that aren't text-mutation based (e.g. the
     /// Normal/Insert mode-ping-pong in Ch1).
     let interactive: InteractiveStep?
+    /// Optional Finder-navigation drill appended after the regular
+    /// drills. Runs as its own step; launches a floating coach panel
+    /// and drives the student through a series of selection targets
+    /// in a temp folder.
+    let finderDrill: FinderDrillSpec?
 
     init(id: String, number: Int, title: String, subtitle: String,
          explanation: [ContentBlock], exercises: [Exercise],
-         motionsIntroduced: [String], interactive: InteractiveStep? = nil) {
+         motionsIntroduced: [String], interactive: InteractiveStep? = nil,
+         finderDrill: FinderDrillSpec? = nil) {
         self.id = id
         self.number = number
         self.title = title
@@ -27,6 +33,7 @@ struct Lesson: Identifiable, Hashable, Sendable {
         self.exercises = exercises
         self.motionsIntroduced = motionsIntroduced
         self.interactive = interactive
+        self.finderDrill = finderDrill
     }
 }
 

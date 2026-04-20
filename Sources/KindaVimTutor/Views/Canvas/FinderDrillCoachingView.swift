@@ -8,14 +8,19 @@ struct FinderDrillCoachingView: View {
     let engine: FinderDrillEngine
     let modeMonitor: ModeMonitor
 
-    @State private var insertModeEntries: Int = 0
+    /// Number of selection changes observed while the student was in
+    /// Insert mode during the current rep. Each one is a clue that
+    /// they tried to act without realizing they're in the wrong mode.
+    /// At two, the "press esc" prompt escalates from a calm nudge to
+    /// an orange warning.
+    @State private var insertModeActivity: Int = 0
 
     private var showsInsertModePrompt: Bool {
         (engine.state == .active || engine.state == .seeding)
             && modeMonitor.currentMode == .insert
     }
 
-    private var isInsertModeEscalated: Bool { insertModeEntries >= 2 }
+    private var isInsertModeEscalated: Bool { insertModeActivity >= 2 }
 
     var body: some View {
         card
@@ -27,15 +32,27 @@ struct FinderDrillCoachingView: View {
             .shadow(color: .black.opacity(0.35), radius: 14, y: 6)
             .fixedSize(horizontal: false, vertical: true)
             .animation(.easeInOut(duration: 0.18), value: showsInsertModePrompt)
-            .onChange(of: modeMonitor.currentMode) { _, newValue in
-                guard newValue == .insert,
+            .onChange(of: engine.currentSelection) { _, _ in
+                // Count selection activity that happens *while* the
+                // student is in Insert mode — that's the signal that
+                // they're trying to drive the drill without realizing
+                // the mode is wrong.
+                guard modeMonitor.currentMode == .insert,
                       engine.state == .active || engine.state == .seeding
                 else { return }
-                insertModeEntries += 1
+                insertModeActivity += 1
+            }
+            .onChange(of: modeMonitor.currentMode) { _, newValue in
+                // Any transition away from insert resets the count —
+                // if they escape to normal, the next time they dip
+                // into insert starts over with the calm tone.
+                if newValue != .insert {
+                    insertModeActivity = 0
+                }
             }
             .onChange(of: engine.completedRepIndex) { _, _ in
                 if engine.state == .active || engine.state == .seeding {
-                    insertModeEntries = 0
+                    insertModeActivity = 0
                 }
             }
     }

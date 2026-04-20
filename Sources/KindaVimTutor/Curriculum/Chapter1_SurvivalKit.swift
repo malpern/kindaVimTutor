@@ -61,99 +61,108 @@ extension Curriculum {
             .heading("Your Hands Stay on Home Row"),
             .text("In Normal mode, you navigate without arrow keys. Instead you use four keys right under your right hand:"),
             .spacer,
+            .homeRow(highlighted: ["h", "j", "k", "l"]),
+            .spacer,
             .keyCommand(keys: ["h"], description: "Move left"),
             .keyCommand(keys: ["j"], description: "Move down"),
             .keyCommand(keys: ["k"], description: "Move up"),
             .keyCommand(keys: ["l"], description: "Move right"),
             .spacer,
-            .text("You'll also need one more key for the drills below: `x` deletes the character under the cursor. Use it to clear the `*` once you've landed on it. The next lesson teaches deletion properly."),
-            .spacer,
             .tip("Think of `j` as having a little hook at the bottom pointing downward. That's how you remember `j` goes down."),
         ],
         exercises: [
-            // Exercise 1: Move down with j — navigate to the * and delete it
+            // Exercise 1: Move down with j — navigate to the *
             Exercise(
                 id: "ch1.l1.e1",
-                instruction: "Move down to the * using `j`, then delete it with `x`",
-                initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n*\n\n\n\n\n\n\n\n\n\n",
-                initialCursorPosition: 53,
-                expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n",
-                expectedCursorPosition: nil,
-                hints: ["Press `j` repeatedly to move down, then `x` to delete the *"],
+                instruction: "Move down to the * using `j`",
+                initialText: "\n// Move down with j to reach the *\n\n\n*\n\n\n\n\n\n\n\n\n\n",
+                initialCursorPosition: 36,
+                expectedText: "\n// Move down with j to reach the *\n\n\n*\n\n\n\n\n\n\n\n\n\n",
+                expectedCursorPosition: 38,
+                hints: ["Press `j` repeatedly to move down onto the *"],
                 difficulty: .learn,
                 drillCount: 6,
                 variations: [
-                    .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n*\n\n\n\n\n\n\n\n", initialCursorPosition: 53, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n*\n\n\n\n\n\n", initialCursorPosition: 54, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n*\n\n\n\n", initialCursorPosition: 58, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n*\n\n", initialCursorPosition: 59, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n*\n", initialCursorPosition: 59, expectedText: "\n// Move down with j to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n// Move down with j to reach the *\n\n\n\n\n*\n\n\n\n\n\n\n\n", initialCursorPosition: 36, expectedText: "\n// Move down with j to reach the *\n\n\n\n\n*\n\n\n\n\n\n\n\n", expectedCursorPosition: 40),
+                    .init(initialText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n*\n\n\n\n\n\n", initialCursorPosition: 37, expectedText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n*\n\n\n\n\n\n", expectedCursorPosition: 42),
+                    .init(initialText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n\n\n*\n\n\n\n", initialCursorPosition: 41, expectedText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n\n\n*\n\n\n\n", expectedCursorPosition: 44),
+                    .init(initialText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n\n\n\n\n*\n\n", initialCursorPosition: 42, expectedText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n\n\n\n\n*\n\n", expectedCursorPosition: 46),
+                    .init(initialText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n\n\n\n\n\n*\n", initialCursorPosition: 42, expectedText: "\n// Move down with j to reach the *\n\n\n\n\n\n\n\n\n\n\n\n*\n", expectedCursorPosition: 47),
                 ],
-                optimalKeystrokes: 5,
+                optimalKeystrokes: 4,
                 futureOptimization: .init(
                     lessonId: "ch2.l5",
                     summary: "prefix counts (e.g. `5j`)"
                 )
             ),
-            // Exercise 2: Move up with k — navigate to the * and delete it
+            // Exercise 2: Move up with k — navigate to the *
             Exercise(
                 id: "ch1.l1.e2",
-                instruction: "Move up to the * using `k`, then delete it with `x`",
-                initialText: "// Move up with k to reach *, then x to delete it\n\n*\n\n\n\n\n\n\n\n\n\n\n\n",
-                initialCursorPosition: 55,
-                expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
-                expectedCursorPosition: nil,
-                hints: ["Press `k` repeatedly to move up, then `x` to delete the *"],
+                instruction: "Move up to the * using `k`",
+                initialText: "// Move up with k to reach the *\n\n*\n\n\n\n\n\n\n\n\n\n\n\n",
+                initialCursorPosition: 38,
+                expectedText: "// Move up with k to reach the *\n\n*\n\n\n\n\n\n\n\n\n\n\n\n",
+                expectedCursorPosition: 34,
+                hints: ["Press `k` repeatedly to move up onto the *"],
                 difficulty: .learn,
                 drillCount: 6,
                 variations: [
-                    .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n*\n\n\n\n\n\n\n\n\n\n\n", initialCursorPosition: 57, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n\n*\n\n\n\n\n\n\n\n\n\n", initialCursorPosition: 59, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n*\n\n\n\n\n\n\n\n\n", initialCursorPosition: 58, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n*\n\n\n\n\n\n\n\n", initialCursorPosition: 60, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n*\n\n\n\n\n\n\n", initialCursorPosition: 62, expectedText: "// Move up with k to reach *, then x to delete it\n\n\n\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "// Move up with k to reach the *\n\n\n*\n\n\n\n\n\n\n\n\n\n\n", initialCursorPosition: 40, expectedText: "// Move up with k to reach the *\n\n\n*\n\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: 35),
+                    .init(initialText: "// Move up with k to reach the *\n\n\n\n*\n\n\n\n\n\n\n\n\n\n", initialCursorPosition: 42, expectedText: "// Move up with k to reach the *\n\n\n\n*\n\n\n\n\n\n\n\n\n\n", expectedCursorPosition: 36),
+                    .init(initialText: "// Move up with k to reach the *\n\n\n\n\n*\n\n\n\n\n\n\n\n\n", initialCursorPosition: 41, expectedText: "// Move up with k to reach the *\n\n\n\n\n*\n\n\n\n\n\n\n\n\n", expectedCursorPosition: 37),
+                    .init(initialText: "// Move up with k to reach the *\n\n\n\n\n\n*\n\n\n\n\n\n\n\n", initialCursorPosition: 43, expectedText: "// Move up with k to reach the *\n\n\n\n\n\n*\n\n\n\n\n\n\n\n", expectedCursorPosition: 38),
+                    .init(initialText: "// Move up with k to reach the *\n\n\n\n\n\n\n*\n\n\n\n\n\n\n", initialCursorPosition: 45, expectedText: "// Move up with k to reach the *\n\n\n\n\n\n\n*\n\n\n\n\n\n\n", expectedCursorPosition: 39),
                 ]
             ),
-            // Exercise 3: Move right with l — navigate to the * and delete it
+            // Exercise 3: Move right with l — navigate to the *
             Exercise(
                 id: "ch1.l1.e3",
-                instruction: "Move right to the * using `l`, then delete it with `x`",
-                initialText: "\n\n// Move right with l to reach *, then x to delete it\n        *\n\n\n\n\n\n\n\n\n\n\n",
-                initialCursorPosition: 55,
-                expectedText: "\n\n// Move right with l to reach *, then x to delete it\n        \n\n\n\n\n\n\n\n\n\n\n",
-                expectedCursorPosition: nil,
-                hints: ["Press `l` repeatedly to move right, then `x` to delete the *"],
+                instruction: "Move right to the * using `l`",
+                initialText: "\n\n// Move right with l to reach the *\n        *\n\n\n\n\n\n\n\n\n\n\n",
+                initialCursorPosition: 39,
+                expectedText: "\n\n// Move right with l to reach the *\n        *\n\n\n\n\n\n\n\n\n\n\n",
+                expectedCursorPosition: 46,
+                hints: ["Press `l` repeatedly to move right onto the *"],
                 difficulty: .learn,
                 drillCount: 6,
                 variations: [
-                    .init(initialText: "\n\n\n\n\n// Move right with l to reach *, then x to delete it\n              *\n\n\n\n\n\n\n\n", initialCursorPosition: 58, expectedText: "\n\n\n\n\n// Move right with l to reach *, then x to delete it\n              \n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                    *\n\n\n\n\n", initialCursorPosition: 61, expectedText: "\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                    \n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                          *\n\n\n", initialCursorPosition: 63, expectedText: "\n\n\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                          \n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n\n\n// Move right with l to reach *, then x to delete it\n                                *\n\n\n\n\n\n\n\n\n", initialCursorPosition: 57, expectedText: "\n\n\n\n// Move right with l to reach *, then x to delete it\n                                \n\n\n\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                                      *\n\n", initialCursorPosition: 64, expectedText: "\n\n\n\n\n\n\n\n\n\n\n// Move right with l to reach *, then x to delete it\n                                      \n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n\n\n\n// Move right with l to reach the *\n              *\n\n\n\n\n\n\n\n", initialCursorPosition: 42, expectedText: "\n\n\n\n\n// Move right with l to reach the *\n              *\n\n\n\n\n\n\n\n", expectedCursorPosition: 55),
+                    .init(initialText: "\n\n\n\n\n\n\n\n// Move right with l to reach the *\n                    *\n\n\n\n\n", initialCursorPosition: 45, expectedText: "\n\n\n\n\n\n\n\n// Move right with l to reach the *\n                    *\n\n\n\n\n", expectedCursorPosition: 64),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n// Move right with l to reach the *\n                          *\n\n\n", initialCursorPosition: 47, expectedText: "\n\n\n\n\n\n\n\n\n\n// Move right with l to reach the *\n                          *\n\n\n", expectedCursorPosition: 72),
+                    .init(initialText: "\n\n\n\n// Move right with l to reach the *\n                                *\n\n\n\n\n\n\n\n\n", initialCursorPosition: 41, expectedText: "\n\n\n\n// Move right with l to reach the *\n                                *\n\n\n\n\n\n\n\n\n", expectedCursorPosition: 72),
+                    .init(initialText: "\n\n\n\n\n\n\n\n\n\n\n// Move right with l to reach the *\n                                      *\n\n", initialCursorPosition: 48, expectedText: "\n\n\n\n\n\n\n\n\n\n\n// Move right with l to reach the *\n                                      *\n\n", expectedCursorPosition: 85),
                 ]
             ),
             // Exercise 4: Combined hjkl — navigate to the * anywhere on the grid
             Exercise(
                 id: "ch1.l1.e4",
-                instruction: "Navigate to the * using `h`, `j`, `k`, `l` and delete it with `x`",
-                initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . * . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n",
-                initialCursorPosition: 56,
-                expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. .   . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n",
-                expectedCursorPosition: nil,
+                instruction: "Navigate to the * using `h`, `j`, `k`, `l`",
+                initialText: "\n\n// Navigate to * using h j k l\n\n. . * . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n",
+                initialCursorPosition: 35,
+                expectedText: "\n\n// Navigate to * using h j k l\n\n. . * . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n",
+                expectedCursorPosition: 38,
                 hints: ["Use `j`/`k` to move vertically, `h`/`l` to move horizontally"],
                 difficulty: .practice,
                 drillCount: 6,
                 variations: [
-                    .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . * . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . .   . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n* . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n  . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . *\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . .  \n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . * . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . .   . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
-                    .init(initialText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . * .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 56, expectedText: "\n\n// Navigate to * using h j k l then delete it with x\n\n. . . . . . . .\n. . . . . . . .\n. . . . . .   .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . * . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 35, expectedText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . * . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: 60),
+                    .init(initialText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n* . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 35, expectedText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n* . . . . . . .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: 66),
+                    .init(initialText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . *\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 35, expectedText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . *\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: 96),
+                    .init(initialText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . * . . . .\n\n\n\n\n\n", initialCursorPosition: 35, expectedText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . . . . . .\n. . . * . . . .\n\n\n\n\n\n", expectedCursorPosition: 104),
+                    .init(initialText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . * .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", initialCursorPosition: 35, expectedText: "\n\n// Navigate to * using h j k l\n\n. . . . . . . .\n. . . . . . . .\n. . . . . . * .\n. . . . . . . .\n. . . . . . . .\n\n\n\n\n\n", expectedCursorPosition: 78),
                 ]
             ),
         ],
-        motionsIntroduced: ["h", "j", "k", "l"]
+        motionsIntroduced: ["h", "j", "k", "l"],
+        finderDrill: FinderDrillSpec(
+            title: "hjkl in the Finder",
+            subtitle: "Same four keys, a different surface. Navigate a grid of files using h/j/k/l and land the selection on each red target.",
+            reps: [
+                .init(start: "file01.txt", target: "file06.txt"),
+                .init(start: "file12.txt", target: "file01.txt"),
+                .init(start: "file07.txt", target: "file04.txt"),
+            ]
+        )
     )
 
     // MARK: - Lesson 1.2: Deleting Characters
