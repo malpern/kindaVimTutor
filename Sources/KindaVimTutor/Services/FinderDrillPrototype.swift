@@ -33,21 +33,31 @@ enum FinderDrillPrototype {
         log.info("finderDrill", "start", fields: ["rows": "\(rows)", "cols": "\(cols)"])
 
         await MainActor.run { closeLeftoverDrillWindows() }
-        removeLeftoverDrillFolders()
 
-        guard let (folder, files) = makeTempFolder(names: names) else {
+        // Run the expensive filesystem work off the main thread so
+        // the UI doesn't beachball for ~20+s while we create 12
+        // subfolders and write 12 custom icons each. macOS's
+        // NSWorkspace.setIcon + the Icon\r file writes are slow
+        // enough in aggregate that this matters a lot.
+        let built = await Task.detached(priority: .userInitiated) {
+            () -> (URL, [URL])? in
+            removeLeftoverDrillFolders()
+            return makeTempFolder(names: names)
+        }.value
+
+        guard let (folder, files) = built else {
             log.info("finderDrill", "tempFolderFailed", fields: [:])
             return nil
         }
+        log.info("finderDrill", "tempFolderReady",
+                 fields: ["path": folder.lastPathComponent])
 
-        // Report "first" and "last" just for the Result log — the
-        // engine drives the actual rep sequence by index.
         let target = files.last!
         let start = files.first!
 
         NSWorkspace.shared.open(folder)
         try? await Task.sleep(for: .milliseconds(700))
-        activateFinderAndSwitchToIconView()
+        await MainActor.run { activateFinderAndSwitchToIconView() }
         try? await Task.sleep(for: .milliseconds(300))
         await MainActor.run { moveFinderWindowToLeft() }
         try? await Task.sleep(for: .milliseconds(200))
@@ -361,18 +371,19 @@ enum FinderDrillPrototype {
         ).first else { return }
         finder.activate(options: [.activateAllWindows])
 
-        // Give the activation a beat so the keystroke lands in the
-        // right app.
-        Thread.sleep(forTimeInterval: 0.15)
-
-        let src = CGEventSource(stateID: .hidSystemState)
-        let keyCode: CGKeyCode = 0x12 // kVK_ANSI_1
-        let down = CGEvent(keyboardEventSource: src, virtualKey: keyCode, keyDown: true)
-        let up   = CGEvent(keyboardEventSource: src, virtualKey: keyCode, keyDown: false)
-        down?.flags = .maskCommand
-        up?.flags   = .maskCommand
-        down?.postToPid(finder.processIdentifier)
-        up?.postToPid(finder.processIdentifier)
+        // Schedule the ⌘1 keystroke a beat after activation so it
+        // lands in Finder. Scheduling asynchronously avoids
+        // blocking the main thread with Thread.sleep.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+            let src = CGEventSource(stateID: .hidSystemState)
+            let keyCode: CGKeyCode = 0x12 // kVK_ANSI_1
+            let down = CGEvent(keyboardEventSource: src, virtualKey: keyCode, keyDown: true)
+            let up   = CGEvent(keyboardEventSource: src, virtualKey: keyCode, keyDown: false)
+            down?.flags = .maskCommand
+            up?.flags   = .maskCommand
+            down?.postToPid(finder.processIdentifier)
+            up?.postToPid(finder.processIdentifier)
+        }
     }
 
     // MARK: - AX readback
