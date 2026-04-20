@@ -198,14 +198,12 @@ enum FinderDrillPrototype {
                 AppLogger.shared.info("finderDrill", "createFolderFailed",
                                       fields: ["name": name, "err": "\(error)"])
             }
-            // Assign icon: vivid target for designated slots, palette
-            // color for the rest (cycling through the 12-color set).
-            let iconKey: String
-            if targetIndices.contains(i) {
-                iconKey = "furry-target"
-            } else {
-                iconKey = baseIconKey(index: i)
-            }
+            // Assign icon: vivid magenta for target slots, a single
+            // muted neutral for every non-target. Keeping the rest
+            // visually quiet is what makes the target POP.
+            let iconKey = targetIndices.contains(i)
+                ? "furry-target"
+                : "furry-neutral"
             if let image = loadIconImage(named: iconKey) {
                 NSWorkspace.shared.setIcon(image, forFile: sub.path, options: [])
             }
