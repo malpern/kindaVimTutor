@@ -383,10 +383,17 @@ struct FinderDrillStepView: View {
         engine.onDrillCompleted = {
             FinderDrillPanel.shared.finish(engine: engine)
         }
+        let kind: FinderDrillEngine.Kind = {
+            switch spec.kind {
+            case .navigate:  return .navigate
+            case .duplicate: return .duplicate
+            }
+        }()
         let ok = await engine.start(
             reps: reps,
             title: spec.title,
-            subtitle: spec.subtitle
+            subtitle: spec.subtitle,
+            kind: kind
         )
         if ok {
             FinderDrillPanel.shared.show(engine: engine, modeMonitor: modeMonitor)

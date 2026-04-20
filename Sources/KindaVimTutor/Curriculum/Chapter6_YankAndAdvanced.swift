@@ -87,7 +87,19 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["yy", "Y"]
+        motionsIntroduced: ["yy", "Y"],
+        finderDrill: FinderDrillSpec(
+            title: "Duplicate the treasure",
+            subtitle: "Your Vim vocabulary works on files too. Press yy to copy the treasure, then p to paste a duplicate right next to it.",
+            kind: .duplicate,
+            // startIndex == targetIndex — student already on the
+            // treasure; the work is entering yy + p.
+            reps: [
+                .init(startIndex: 5, targetIndex: 5),
+                .init(startIndex: 2, targetIndex: 2),
+                .init(startIndex: 11, targetIndex: 11),
+            ]
+        )
     )
 
     // MARK: - Lesson 6.3: Toggle Case

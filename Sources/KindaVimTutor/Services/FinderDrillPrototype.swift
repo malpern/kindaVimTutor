@@ -208,8 +208,15 @@ enum FinderDrillPrototype {
 
     // MARK: - Target icon swap (per rep)
 
-    /// The palette of vivid target icon keys, cycled through per rep
-    /// so each challenge has a distinct color identity.
+    /// The key used for the closed-treasure-chest folder icon —
+    /// applied to the current rep's target so it reads as "the
+    /// treasure" against the neutral-furry crowd. Sits in a
+    /// different Resources subdirectory than the furry folders.
+    static let targetIconKey = "chest-closed"
+
+    /// Retained for earlier per-rep-color iterations. Not used by
+    /// the current drill but left in place in case future drills
+    /// want vivid-colored targets back.
     static let targetIconKeys: [String] = [
         "furry-target-magenta",
         "furry-target-gold",
@@ -312,13 +319,19 @@ enum FinderDrillPrototype {
     }
 
     private static func loadIconImage(named key: String) -> NSImage? {
-        // Bundled via .process("Resources"). SwiftPM preserves the
-        // subdirectory layout, so we look up under "furry-folders".
-        let url = Bundle.module.url(forResource: key, withExtension: "png",
-                                     subdirectory: "furry-folders")
-            ?? Bundle.module.url(forResource: key, withExtension: "png")
-        guard let url else { return nil }
-        return NSImage(contentsOf: url)
+        // Bundled via .process("Resources"). SwiftPM may preserve
+        // subdirectory layout in the top-level bundle but flatten
+        // it inside the generated resource bundle. Try each known
+        // subdirectory + the root fallback.
+        let candidates: [String?] = ["furry-folders", "treasure", nil]
+        for sub in candidates {
+            if let url = Bundle.module.url(
+                forResource: key, withExtension: "png", subdirectory: sub
+            ) {
+                if let image = NSImage(contentsOf: url) { return image }
+            }
+        }
+        return nil
     }
 
     // MARK: - Layout

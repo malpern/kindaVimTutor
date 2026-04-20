@@ -76,11 +76,32 @@ enum LessonStep: Identifiable {
 /// gets an ALL-CAPS name (e.g. "TREASURE") and a dramatic
 /// off-palette icon color so it reads at a glance.
 struct FinderDrillSpec: Hashable, Sendable {
+    /// What action the student has to perform per rep.
+    ///
+    /// - `.navigate`: move the selection from start → target using
+    ///   hjkl. Completes when target is selected.
+    /// - `.duplicate`: start selected on the target; student presses
+    ///   `yy` + `p` to copy it. Completes when a new file appears
+    ///   in the folder.
+    enum Kind: Hashable, Sendable {
+        case navigate
+        case duplicate
+    }
+
     struct Rep: Hashable, Sendable {
         let startIndex: Int
         let targetIndex: Int
     }
     let title: String
     let subtitle: String
+    let kind: Kind
     let reps: [Rep]
+
+    init(title: String, subtitle: String,
+         kind: Kind = .navigate, reps: [Rep]) {
+        self.title = title
+        self.subtitle = subtitle
+        self.kind = kind
+        self.reps = reps
+    }
 }

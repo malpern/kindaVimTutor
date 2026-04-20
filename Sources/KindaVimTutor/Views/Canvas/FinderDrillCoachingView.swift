@@ -176,25 +176,55 @@ struct FinderDrillCoachingView: View {
                 Circle()
                     .fill(currentTargetColor)
                     .frame(width: 8, height: 8)
-                (Text("Move to ")
-                    .foregroundStyle(.primary)
-                 + Text(engine.currentTargetName)
-                    .font(.system(size: 14, weight: .bold, design: .monospaced))
-                    .foregroundColor(currentTargetColor)
-                )
-                .font(.system(size: 14, weight: .medium))
-                .id("repInstruction-\(engine.completedRepIndex)")
+                if engine.kind == .duplicate {
+                    (Text("Duplicate ")
+                        .foregroundStyle(.primary)
+                     + Text(engine.currentTargetName)
+                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                        .foregroundColor(currentTargetColor)
+                    )
+                    .font(.system(size: 14, weight: .medium))
+                } else {
+                    (Text("Move to ")
+                        .foregroundStyle(.primary)
+                     + Text(engine.currentTargetName)
+                        .font(.system(size: 14, weight: .bold, design: .monospaced))
+                        .foregroundColor(currentTargetColor)
+                    )
+                    .font(.system(size: 14, weight: .medium))
+                }
             }
-            directionKeys
+            .id("repInstruction-\(engine.completedRepIndex)")
+
+            if engine.kind == .duplicate {
+                duplicateKeys
+            } else {
+                directionKeys
+            }
         }
         .animation(.easeOut(duration: 0.22), value: engine.completedRepIndex)
     }
 
+    /// Highlights the two keystrokes that accomplish a duplicate —
+    /// `yy` to copy the current item, `p` to paste a sibling.
+    private var duplicateKeys: some View {
+        HStack(spacing: 6) {
+            KeyCapView(label: "y", size: .regular)
+            KeyCapView(label: "y", size: .regular)
+            Text("→")
+                .font(.system(size: 14))
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, 2)
+            KeyCapView(label: "p", size: .regular)
+            Spacer()
+        }
+    }
+
+    /// Warm gold tint that echoes the treasure chest icon. Used for
+    /// the target name in the "Move to TREASURE" label and the
+    /// accompanying accent dot.
     private var currentTargetColor: Color {
-        let rgb = FinderDrillPrototype.approximateColor(
-            forIconKey: engine.currentTargetIconKey
-        )
-        return Color(red: rgb.r, green: rgb.g, blue: rgb.b)
+        Color(red: 0.92, green: 0.72, blue: 0.18)
     }
 
     private var directionKeys: some View {
