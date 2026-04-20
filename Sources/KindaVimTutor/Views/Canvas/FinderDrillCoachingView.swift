@@ -126,10 +126,11 @@ struct FinderDrillCoachingView: View {
 
     @ViewBuilder
     private var treasureChestImage: some View {
-        if let url = Bundle.module.url(
+        let url = Bundle.module.url(
             forResource: "chest-open", withExtension: "png",
             subdirectory: "treasure"
-        ), let image = NSImage(contentsOf: url) {
+        ) ?? Bundle.module.url(forResource: "chest-open", withExtension: "png")
+        if let url, let image = NSImage(contentsOf: url) {
             Image(nsImage: image)
                 .resizable()
                 .interpolation(.high)
