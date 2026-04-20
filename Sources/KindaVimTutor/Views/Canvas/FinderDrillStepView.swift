@@ -10,14 +10,14 @@ struct FinderDrillStepView: View {
     let modeMonitor: ModeMonitor
     var onAdvance: (() -> Void)?
 
+    private let autoAdvanceDuration: Double = 2.5
+
     @State private var engine = FinderDrillEngine()
-    @State private var hasStarted = false
     /// Remaining seconds before we auto-advance from the summary
     /// screen. Nil when no countdown is active (drill not complete
     /// yet, or user cancelled by hitting Retry).
     @State private var autoAdvanceRemaining: Double?
     @State private var autoAdvanceTask: Task<Void, Never>?
-    private let autoAdvanceDuration: Double = 2.5
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -375,7 +375,6 @@ struct FinderDrillStepView: View {
     // MARK: - Engine wiring
 
     private func startDrill() async {
-        hasStarted = true
         let reps = spec.reps.map {
             FinderDrillEngine.Rep(startIndex: $0.startIndex,
                                   targetIndex: $0.targetIndex)
