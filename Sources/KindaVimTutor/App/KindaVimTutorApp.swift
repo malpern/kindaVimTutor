@@ -116,9 +116,7 @@ private struct AppMenuCommands: Commands {
                     let names = FinderDrillPrototype.generateFolderNames(
                         count: count, targetIndices: targets
                     )
-                    if let result = await FinderDrillPrototype.run(
-                        names: names, targetIndices: targets
-                    ) {
+                    if let result = await FinderDrillPrototype.run(names: names) {
                         AppLogger.shared.info("finderDrill", "result", fields: [
                             "folder": result.folder.path,
                             "target": result.target.lastPathComponent,

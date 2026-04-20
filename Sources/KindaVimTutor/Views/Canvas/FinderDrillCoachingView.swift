@@ -68,40 +68,50 @@ struct FinderDrillCoachingView: View {
 
     // MARK: - Success flash
 
-    /// Shown briefly on rep completion, before the next rep begins.
-    /// Layered microanimations:
-    /// - A soft green ring radiates out and fades behind the check
-    /// - The check itself bounces in (symbolEffect)
-    /// - The two text lines stagger-fade-slide in from below
-    /// - The whole block settles with a gentle spring
+    /// Shown briefly on rep completion. A treasure-chest image bursts
+    /// in with a gold radial glow and a soft scale spring; the text
+    /// lines stagger-fade up from below.
     private var successFlash: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 14) {
             ZStack {
-                Circle()
-                    .stroke(Color.green.opacity(0.35), lineWidth: 1.5)
-                    .frame(width: 36, height: 36)
-                    .scaleEffect(engine.state == .repCompleted ? 1.6 : 0.8)
-                    .opacity(engine.state == .repCompleted ? 0 : 0.9)
+                // Warm gold halo radiating out from behind the chest.
+                RadialGradient(
+                    colors: [
+                        Color(red: 1.0, green: 0.88, blue: 0.38).opacity(0.55),
+                        Color(red: 1.0, green: 0.72, blue: 0.18).opacity(0.25),
+                        .clear
+                    ],
+                    center: .center,
+                    startRadius: 0,
+                    endRadius: 46
+                )
+                .frame(width: 92, height: 92)
+                .scaleEffect(engine.state == .repCompleted ? 1.0 : 0.6)
+                .opacity(engine.state == .repCompleted ? 1 : 0)
+                .animation(.easeOut(duration: 0.6), value: engine.state)
+                treasureChestImage
+                    .frame(width: 56, height: 56)
+                    .shadow(color: Color(red: 1.0, green: 0.72, blue: 0.18)
+                            .opacity(0.7), radius: 12)
+                    .scaleEffect(engine.state == .repCompleted ? 1.0 : 0.5)
+                    .rotationEffect(
+                        .degrees(engine.state == .repCompleted ? 0 : -8)
+                    )
                     .animation(
-                        .easeOut(duration: 0.9).delay(0.02),
+                        .spring(response: 0.45, dampingFraction: 0.6),
                         value: engine.state
                     )
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(.green)
-                    .symbolEffect(.bounce.up, value: engine.completedRepIndex)
-                    .shadow(color: .green.opacity(0.5), radius: 6)
             }
             VStack(alignment: .leading, spacing: 2) {
-                Text("Got it")
-                    .font(.system(size: 14, weight: .semibold))
+                Text("Got it!")
+                    .font(.system(size: 15, weight: .semibold))
                     .foregroundStyle(.primary)
                     .transition(
                         .opacity.combined(with: .move(edge: .bottom))
                     )
                 Text(engine.completedRepIndex >= engine.reps.count
                      ? "Drill complete"
-                     : "Next rep starting…")
+                     : "Next treasure coming…")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .transition(
@@ -112,6 +122,23 @@ struct FinderDrillCoachingView: View {
         }
         .id("success-\(engine.completedRepIndex)")
         .transition(.opacity.combined(with: .scale(scale: 0.92)))
+    }
+
+    @ViewBuilder
+    private var treasureChestImage: some View {
+        if let url = Bundle.module.url(
+            forResource: "chest-open", withExtension: "png",
+            subdirectory: "treasure"
+        ), let image = NSImage(contentsOf: url) {
+            Image(nsImage: image)
+                .resizable()
+                .interpolation(.high)
+                .aspectRatio(contentMode: .fit)
+        } else {
+            Image(systemName: "sparkles")
+                .font(.system(size: 32))
+                .foregroundStyle(Color(red: 1.0, green: 0.72, blue: 0.18))
+        }
     }
 
     // MARK: - Title row
@@ -146,13 +173,13 @@ struct FinderDrillCoachingView: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 7) {
                 Circle()
-                    .fill(Color(red: 0.96, green: 0.1, blue: 0.7))
+                    .fill(currentTargetColor)
                     .frame(width: 8, height: 8)
                 (Text("Move to ")
                     .foregroundStyle(.primary)
                  + Text(engine.currentTargetName)
                     .font(.system(size: 14, weight: .bold, design: .monospaced))
-                    .foregroundColor(Color(red: 0.96, green: 0.1, blue: 0.7))
+                    .foregroundColor(currentTargetColor)
                 )
                 .font(.system(size: 14, weight: .medium))
                 .id("repInstruction-\(engine.completedRepIndex)")
@@ -160,6 +187,13 @@ struct FinderDrillCoachingView: View {
             directionKeys
         }
         .animation(.easeOut(duration: 0.22), value: engine.completedRepIndex)
+    }
+
+    private var currentTargetColor: Color {
+        let rgb = FinderDrillPrototype.approximateColor(
+            forIconKey: engine.currentTargetIconKey
+        )
+        return Color(red: rgb.r, green: rgb.g, blue: rgb.b)
     }
 
     private var directionKeys: some View {

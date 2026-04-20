@@ -27,7 +27,6 @@ enum FinderDrillPrototype {
 
     @discardableResult
     static func run(names: [String],
-                    targetIndices: Set<Int>,
                     rows: Int = 3,
                     cols: Int = 4) async -> Result? {
         let log = AppLogger.shared
@@ -36,16 +35,14 @@ enum FinderDrillPrototype {
         await MainActor.run { closeLeftoverDrillWindows() }
         removeLeftoverDrillFolders()
 
-        guard let (folder, files) = makeTempFolder(names: names,
-                                                    targetIndices: targetIndices)
-        else {
+        guard let (folder, files) = makeTempFolder(names: names) else {
             log.info("finderDrill", "tempFolderFailed", fields: [:])
             return nil
         }
 
-        let target = files.first(where: { targetIndices.contains(
-            files.firstIndex(of: $0) ?? -1
-        )}) ?? files.last!
+        // Report "first" and "last" just for the Result log — the
+        // engine drives the actual rep sequence by index.
+        let target = files.last!
         let start = files.first!
 
         NSWorkspace.shared.open(folder)
@@ -175,10 +172,7 @@ enum FinderDrillPrototype {
 
     // MARK: - Filesystem
 
-    private static func makeTempFolder(names: [String],
-                                        targetIndices: Set<Int>)
-        -> (URL, [URL])?
-    {
+    private static func makeTempFolder(names: [String]) -> (URL, [URL])? {
         let fm = FileManager.default
         let tmp = fm.temporaryDirectory
             .appendingPathComponent("kindaVimTutorFinder-\(UUID().uuidString.prefix(8))",
@@ -189,7 +183,7 @@ enum FinderDrillPrototype {
             return nil
         }
         var urls: [URL] = []
-        for (i, name) in names.enumerated() {
+        for name in names {
             let sub = tmp.appendingPathComponent(name, isDirectory: true)
             do {
                 try fm.createDirectory(at: sub, withIntermediateDirectories: false)
@@ -198,14 +192,13 @@ enum FinderDrillPrototype {
                 AppLogger.shared.info("finderDrill", "createFolderFailed",
                                       fields: ["name": name, "err": "\(error)"])
             }
-            // Assign icon: vivid magenta for target slots, a single
-            // muted neutral for every non-target. Keeping the rest
-            // visually quiet is what makes the target POP.
-            let iconKey = targetIndices.contains(i)
-                ? "furry-target"
-                : "furry-neutral"
-            if let image = loadIconImage(named: iconKey) {
-                NSWorkspace.shared.setIcon(image, forFile: sub.path, options: [])
+            // Non-targets all wear the same muted neutral folder so
+            // the target is the only color in the grid. Target icons
+            // are applied per-rep by the engine (different vivid
+            // color each time), so at creation we just seed every
+            // slot with the neutral.
+            if let neutral = loadIconImage(named: "furry-neutral") {
+                NSWorkspace.shared.setIcon(neutral, forFile: sub.path, options: [])
             }
         }
         return (tmp, urls)
@@ -213,9 +206,42 @@ enum FinderDrillPrototype {
 
     // MARK: - Folder icons
 
-    // Icons are assigned in makeTempFolder based on targetIndices.
-    // No per-rep swap helper needed — all target folders stay
-    // vivid for the whole drill.
+    // MARK: - Target icon swap (per rep)
+
+    /// The palette of vivid target icon keys, cycled through per rep
+    /// so each challenge has a distinct color identity.
+    static let targetIconKeys: [String] = [
+        "furry-target-magenta",
+        "furry-target-gold",
+        "furry-target-cyan",
+        "furry-target-lime",
+        "furry-target-orange",
+        "furry-target-violet",
+    ]
+
+    /// Approximate display color for a target icon key. Used by the
+    /// coaching panel to tint the target name and accent dots to
+    /// match the folder's color.
+    static func approximateColor(forIconKey key: String) -> (r: Double, g: Double, b: Double) {
+        switch key {
+        case "furry-target-magenta": return (0.96, 0.10, 0.70)
+        case "furry-target-gold":    return (0.97, 0.76, 0.10)
+        case "furry-target-cyan":    return (0.10, 0.80, 0.92)
+        case "furry-target-lime":    return (0.55, 0.88, 0.18)
+        case "furry-target-orange":  return (0.99, 0.55, 0.10)
+        case "furry-target-violet":  return (0.60, 0.30, 0.96)
+        default:                      return (0.96, 0.10, 0.70)
+        }
+    }
+
+    /// Applies the given vivid icon to `folder`. Pass `nil` to
+    /// restore the neutral icon (used when advancing off a prior
+    /// rep's target).
+    static func setTargetIcon(on folder: URL, key: String?) {
+        let loadKey = key ?? "furry-neutral"
+        guard let image = loadIconImage(named: loadKey) else { return }
+        NSWorkspace.shared.setIcon(image, forFile: folder.path, options: [])
+    }
 
     /// The 12 base color keys in stable order. Names matched to the
     /// assets bundled under Resources/furry-folders.

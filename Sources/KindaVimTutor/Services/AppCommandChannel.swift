@@ -196,9 +196,9 @@ final class AppCommandChannel {
         }
         if !reps.isEmpty { return reps }
         return [
-            .init(startIndex: 0,  targetIndex: 11),
+            .init(startIndex: 0,  targetIndex: 5),
+            .init(startIndex: 8,  targetIndex: 2),
             .init(startIndex: 6,  targetIndex: 11),
-            .init(startIndex: 5,  targetIndex: 11),
         ]
     }
 

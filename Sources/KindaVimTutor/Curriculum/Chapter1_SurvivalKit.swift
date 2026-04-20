@@ -157,14 +157,18 @@ extension Curriculum {
         finderDrill: FinderDrillSpec(
             title: "hjkl in the Finder",
             subtitle: "Same four keys, a different surface. Navigate to the bright ALL-CAPS folder using h/j/k/l.",
-            // All reps converge on the same target (index 11 — a
-            // distinct position in the grid), starting from varied
-            // corners. Indices refer to slots in the folder list;
-            // names are randomized per run.
+            // Each rep has its own target folder — different name,
+            // different vivid color — to keep the exercise feeling
+            // fresh as the student repeats. Indices refer to slots
+            // in the shuffled name list; names + colors are
+            // randomized per run.
+            // Starts and targets must not overlap — a start slot
+            // that's also a target gets an ALL-CAPS target name,
+            // which gives the goal away before the student starts.
             reps: [
-                .init(startIndex: 0,  targetIndex: 11),
+                .init(startIndex: 0,  targetIndex: 5),
+                .init(startIndex: 8,  targetIndex: 2),
                 .init(startIndex: 6,  targetIndex: 11),
-                .init(startIndex: 5,  targetIndex: 11),
             ]
         )
     )
