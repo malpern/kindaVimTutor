@@ -40,9 +40,9 @@ enum FinderGrid {
     ///   2. Set the icon's parent's `AXSelectedChildren` to `[icon]`.
     ///   3. Perform `AXPress` on the icon (acts like a click).
     @discardableResult
-    static func selectFile(named filename: String) -> Bool {
+    static func selectFile(named filename: String) async -> Bool {
         guard let window = focusedFinderWindow() else { return false }
-        activateFinder()
+        await activateFinder()
 
         guard let (icon, parent) = findIconWithParent(
             in: window, matching: filename, parent: nil, depth: 0
@@ -52,7 +52,7 @@ enum FinderGrid {
         _ = AXUIElementSetAttributeValue(
             icon, kAXSelectedAttribute as CFString, kCFBooleanTrue
         )
-        if verifySelection(matches: filename) { return true }
+        if await verifySelection(matches: filename) { return true }
 
         // 2. AXSelectedChildren on the parent.
         if let parent {
@@ -60,17 +60,17 @@ enum FinderGrid {
             _ = AXUIElementSetAttributeValue(
                 parent, kAXSelectedChildrenAttribute as CFString, arr
             )
-            if verifySelection(matches: filename) { return true }
+            if await verifySelection(matches: filename) { return true }
         }
 
         // 3. AXPress (acts like a click).
         _ = AXUIElementPerformAction(icon, kAXPressAction as CFString)
-        if verifySelection(matches: filename) { return true }
+        if await verifySelection(matches: filename) { return true }
 
         // 4. Fallback: synthesize a click at the icon's screen center.
         if let frame = frameOf(icon) {
             clickAt(CGPoint(x: frame.midX, y: frame.midY))
-            if verifySelection(matches: filename) { return true }
+            if await verifySelection(matches: filename) { return true }
         }
         return false
     }
@@ -85,16 +85,16 @@ enum FinderGrid {
         up?.post(tap: .cghidEventTap)
     }
 
-    private static func activateFinder() {
+    private static func activateFinder() async {
         guard let finder = NSRunningApplication.runningApplications(
             withBundleIdentifier: "com.apple.finder"
         ).first else { return }
         finder.activate(options: [.activateAllWindows])
-        Thread.sleep(forTimeInterval: 0.12)
+        try? await Task.sleep(for: .milliseconds(120))
     }
 
-    private static func verifySelection(matches name: String) -> Bool {
-        Thread.sleep(forTimeInterval: 0.08)
+    private static func verifySelection(matches name: String) async -> Bool {
+        try? await Task.sleep(for: .milliseconds(80))
         return FinderDrillPrototype.readFinderSelection() == name
     }
 

@@ -233,7 +233,13 @@ final class FinderDrillEngine {
         let seedIndex = kind == .duplicate ? rep.targetIndex : rep.startIndex
         let startName = folderNames[seedIndex]
         state = .seeding
-        _ = FinderGrid.selectFile(named: startName)
+        // Fire-and-forget: selectFile awaits verification sleeps on
+        // the cooperative thread pool, so the engine doesn't block
+        // here. The observer will pick up the selection change and
+        // flip us from .seeding to .active via selectionDidChange.
+        Task {
+            _ = await FinderGrid.selectFile(named: startName)
+        }
         AppLogger.shared.info("finderDrill", "repStart", fields: [
             "index": "\(completedRepIndex)",
             "kind": "\(kind)",

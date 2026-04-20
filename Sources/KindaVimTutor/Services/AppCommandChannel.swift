@@ -145,9 +145,11 @@ final class AppCommandChannel {
             FinderDrillPanel.shared.hide()
         case "finder.select":
             // Usage: finder.select file07.txt
-            let ok = FinderGrid.selectFile(named: arg)
-            AppLogger.shared.info("finderDrill", "selectResult",
-                                  fields: ["name": arg, "ok": ok ? "yes" : "no"])
+            Task {
+                let ok = await FinderGrid.selectFile(named: arg)
+                AppLogger.shared.info("finderDrill", "selectResult",
+                                      fields: ["name": arg, "ok": ok ? "yes" : "no"])
+            }
         case "finder.grid":
             FinderGrid.resizeFocusedFinderWindow(to: CGSize(width: 640, height: 440))
             Task { @MainActor in

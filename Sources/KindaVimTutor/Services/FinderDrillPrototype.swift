@@ -34,18 +34,13 @@ enum FinderDrillPrototype {
 
         await MainActor.run { closeLeftoverDrillWindows() }
 
-        // Run the expensive filesystem work off the main thread so
-        // the UI doesn't beachball for ~20+s while we create 12
-        // subfolders and write 12 custom icons each. macOS's
-        // NSWorkspace.setIcon + the Icon\r file writes are slow
-        // enough in aggregate that this matters a lot.
-        let built = await Task.detached(priority: .userInitiated) {
-            () -> (URL, [URL])? in
-            removeLeftoverDrillFolders()
-            return makeTempFolder(names: names)
-        }.value
-
-        guard let (folder, files) = built else {
+        // Filesystem + icon-write work runs on the cooperative
+        // thread pool because both helpers are async nonisolated
+        // in a Swift 6 module without NonisolatedNonsendingByDefault
+        // — the compiler hops off MainActor for each await. No
+        // Task.detached needed; parent cancellation still applies.
+        await removeLeftoverDrillFolders()
+        guard let (folder, files) = await makeTempFolder(names: names) else {
             log.info("finderDrill", "tempFolderFailed", fields: [:])
             return nil
         }
@@ -168,7 +163,9 @@ enum FinderDrillPrototype {
     /// Delete any leftover `kindaVimTutorFinder-*` directories in the
     /// temporary directory. Covers prior runs that crashed or were
     /// killed before the end-of-drill cleanup ran.
-    private static func removeLeftoverDrillFolders() {
+    /// Async for the same reason as `makeTempFolder` — keep the
+    /// filesystem walk + recursive delete off MainActor.
+    private static func removeLeftoverDrillFolders() async {
         let fm = FileManager.default
         let tmp = fm.temporaryDirectory
         guard let entries = try? fm.contentsOfDirectory(
@@ -182,7 +179,12 @@ enum FinderDrillPrototype {
 
     // MARK: - Filesystem
 
-    private static func makeTempFolder(names: [String]) -> (URL, [URL])? {
+    /// Async so the filesystem + icon writes run on the cooperative
+    /// thread pool (the compiler places nonisolated async work off
+    /// the caller's actor in Swift 6). Doing 12 folder creates +
+    /// setIcon writes synchronously on MainActor beachballed the
+    /// UI for tens of seconds.
+    private static func makeTempFolder(names: [String]) async -> (URL, [URL])? {
         let fm = FileManager.default
         let tmp = fm.temporaryDirectory
             .appendingPathComponent("kindaVimTutorFinder-\(UUID().uuidString.prefix(8))",
