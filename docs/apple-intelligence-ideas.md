@@ -99,7 +99,35 @@ Cost: one inference per stats screen view. Cache per-day.
 Risk: summary invents numbers. Fix by passing aggregates verbatim
 and asking the model only to narrativise — not compute.
 
-### 5. Generate drill variations on demand
+### 5. Ask-a-question panel, grounded in curriculum + vim reference
+A "?" affordance the student can tap from any lesson to ask a
+free-form question ("what's the difference between `dw` and `de`?",
+"does kindaVim support macros?"). We answer by handing the model:
+
+- The current step context (chapter, lesson, motion being taught,
+  which exact page the student is on).
+- A pinned vim reference markdown bundled with the app (motions,
+  operators, counts, registers — the things the model might
+  misremember if we relied on its parametric knowledge).
+- A pinned kindaVim reference markdown covering what *our* strategy
+  supports, what it doesn't, and the Keyboard vs Accessibility
+  Strategy distinction. Critical — stock Vim behavior and kindaVim
+  behavior diverge in real ways, and students will trust the
+  model's answer.
+- The student's question.
+
+Output: a short grounded answer, ideally with a "see lesson X.Y"
+pointer when one of our lessons covers the topic.
+
+Cost: one inference per question. Not on a hot path.
+
+Risk: model answers about vim features kindaVim doesn't implement
+as if they work. Mitigation: the kindaVim reference is the source
+of truth; system prompt instructs the model to defer to it on any
+conflict and to say "kindaVim doesn't support this yet" when the
+reference says so.
+
+### 6. Generate drill variations on demand
 "I want 5 more `cw` drills on medical vocabulary." User picks a
 theme, we generate seed bodies + predicates matching the theme. Lets
 the app grow organically without a content pipeline.
