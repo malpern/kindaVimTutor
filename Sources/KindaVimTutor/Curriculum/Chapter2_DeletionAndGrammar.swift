@@ -102,7 +102,21 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["d$", "D"]
+        motionsIntroduced: ["d$", "D"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "D in the Wild",
+            subtitle: "Use **D** to delete from the cursor to the end of each line in a real note.",
+            preferredApp: .notes,
+            seedBody: "Keep this part DELETE ALL OF THIS\nGood text REMOVE THE JUNK\nReal content KILL EVERYTHING HERE",
+            reps: [
+                .init(instruction: "On line 1, put the cursor on `DELETE` and press `D`",
+                      predicate: .textDoesNotContain("DELETE ALL OF THIS")),
+                .init(instruction: "On line 2, put the cursor on `REMOVE` and press `D`",
+                      predicate: .textDoesNotContain("REMOVE THE JUNK")),
+                .init(instruction: "On line 3, put the cursor on `KILL` and press `D`",
+                      predicate: .textDoesNotContain("KILL EVERYTHING HERE")),
+            ]
+        )
     )
 
     // MARK: - Lesson 2.3: Delete Entire Line
@@ -139,7 +153,21 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["dd"]
+        motionsIntroduced: ["dd"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "dd in the Wild",
+            subtitle: "Use **dd** to delete entire lines from a real TODO list. Three lines, three presses of `dd`.",
+            preferredApp: .notes,
+            seedBody: "TODO: buy milk\nTODO: call Alex\nTODO: book flight",
+            reps: [
+                .init(instruction: "Delete the `buy milk` line with `dd`",
+                      predicate: .textDoesNotContain("buy milk")),
+                .init(instruction: "Delete the `call Alex` line with `dd`",
+                      predicate: .textDoesNotContain("call Alex")),
+                .init(instruction: "Delete the `book flight` line with `dd`",
+                      predicate: .textDoesNotContain("book flight")),
+            ]
+        )
     )
 
     // MARK: - Lesson 2.4: The Vim Grammar
