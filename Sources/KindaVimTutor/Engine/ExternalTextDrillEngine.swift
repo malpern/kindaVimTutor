@@ -40,6 +40,12 @@ final class ExternalTextDrillEngine {
     private(set) var results: [RepResult] = []
     private(set) var elapsedTime: TimeInterval = 0
     private(set) var latestText: String = ""
+    /// Flips true the first time we receive a non-nil observation.
+    /// Until then, the engine ignores `nil` reads ("AX couldn't
+    /// find the text area yet") — otherwise an unresolved initial
+    /// read would coerce to "" and fire empty-text completions
+    /// before the student does anything.
+    private(set) var hasReceivedText: Bool = false
 
     /// Fires once when all reps are complete. Callers (views / the
     /// panel) use this to trigger cleanup + celebration.
@@ -92,6 +98,7 @@ final class ExternalTextDrillEngine {
         completedRepIndex = 0
         results = []
         latestText = spec.seedBody
+        hasReceivedText = false
         activateRep()
     }
 
@@ -103,7 +110,12 @@ final class ExternalTextDrillEngine {
             Task { [surface] in await surface.cleanup(prepared) }
         }
         prepared = nil
-        state = .idle
+        // Preserve `.drillCompleted` so a step view showing the
+        // summary can survive teardown without flipping back to
+        // idle. Any non-completed state is treated as abandoned.
+        if state != .drillCompleted {
+            state = .idle
+        }
     }
 
     // MARK: - Per-rep machine
@@ -133,8 +145,17 @@ final class ExternalTextDrillEngine {
         ])
     }
 
-    private func textDidChange(to text: String) {
+    private func textDidChange(to text: String?) {
+        // Ignore reads where AX returned nothing — they'd coerce
+        // to "" and falsely satisfy textDoesNotContain predicates
+        // before the student did anything.
+        guard let text else { return }
         latestText = text
+        if !hasReceivedText {
+            hasReceivedText = true
+            AppLogger.shared.info("extDrill", "textSeeded",
+                                  fields: ["length": "\(text.count)"])
+        }
         guard state == .active, let predicate = currentRep else { return }
         if predicate.evaluate(against: text) {
             completeRep()
@@ -168,6 +189,15 @@ final class ExternalTextDrillEngine {
         AppLogger.shared.info("extDrill", "drillComplete", fields: [
             "reps": "\(results.count)"
         ])
+        // Tear down the surface (delete the drill note / draft)
+        // here rather than waiting for a caller to call stop(). A
+        // completed drill is "done with" the surface; callers who
+        // need to retain the engine for summary rendering don't
+        // need the underlying note to still exist.
+        if let prepared {
+            Task { [surface] in await surface.cleanup(prepared) }
+            self.prepared = nil
+        }
         onDrillCompleted?()
     }
 }

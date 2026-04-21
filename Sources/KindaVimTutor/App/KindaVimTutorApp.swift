@@ -41,6 +41,12 @@ struct KindaVimTutorApp: App {
                         prefs: NotificationPreferencesStorage.current()
                     )
                 }
+                // Reap any Notes drill notes (or Mail drafts,
+                // when that adapter lands) left behind by a prior
+                // crashed or force-quit session. Best-effort.
+                Task.detached(priority: .utility) {
+                    await NotesSurface().sweepOrphans()
+                }
             }
         }
         .commands {
