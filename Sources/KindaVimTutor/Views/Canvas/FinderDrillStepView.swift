@@ -29,6 +29,20 @@ struct FinderDrillStepView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .padding(.horizontal, 56)
         .animation(.easeInOut(duration: 0.25), value: engine.state)
+        .onDisappear {
+            // Student may have bypassed mid-drill with `]`. Leaving
+            // the engine running would leak the Finder window + AX
+            // observer + tmp folder. Abort runs the same teardown
+            // path the completion handler uses, minus the
+            // celebratory hop + confetti.
+            if engine.state == .preparing
+                || engine.state == .seeding
+                || engine.state == .active
+                || engine.state == .repCompleted {
+                FinderDrillPanel.shared.abort(engine: engine)
+            }
+            autoAdvanceTask?.cancel()
+        }
     }
 
     @ViewBuilder

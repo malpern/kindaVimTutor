@@ -145,21 +145,37 @@ final class FinderDrillPanel {
     /// still open at delete time it auto-navigates up to the parent
     /// `/T/` dir rather than closing, and that sweep catches those.
     func finish(engine: FinderDrillEngine) {
-        let folder = engine.folder
-        closeDrillFinderWindows(matching: folder)
-        hide()
         Task { @MainActor in
-            // Give Finder time to process the close button press
-            // before the folder vanishes underneath it.
-            try? await Task.sleep(for: .milliseconds(250))
-            engine.stop()
-            // Second sweep: anything that auto-navigated to the
-            // parent or is still showing a stale drill path.
-            try? await Task.sleep(for: .milliseconds(150))
-            closeDrillFinderWindows(matching: folder, includeParent: true)
+            await teardown(engine: engine)
             NSApp.activate(ignoringOtherApps: true)
             Confetti.fireBurst(times: 2, interval: 0.35)
         }
+    }
+
+    /// Same teardown as `finish` but without the celebratory hop
+    /// back + confetti. Called when the student bypasses a drill
+    /// mid-way (e.g. pressing `]` to skip the Finder lesson). The
+    /// cleanup still needs to run — leftover Finder windows or
+    /// tmp folders are visible mess.
+    func abort(engine: FinderDrillEngine) {
+        Task { @MainActor in
+            await teardown(engine: engine)
+        }
+    }
+
+    /// Shared close → delete → sweep sequence. The exact timing
+    /// matters: when Finder's drill window is still open at the
+    /// moment we delete its folder, Finder auto-navigates it up to
+    /// the parent `/T/` dir instead of closing. Close first, let
+    /// Finder process, delete, sweep the parent.
+    private func teardown(engine: FinderDrillEngine) async {
+        let folder = engine.folder
+        closeDrillFinderWindows(matching: folder)
+        hide()
+        try? await Task.sleep(for: .milliseconds(250))
+        engine.stop()
+        try? await Task.sleep(for: .milliseconds(150))
+        closeDrillFinderWindows(matching: folder, includeParent: true)
     }
 
     /// Closes any Finder windows whose displayed folder sits inside
