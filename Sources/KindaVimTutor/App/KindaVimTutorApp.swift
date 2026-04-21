@@ -17,12 +17,18 @@ struct KindaVimTutorApp: App {
         Window("kindaVim Tutor", id: "main") {
             mainUI
             .toolbar {
-                if #available(macOS 26.0, *) {
-                    toolbarContent.sharedBackgroundVisibility(.hidden)
-                } else {
-                    toolbarContent
-                }
+                toolbarContent
             }
+            // macOS 26's window toolbar transitions between a
+            // "scrolled under" (opaque) and "at top" (transparent)
+            // appearance based on what's under it in the detail
+            // pane. That state change ripples into a shared
+            // window-level safe-area inset shift, which in turn
+            // slides the sidebar's top content up into the title-
+            // bar strip on every step advance. Pinning the toolbar
+            // background to always visible stops the inset from
+            // shifting.
+            .toolbarBackground(.visible, for: .windowToolbar)
             .frame(minWidth: 900, minHeight: 600)
             .environment(appState.modeMonitor)
             .onAppear {

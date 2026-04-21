@@ -39,27 +39,28 @@ final class LessonStepController {
     func nextStep() {
         guard !isLastStep else { return }
         navigationDirection = .forward
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentStepIndex += 1
-        }
+        // Intentionally no `withAnimation` here. SwiftUI's
+        // `withAnimation` applies to every observable state change
+        // inside the transaction, including sidebar layout — which
+        // caused the rail to jitter / scroll-reset on every step
+        // advance. The step-container in StepCanvasView has a
+        // scoped `.animation(.easeInOut, value: currentStepIndex)`
+        // that drives the transition.
+        currentStepIndex += 1
         logCurrentStep("next")
     }
 
     func previousStep() {
         guard !isFirstStep else { return }
         navigationDirection = .backward
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentStepIndex -= 1
-        }
+        currentStepIndex -= 1
         logCurrentStep("previous")
     }
 
     func goToStep(_ index: Int) {
         guard index >= 0, index < steps.count else { return }
         navigationDirection = index > currentStepIndex ? .forward : .backward
-        withAnimation(.easeInOut(duration: 0.3)) {
-            currentStepIndex = index
-        }
+        currentStepIndex = index
         logCurrentStep("goTo")
     }
 

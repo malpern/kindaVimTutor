@@ -84,16 +84,23 @@ struct StepCanvasView: View {
                 }
 
             }
+            .animation(.easeInOut(duration: 0.3), value: controller.currentStepIndex)
             .frame(maxWidth: .infinity)
             .layoutPriority(1)  // step content flexes; chrome stays fixed
 
             // Canvas-level chrome — real sibling in the VStack, renders reliably.
+            // The hint always occupies its slot (hidden via opacity
+            // when not applicable) so the chrome height doesn't
+            // change between steps. A height change here propagates
+            // up, forces the sidebar's NSTableView to revalidate
+            // scroll, and can push the selected lesson row into the
+            // title-bar strip.
             VStack(spacing: 16) {
-                if shouldShowCanvasAdvanceHint {
-                    AdvanceHintView("press to continue",
-                                    action: canNavigateForward ? { advanceForward() } : nil)
-                        .transition(.opacity.combined(with: .offset(y: 4)))
-                }
+                AdvanceHintView("press to continue",
+                                action: canNavigateForward ? { advanceForward() } : nil)
+                    .opacity(shouldShowCanvasAdvanceHint ? 1 : 0)
+                    .allowsHitTesting(shouldShowCanvasAdvanceHint)
+                    .animation(.easeInOut(duration: 0.2), value: shouldShowCanvasAdvanceHint)
                 StepIndicatorView(
                     stepCount: controller.stepCount,
                     currentIndex: controller.currentStepIndex

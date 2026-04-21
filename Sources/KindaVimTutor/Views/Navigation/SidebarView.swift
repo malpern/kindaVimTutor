@@ -1,5 +1,16 @@
 import SwiftUI
 
+/// Navigation rail for the lesson browser.
+///
+/// Implemented with `ScrollView { LazyVStack }` instead of `List` on
+/// purpose: macOS 26's `List(selection:)` auto-scrolls the selected
+/// row to the top of the viewport whenever the containing window
+/// re-lays out (detail-view transitions, `.id()` swaps, toolbar
+/// changes). For our tutor that means the expanded chapter's
+/// selected lesson row gets shoved into the title-bar strip on every
+/// `]` step-advance — see 2026-04-21 bug investigation. There is no
+/// public API to suppress `List`'s auto-scroll, so we render the
+/// rail by hand and keep selection styling local.
 struct SidebarView: View {
     let chapters: [Chapter]
     @Binding var selectedLessonId: String?
@@ -17,21 +28,21 @@ struct SidebarView: View {
     }
 
     var body: some View {
-        List(selection: $selectedLessonId) {
-            if inspectorState.isVisible {
-                Section {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 0) {
+                if inspectorState.isVisible {
                     DrillSidebarSection(state: inspectorState)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 8, bottom: 14, trailing: 8))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
+                        .padding(.horizontal, 8)
+                        .padding(.top, 8)
+                        .padding(.bottom, 14)
+                }
+                ForEach(chapters) { chapter in
+                    chapterSection(chapter)
                 }
             }
-
-            ForEach(chapters) { chapter in
-                chapterSection(chapter)
-            }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
         }
-        .listStyle(.sidebar)
         .frame(minWidth: 200)
         .navigationTitle("kindaVim Tutor")
         .onAppear {
@@ -52,29 +63,7 @@ struct SidebarView: View {
         let isChapterComplete = !chapter.lessons.isEmpty &&
             chapter.lessons.allSatisfy { progressStore.isLessonCompleted($0) }
 
-        Section {
-            if isExpanded {
-                // Subtle chapter marker so prose references like "see
-                // Chapter 5" have a corresponding label in the rail.
-                Text("Chapter \(chapter.number)")
-                    .font(.system(size: 10, weight: .medium))
-                    .foregroundStyle(.tertiary)
-                    .tracking(0.3)
-                    .padding(.leading, 8)
-                    .padding(.top, 2)
-                    .padding(.bottom, 4)
-                    .listRowSeparator(.hidden)
-                    .selectionDisabled()
-                ForEach(chapter.lessons) { lesson in
-                    LessonRowView(
-                        lesson: lesson,
-                        chapterNumber: chapter.number,
-                        isCompleted: progressStore.isLessonCompleted(lesson)
-                    )
-                    .tag(lesson.id)
-                }
-            }
-        } header: {
+        VStack(alignment: .leading, spacing: 2) {
             ChapterHeader(
                 chapter: chapter,
                 isExpanded: isExpanded,
@@ -85,7 +74,60 @@ struct SidebarView: View {
                     }
                 }
             )
+            if isExpanded {
+                // Subtle chapter marker so prose references like "see
+                // Chapter 5" have a corresponding label in the rail.
+                Text("Chapter \(chapter.number)")
+                    .font(.system(size: 10, weight: .medium))
+                    .foregroundStyle(.tertiary)
+                    .tracking(0.3)
+                    .padding(.leading, 8)
+                    .padding(.top, 2)
+                    .padding(.bottom, 4)
+                ForEach(chapter.lessons) { lesson in
+                    SidebarLessonRow(
+                        lesson: lesson,
+                        chapterNumber: chapter.number,
+                        isCompleted: progressStore.isLessonCompleted(lesson),
+                        isSelected: selectedLessonId == lesson.id,
+                        onTap: { selectedLessonId = lesson.id }
+                    )
+                }
+            }
         }
+        .padding(.bottom, 2)
+    }
+}
+
+/// One clickable lesson row with its own selection-highlight state.
+/// `List` would give this for free, but we're on our own — a
+/// `Button` with a rounded-rect background driven by `isSelected`
+/// approximates sidebar selection without the auto-scroll baggage.
+private struct SidebarLessonRow: View {
+    let lesson: Lesson
+    let chapterNumber: Int
+    let isCompleted: Bool
+    let isSelected: Bool
+    let onTap: () -> Void
+
+    var body: some View {
+        Button(action: onTap) {
+            LessonRowView(
+                lesson: lesson,
+                chapterNumber: chapterNumber,
+                isCompleted: isCompleted
+            )
+            .padding(.horizontal, 6)
+            .padding(.vertical, 1)
+            .background(
+                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                    .fill(isSelected
+                          ? Color.accentColor.opacity(0.28)
+                          : Color.clear)
+            )
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 }
 
