@@ -30,6 +30,7 @@ final class ExternalTextDrillEngine {
     struct RepResult: Equatable {
         let predicate: CompletionPredicate
         let timeSeconds: TimeInterval
+        let keystrokes: Int
     }
 
     let surface: ExternalTextSurface
@@ -55,6 +56,15 @@ final class ExternalTextDrillEngine {
     private let observer = ExternalTextObserver()
     private var startTime: Date?
     private var timer: Timer?
+    /// Per-rep key count. Reset at each rep boundary and copied into
+    /// RepResult on completion. Total across the drill is the sum of
+    /// result keystrokes.
+    private var currentRepKeystrokes: Int = 0
+    private var keydownMonitor: Any?
+
+    var totalKeystrokes: Int {
+        results.reduce(0) { $0 + $1.keystrokes } + currentRepKeystrokes
+    }
 
     init(surface: ExternalTextSurface, spec: ExternalTextDrillSpec) {
         self.surface = surface
@@ -99,6 +109,8 @@ final class ExternalTextDrillEngine {
         results = []
         latestText = spec.seedBody
         hasReceivedText = false
+        currentRepKeystrokes = 0
+        installKeydownMonitor()
         activateRep()
     }
 
@@ -106,6 +118,7 @@ final class ExternalTextDrillEngine {
         timer?.invalidate()
         timer = nil
         observer.stop()
+        removeKeydownMonitor()
         if let prepared {
             Task { [surface] in await surface.cleanup(prepared) }
         }
@@ -116,6 +129,36 @@ final class ExternalTextDrillEngine {
         if state != .drillCompleted {
             state = .idle
         }
+    }
+
+    /// Global keydown watcher. Same pattern the coaching view uses to
+    /// spot "student is still in insert mode" keystrokes, but here we
+    /// just tally them so the completion screen can show a Keys metric.
+    /// Keystrokes fire in the target app (Notes), which the tutor
+    /// never sees through responder chain — only a global monitor
+    /// catches them. Modifier-only keys (Cmd+X, Option+arrow) are
+    /// ignored; they're system shortcuts, not drill keystrokes.
+    private func installKeydownMonitor() {
+        guard keydownMonitor == nil else { return }
+        keydownMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: .keyDown
+        ) { [weak self] event in
+            let flags = event.modifierFlags
+            if flags.contains(.command) || flags.contains(.option) { return }
+            DispatchQueue.main.async {
+                MainActor.assumeIsolated {
+                    guard let self, self.state == .active else { return }
+                    self.currentRepKeystrokes += 1
+                }
+            }
+        }
+    }
+
+    private func removeKeydownMonitor() {
+        if let keydownMonitor {
+            NSEvent.removeMonitor(keydownMonitor)
+        }
+        keydownMonitor = nil
     }
 
     // MARK: - Per-rep machine
@@ -169,11 +212,17 @@ final class ExternalTextDrillEngine {
         timer?.invalidate()
         timer = nil
         let elapsed = startTime.map { Date().timeIntervalSince($0) } ?? 0
-        results.append(RepResult(predicate: predicate, timeSeconds: elapsed))
+        results.append(RepResult(
+            predicate: predicate,
+            timeSeconds: elapsed,
+            keystrokes: currentRepKeystrokes
+        ))
         AppLogger.shared.info("extDrill", "repComplete", fields: [
             "index": "\(completedRepIndex)",
-            "time": String(format: "%.2f", elapsed)
+            "time": String(format: "%.2f", elapsed),
+            "keys": "\(currentRepKeystrokes)"
         ])
+        currentRepKeystrokes = 0
         completedRepIndex += 1
         state = .repCompleted
         // Brief beat so the student sees the flash, then the next rep.
@@ -187,6 +236,7 @@ final class ExternalTextDrillEngine {
         timer?.invalidate()
         timer = nil
         observer.stop()
+        removeKeydownMonitor()
         state = .drillCompleted
         AppLogger.shared.info("extDrill", "drillComplete", fields: [
             "reps": "\(results.count)"

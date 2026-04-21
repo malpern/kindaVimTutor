@@ -290,6 +290,7 @@ struct ExternalTextDrillStepView: View {
             }
             HStack(spacing: 24) {
                 metric(label: "Reps", value: "\(engine.results.count) / \(spec.reps.count)")
+                metric(label: "Keys", value: "\(engine.totalKeystrokes)")
                 metric(label: "Time", value: String(format: "%.1fs", totalTime))
             }
             HStack(spacing: 10) {
