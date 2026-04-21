@@ -137,21 +137,39 @@ final class FinderDrillPanel {
     /// Seamless end-of-drill: close the drill's Finder window, drop
     /// the floating panel, activate the tutor app, and fire confetti
     /// from within the tutor window.
+    ///
+    /// The close-then-delete order matters and is sequenced via
+    /// `Task`: we close the drill window, wait long enough for
+    /// Finder to actually process the close, delete the tmp folder,
+    /// then sweep once more — because when Finder's window was
+    /// still open at delete time it auto-navigates up to the parent
+    /// `/T/` dir rather than closing, and that sweep catches those.
     func finish(engine: FinderDrillEngine) {
-        closeDrillFinderWindows(folder: engine.folder)
+        let folder = engine.folder
+        closeDrillFinderWindows(matching: folder)
         hide()
-        // stop() deletes the tmp folder and tears down the observer;
-        // call after the Finder window close so the folder path is
-        // still resolvable above.
-        engine.stop()
-        NSApp.activate(ignoringOtherApps: true)
-        Confetti.fireBurst(times: 2, interval: 0.35)
+        Task { @MainActor in
+            // Give Finder time to process the close button press
+            // before the folder vanishes underneath it.
+            try? await Task.sleep(for: .milliseconds(250))
+            engine.stop()
+            // Second sweep: anything that auto-navigated to the
+            // parent or is still showing a stale drill path.
+            try? await Task.sleep(for: .milliseconds(150))
+            closeDrillFinderWindows(matching: folder, includeParent: true)
+            NSApp.activate(ignoringOtherApps: true)
+            Confetti.fireBurst(times: 2, interval: 0.35)
+        }
     }
 
     /// Closes any Finder windows whose displayed folder sits inside
-    /// our tmp dir. AX-only — no AppleScript — so we don't trip the
-    /// Automation TCC bucket or risk another hang.
-    private func closeDrillFinderWindows(folder: URL?) {
+    /// our drill's tmp dir. When `includeParent` is true, also
+    /// closes windows showing the immediate parent (e.g. the
+    /// per-user `/T/` directory Finder auto-navigates to when its
+    /// drill folder is deleted out from under it). AX-only — no
+    /// AppleScript — so we don't trip the Automation TCC bucket.
+    private func closeDrillFinderWindows(matching folder: URL?,
+                                          includeParent: Bool = false) {
         guard let folder,
               let finder = NSRunningApplication.runningApplications(
                 withBundleIdentifier: "com.apple.finder"
@@ -164,24 +182,28 @@ final class FinderDrillPanel {
               let list = windows as? [AXUIElement] else { return }
 
         let folderPath = folder.path
+        let folderName = folder.lastPathComponent
+        let parentPath = folder.deletingLastPathComponent().path
+
         for window in list {
             var doc: CFTypeRef?
             AXUIElementCopyAttributeValue(
                 window, kAXDocumentAttribute as CFString, &doc
             )
-            // `AXDocument` returns a file URL string for Finder windows.
             let docStr = (doc as? String) ?? ""
-            if docStr.contains(folder.lastPathComponent) ||
-               docStr.contains(folderPath) {
-                var closeButton: CFTypeRef?
-                if AXUIElementCopyAttributeValue(
-                    window, kAXCloseButtonAttribute as CFString, &closeButton
-                ) == .success, let closeButton {
-                    AXUIElementPerformAction(
-                        closeButton as! AXUIElement,
-                        kAXPressAction as CFString
-                    )
-                }
+            let matchesDrill =
+                docStr.contains(folderName) || docStr.contains(folderPath)
+            let matchesParent = includeParent && docStr.contains(parentPath)
+            guard matchesDrill || matchesParent else { continue }
+
+            var closeButton: CFTypeRef?
+            if AXUIElementCopyAttributeValue(
+                window, kAXCloseButtonAttribute as CFString, &closeButton
+            ) == .success, let closeButton {
+                AXUIElementPerformAction(
+                    closeButton as! AXUIElement,
+                    kAXPressAction as CFString
+                )
             }
         }
     }
