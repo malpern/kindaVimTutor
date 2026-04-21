@@ -31,6 +31,10 @@ final class AppCommandChannel {
     private weak var appState: AppState?
     private weak var currentController: LessonStepController?
     private let finderDrill = FinderDrillEngine()
+    /// Holds the external-text drill engine across the async
+    /// lifetime of the `notes.drill` debug command so the observer
+    /// and state stick around.
+    private var externalDrillEngine: ExternalTextDrillEngine?
 
     private init() {
         let logDir = AppLogger.shared.logDirectoryURL
@@ -168,6 +172,43 @@ final class AppCommandChannel {
             }
         case "notes.sweep":
             Task { await NotesSurface().sweepOrphans() }
+        case "notes.drill":
+            // End-to-end probe of the external-text drill engine
+            // against Notes. Seeds a note with three todos and
+            // completes a rep every time one is deleted.
+            Task { @MainActor in
+                let spec = ExternalTextDrillSpec(
+                    title: "Delete drill probe",
+                    subtitle: "Remove each TODO line using dd",
+                    preferredApp: .notes,
+                    seedBody: "TODO: buy milk\nTODO: call Alex\nTODO: book flight",
+                    reps: [
+                        .textDoesNotContain("buy milk"),
+                        .textDoesNotContain("call Alex"),
+                        .textDoesNotContain("book flight"),
+                    ]
+                )
+                let engine = ExternalTextDrillEngine(
+                    surface: NotesSurface(), spec: spec
+                )
+                engine.onDrillCompleted = {
+                    AppLogger.shared.info("extDrill", "drillFinished",
+                                          fields: ["reps": "\(engine.results.count)"])
+                }
+                do {
+                    try await engine.start()
+                    AppLogger.shared.info("extDrill", "drillStarted", fields: [:])
+                } catch {
+                    AppLogger.shared.info("extDrill", "drillStartError",
+                                          fields: ["err": "\(error)"])
+                }
+                // Retain the engine beyond the Task; store it on
+                // self so state / observer survive.
+                self.externalDrillEngine = engine
+            }
+        case "notes.drill.stop":
+            externalDrillEngine?.stop()
+            externalDrillEngine = nil
         case "finder.select":
             // Usage: finder.select file07.txt
             Task {
