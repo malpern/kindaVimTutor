@@ -124,7 +124,21 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["ce", "cw"]
+        motionsIntroduced: ["ce", "cw"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "cw in the Wild",
+            subtitle: "Change whole words in a real note. `cw` deletes the word and drops you into insert mode to type the replacement.",
+            preferredApp: .notes,
+            seedBody: "The DOG ran fast\nThe CAT slept late\nThe BIRD sang loud",
+            reps: [
+                .init(instruction: "Change `DOG` to `fox` with `cw fox` + `Esc`",
+                      predicate: .textContains("fox ran")),
+                .init(instruction: "Change `CAT` to `owl` with `cw owl` + `Esc`",
+                      predicate: .textContains("owl slept")),
+                .init(instruction: "Change `BIRD` to `wolf` with `cw wolf` + `Esc`",
+                      predicate: .textContains("wolf sang")),
+            ]
+        )
     )
 
     // MARK: - Lesson 3.4: Change to End of Line
@@ -162,7 +176,21 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["c$", "C"]
+        motionsIntroduced: ["c$", "C"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "C in the Wild",
+            subtitle: "Use **C** to rewrite the end of each line. Position the cursor where the new text should start, press `C`, type the replacement, `Esc`.",
+            preferredApp: .notes,
+            seedBody: "Good start XXXXXXX\nThe path YYYYYYY\nMy code UUUUUUU",
+            reps: [
+                .init(instruction: "On line 1, put the cursor on `XXXXXXX` and change it to `end here` with `C`",
+                      predicate: .textContains("Good start end here")),
+                .init(instruction: "On line 2, put the cursor on `YYYYYYY` and change it to `is clear` with `C`",
+                      predicate: .textContains("The path is clear")),
+                .init(instruction: "On line 3, put the cursor on `UUUUUUU` and change it to `runs fast` with `C`",
+                      predicate: .textContains("My code runs fast")),
+            ]
+        )
     )
 
     // MARK: - Lesson 3.5: Open Lines

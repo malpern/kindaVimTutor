@@ -135,7 +135,21 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["~"]
+        motionsIntroduced: ["~"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "~ in the Wild",
+            subtitle: "Toggle case letter by letter in a real note. Position on the first letter of each lowercase word and press `~` until the word is UPPERCASE.",
+            preferredApp: .notes,
+            seedBody: "Make hello loud.\nSay world fast.\nCall power up.",
+            reps: [
+                .init(instruction: "Uppercase `hello` to `HELLO` with `~~~~~`",
+                      predicate: .textContains("HELLO loud")),
+                .init(instruction: "Uppercase `world` to `WORLD` with `~~~~~`",
+                      predicate: .textContains("WORLD fast")),
+                .init(instruction: "Uppercase `power` to `POWER` with `~~~~~`",
+                      predicate: .textContains("POWER up")),
+            ]
+        )
     )
 
     // MARK: - Lesson 6.4: Indent and Outdent
