@@ -174,7 +174,13 @@ final class FinderDrillEngine {
         if let folder { FinderDrillPrototype.cleanUp(folder) }
         folder = nil
         files = []
-        state = .idle
+        // Preserve `.drillCompleted` so the step view can still show
+        // the summary when the student returns to the tutor after a
+        // successful drill. Other states (preparing/seeding/active)
+        // reset to idle because they imply an abandoned drill.
+        if state != .drillCompleted {
+            state = .idle
+        }
     }
 
     // MARK: - Rep machine
