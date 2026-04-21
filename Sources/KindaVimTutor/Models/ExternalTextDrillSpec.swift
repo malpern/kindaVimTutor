@@ -11,6 +11,15 @@ struct ExternalTextDrillSpec: Hashable, Sendable {
         case mail
     }
 
+    struct Rep: Hashable, Sendable {
+        /// Short human-readable direction shown in the coaching
+        /// panel ("Delete the first line with `dd`").
+        let instruction: String
+        /// How the engine recognises completion against observed
+        /// editor state.
+        let predicate: CompletionPredicate
+    }
+
     let title: String
     let subtitle: String
     /// Which system app the drill is authored for. The engine may
@@ -20,9 +29,7 @@ struct ExternalTextDrillSpec: Hashable, Sendable {
     /// Text pre-populated into the fresh note / draft before the
     /// student begins. Use `\n` for line breaks.
     let seedBody: String
-    /// One predicate per rep. The drill advances when the current
-    /// predicate evaluates true against the observed editor state.
-    let reps: [CompletionPredicate]
+    let reps: [Rep]
 }
 
 /// Predicates evaluated against live editor state after each AX

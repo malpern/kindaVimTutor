@@ -47,7 +47,21 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["dw"]
+        motionsIntroduced: ["dw"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "dw in the Wild",
+            subtitle: "Now let's use **dw** on a real note. You'll delete the uppercase filler word from each line.",
+            preferredApp: .notes,
+            seedBody: "The QUICK brown fox jumps\nA BAD sentence shows up\nOne LARGE gap was noted",
+            reps: [
+                .init(instruction: "Delete `QUICK` from the first line with `dw`",
+                      predicate: .textDoesNotContain("QUICK")),
+                .init(instruction: "Delete `BAD` from the second line with `dw`",
+                      predicate: .textDoesNotContain("BAD")),
+                .init(instruction: "Delete `LARGE` from the third line with `dw`",
+                      predicate: .textDoesNotContain("LARGE")),
+            ]
+        )
     )
 
     // MARK: - Lesson 2.2: Delete to End of Line
@@ -139,10 +153,11 @@ extension Curriculum {
             .heading("The Most Important Concept in Vim"),
             .text("Vim commands follow a grammar: an operator (what to do) followed by a motion (where to do it)."),
             .spacer,
-            .text("You already know this! dw = delete + word. d$ = delete + end-of-line. Every motion you learn multiplies every operator you know:"),
-            .keyCommand(keys: ["d", "e"], description: "Delete to end of word"),
-            .keyCommand(keys: ["d", "0"], description: "Delete to start of line"),
-            .keyCommand(keys: ["d", "G"], description: "Delete to end of file"),
+            .text("You already know this! `dw` = delete + word. `d$` = delete + end-of-line. Every motion you learn multiplies every operator you know:"),
+            .spacer,
+            .grammarGrid,
+            .spacer,
+            .text("Each cell is a real command. Learn one new operator or one new motion and every row or column it touches becomes available for free."),
             .spacer,
             .tip("This grammar is why Vim is so powerful. A few operators times a few motions gives you dozens of commands."),
         ],

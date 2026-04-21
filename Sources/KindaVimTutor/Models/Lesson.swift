@@ -20,11 +20,16 @@ struct Lesson: Identifiable, Hashable, Sendable {
     /// and drives the student through a series of selection targets
     /// in a temp folder.
     let finderDrill: FinderDrillSpec?
+    /// Optional "in the wild" text drill — sibling to `finderDrill`,
+    /// but runs inside Notes or Mail and completes on observed text
+    /// mutations rather than Finder selection.
+    let externalTextDrill: ExternalTextDrillSpec?
 
     init(id: String, number: Int, title: String, subtitle: String,
          explanation: [ContentBlock], exercises: [Exercise],
          motionsIntroduced: [String], interactive: InteractiveStep? = nil,
-         finderDrill: FinderDrillSpec? = nil) {
+         finderDrill: FinderDrillSpec? = nil,
+         externalTextDrill: ExternalTextDrillSpec? = nil) {
         self.id = id
         self.number = number
         self.title = title
@@ -34,6 +39,7 @@ struct Lesson: Identifiable, Hashable, Sendable {
         self.motionsIntroduced = motionsIntroduced
         self.interactive = interactive
         self.finderDrill = finderDrill
+        self.externalTextDrill = externalTextDrill
     }
 }
 

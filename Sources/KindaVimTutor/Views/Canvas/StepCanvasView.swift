@@ -70,6 +70,13 @@ struct StepCanvasView: View {
                                 modeMonitor: modeMonitor,
                                 onAdvance: { advanceForward() }
                             )
+
+                        case .externalTextDrill(_, let spec):
+                            ExternalTextDrillStepView(
+                                spec: spec,
+                                modeMonitor: modeMonitor,
+                                onAdvance: { advanceForward() }
+                            )
                         }
                     }
                     .id(step.id)
@@ -205,6 +212,8 @@ struct StepCanvasView: View {
             // FinderDrillStepView has its own internal Continue
             // button on completion; no canvas-level hint needed.
             return false
+        case .externalTextDrill:
+            return false
         }
     }
 
@@ -255,6 +264,8 @@ struct StepCanvasView: View {
             stepKind = "modeseq"; stepId = id
         case .finderDrill(let id, _):
             stepKind = "finderdrill"; stepId = id
+        case .externalTextDrill(let id, _):
+            stepKind = "extdrill"; stepId = id
         case .none:
             stepKind = "none"; stepId = ""
         }

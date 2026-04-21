@@ -19,12 +19,15 @@ import Foundation
 final class ExternalTextObserver {
     private var observer: AXObserver?
     private var appElement: AXUIElement?
-    private var onChange: ((String) -> Void)?
+    /// nil text = "we couldn't read anything", as distinct from
+    /// "the text is currently empty". Engines should treat nil as
+    /// "don't evaluate" rather than as "empty string".
+    private var onChange: ((String?) -> Void)?
 
     @discardableResult
     func start(
         bundleIdentifier: String,
-        onChange: @escaping (String) -> Void
+        onChange: @escaping (String?) -> Void
     ) -> Bool {
         stop()
         self.onChange = onChange
@@ -64,8 +67,11 @@ final class ExternalTextObserver {
         )
 
         // Seed with the current text so the engine has state to
-        // compare against on the first notification.
-        onChange(readFocusedText() ?? "")
+        // compare against on the first notification. Pass `nil`
+        // when AX couldn't find the text area — lets the engine
+        // distinguish "didn't observe anything" from "observed
+        // empty text".
+        onChange(readFocusedText())
         return true
     }
 
@@ -149,7 +155,6 @@ final class ExternalTextObserver {
     }
 
     private func handleNotification() {
-        let text = readFocusedText() ?? ""
-        onChange?(text)
+        onChange?(readFocusedText())
     }
 }

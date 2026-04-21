@@ -183,9 +183,12 @@ final class AppCommandChannel {
                     preferredApp: .notes,
                     seedBody: "TODO: buy milk\nTODO: call Alex\nTODO: book flight",
                     reps: [
-                        .textDoesNotContain("buy milk"),
-                        .textDoesNotContain("call Alex"),
-                        .textDoesNotContain("book flight"),
+                        .init(instruction: "Delete the `buy milk` line with `dd`",
+                              predicate: .textDoesNotContain("buy milk")),
+                        .init(instruction: "Delete the `call Alex` line with `dd`",
+                              predicate: .textDoesNotContain("call Alex")),
+                        .init(instruction: "Delete the `book flight` line with `dd`",
+                              predicate: .textDoesNotContain("book flight")),
                     ]
                 )
                 let engine = ExternalTextDrillEngine(
@@ -312,6 +315,7 @@ final class AppCommandChannel {
         case .drill(let exercise, _): kind = "drill"; stepId = exercise.id
         case .modeSequence(let id, _): kind = "modeseq"; stepId = id
         case .finderDrill(let id, _): kind = "finderdrill"; stepId = id
+        case .externalTextDrill(let id, _): kind = "extdrill"; stepId = id
         case .none: kind = "none"; stepId = ""
         }
         let state = State(

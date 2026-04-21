@@ -120,10 +120,12 @@ final class ExternalTextDrillEngine {
 
     // MARK: - Per-rep machine
 
-    var currentRep: CompletionPredicate? {
+    var currentRep: ExternalTextDrillSpec.Rep? {
         guard completedRepIndex < spec.reps.count else { return nil }
         return spec.reps[completedRepIndex]
     }
+
+    var currentPredicate: CompletionPredicate? { currentRep?.predicate }
 
     private func activateRep() {
         guard currentRep != nil else {
@@ -156,14 +158,14 @@ final class ExternalTextDrillEngine {
             AppLogger.shared.info("extDrill", "textSeeded",
                                   fields: ["length": "\(text.count)"])
         }
-        guard state == .active, let predicate = currentRep else { return }
+        guard state == .active, let predicate = currentPredicate else { return }
         if predicate.evaluate(against: text) {
             completeRep()
         }
     }
 
     private func completeRep() {
-        guard let predicate = currentRep else { return }
+        guard let predicate = currentPredicate else { return }
         timer?.invalidate()
         timer = nil
         let elapsed = startTime.map { Date().timeIntervalSince($0) } ?? 0

@@ -6,6 +6,7 @@ enum LessonStep: Identifiable {
     case drill(exercise: Exercise, exerciseNumber: Int)
     case modeSequence(id: String, step: InteractiveStep)
     case finderDrill(id: String, spec: FinderDrillSpec)
+    case externalTextDrill(id: String, spec: ExternalTextDrillSpec)
 
     var id: String {
         switch self {
@@ -14,6 +15,7 @@ enum LessonStep: Identifiable {
         case .drill(let exercise, _): "drill-\(exercise.id)"
         case .modeSequence(let id, _): "modeseq-\(id)"
         case .finderDrill(let id, _): "finderdrill-\(id)"
+        case .externalTextDrill(let id, _): "extdrill-\(id)"
         }
     }
 
@@ -63,6 +65,11 @@ enum LessonStep: Identifiable {
         // system Finder.
         if let spec = lesson.finderDrill {
             result.append(.finderDrill(id: lesson.id, spec: spec))
+        }
+
+        // 6. External-text drill (if any). Notes / Mail.
+        if let spec = lesson.externalTextDrill {
+            result.append(.externalTextDrill(id: lesson.id, spec: spec))
         }
 
         return result
