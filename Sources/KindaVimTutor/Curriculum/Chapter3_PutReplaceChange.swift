@@ -48,7 +48,17 @@ extension Curriculum {
                 ]
             ),
         ],
-        motionsIntroduced: ["p", "P"]
+        motionsIntroduced: ["p", "P"],
+        externalTextDrill: ExternalTextDrillSpec(
+            title: "p in the Wild",
+            subtitle: "Reorder lines in a real Mail draft. Delete the out-of-order line with `dd`, move to where it belongs, then `p` to put it back.",
+            preferredApp: .mail,
+            seedBody: "1. Wake\n3. Work\n2. Eat\n4. Sleep",
+            reps: [
+                .init(instruction: "Move `2. Eat` above `3. Work` using `dd` + `p` (or `P`)",
+                      predicate: .textContains("1. Wake\n2. Eat\n3. Work\n4. Sleep")),
+            ]
+        )
     )
 
     // MARK: - Lesson 3.2: Replace Character

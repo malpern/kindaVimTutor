@@ -46,6 +46,7 @@ struct KindaVimTutorApp: App {
                 // crashed or force-quit session. Best-effort.
                 Task.detached(priority: .utility) {
                     await NotesSurface().sweepOrphans()
+                    await MailSurface().sweepOrphans()
                 }
             }
         }

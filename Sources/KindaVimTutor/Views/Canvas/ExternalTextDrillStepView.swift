@@ -35,7 +35,7 @@ struct ExternalTextDrillStepView: View {
     private static func makeSurface(for app: ExternalTextDrillSpec.App) -> ExternalTextSurface {
         switch app {
         case .notes: return NotesSurface()
-        case .mail:  return NotesSurface()
+        case .mail:  return MailSurface()
         }
     }
 
