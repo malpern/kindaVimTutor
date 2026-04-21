@@ -41,7 +41,8 @@ struct NotesSurface: ExternalTextSurface {
         end tell
         """
         do {
-            let result = try await OSAScriptRunner.run(script, timeout: 4)
+            _ = try? await warmup()
+            let result = try await OSAScriptRunner.runWithRetry(script, timeout: 4)
             if result.isEmpty {
                 return .needsSetup(reason: "No Notes account is enabled.")
             }
@@ -54,14 +55,23 @@ struct NotesSurface: ExternalTextSurface {
     // MARK: - Prepare
 
     func prepare(body: String) async throws -> PreparedSurface {
+        _ = try? await warmup()
+
         let title = "\(titlePrefix) \(UUID().uuidString.prefix(6))"
         let escapedTitle = escape(title)
-        let escapedBody = escape(body)
         let escapedFolder = escape(folderName)
+        // Notes stores bodies as HTML. Wrap plain text in <pre> so
+        // spaces, newlines, and punctuation survive without being
+        // collapsed by the renderer. Escape HTML metacharacters
+        // first so the input can't inject tags.
+        let htmlBody = "<pre>\(htmlEscape(body))</pre>"
+        let escapedBody = escape(htmlBody)
 
         // Create the dedicated folder if it doesn't exist, then
         // create the note in it. Return the note's id so cleanup
-        // can reference it precisely.
+        // can reference it precisely. Wrapped in try/-609 since
+        // first-run after a permission grant sometimes fails once
+        // even after the warmup.
         let script = """
         tell application "Notes"
             activate
@@ -82,7 +92,7 @@ struct NotesSurface: ExternalTextSurface {
         end tell
         """
 
-        let noteId = try await OSAScriptRunner.run(script, timeout: 8)
+        let noteId = try await OSAScriptRunner.runWithRetry(script, timeout: 8)
         guard !noteId.isEmpty else {
             throw ExternalTextSurfaceError.surfaceNotResolved
         }
@@ -104,7 +114,7 @@ struct NotesSurface: ExternalTextSurface {
             end try
         end tell
         """
-        _ = try? await OSAScriptRunner.run(script, timeout: 4)
+        _ = try? await OSAScriptRunner.runWithRetry(script, timeout: 4)
     }
 
     /// Scan for any leftover `kV Drill –` notes in our folder and
@@ -124,7 +134,22 @@ struct NotesSurface: ExternalTextSurface {
             end try
         end tell
         """
-        _ = try? await OSAScriptRunner.run(script, timeout: 6)
+        _ = try? await OSAScriptRunner.runWithRetry(script, timeout: 6)
+    }
+
+    // MARK: - Warmup
+
+    /// A cheap query against Notes to establish the AE connection
+    /// before we do real work. `version` is the one scripting
+    /// property that's documented to return immediately — heavier
+    /// queries (folders, accounts) can hang if Notes is mid-sync.
+    /// Called before every substantive operation; cheap enough to
+    /// run repeatedly.
+    private func warmup() async throws {
+        let script = """
+        tell application "Notes" to return version
+        """
+        _ = try await OSAScriptRunner.runWithRetry(script, timeout: 4, retries: 2)
     }
 
     // MARK: - AppleScript string escaping
@@ -142,6 +167,22 @@ struct NotesSurface: ExternalTextSurface {
             case "\n":  result.append("\\n")
             case "\r":  result.append("\\r")
             default:    result.append(ch)
+            }
+        }
+        return result
+    }
+
+    /// Escape HTML metacharacters so the student-visible body can't
+    /// inject tags into Notes' rendered view.
+    private func htmlEscape(_ string: String) -> String {
+        var result = ""
+        for ch in string {
+            switch ch {
+            case "&": result.append("&amp;")
+            case "<": result.append("&lt;")
+            case ">": result.append("&gt;")
+            case "\"": result.append("&quot;")
+            default: result.append(ch)
             }
         }
         return result

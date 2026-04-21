@@ -8,11 +8,54 @@ import Foundation
 /// cancellation and keeps the main thread free no matter how slow
 /// the target app is.
 enum OSAScriptRunner {
-    /// Run `source` and return stdout. Throws
-    /// `ExternalTextSurfaceError.scriptingTimedOut` if the process
-    /// doesn't finish within `timeout` seconds,
-    /// `ExternalTextSurfaceError.scriptingFailed` on non-zero exit.
+    /// Patterns in stderr that indicate a transient Apple Events
+    /// failure — the target app was just-launched / mid-sync / had
+    /// its AE connection go stale. Retrying after a short delay
+    /// usually succeeds. -609 is the classic "Connection is
+    /// invalid"; -600 is "Application isn't running"; -1712 is the
+    /// AE timeout that sometimes fires when the app is busy.
+    private static let transientErrorPatterns = [
+        "-609",
+        "Connection is invalid",
+        "-600",
+        "-1712",
+    ]
+
+    /// Run `source` once. Throws
+    /// `ExternalTextSurfaceError.scriptingTimedOut` on our own
+    /// timeout, `.scriptingFailed` on non-zero exit.
     static func run(_ source: String, timeout: TimeInterval = 5.0) async throws -> String {
+        try await runOnce(source, timeout: timeout)
+    }
+
+    /// Run `source` up to `retries + 1` times, retrying only when the
+    /// previous attempt failed with a pattern we recognise as
+    /// transient (stale AE connection, just-launched app, etc.).
+    /// Uses a 350ms delay between attempts so the target app has a
+    /// beat to finish whatever it was busy with.
+    static func runWithRetry(
+        _ source: String,
+        timeout: TimeInterval = 5.0,
+        retries: Int = 1
+    ) async throws -> String {
+        var attempt = 0
+        while true {
+            do {
+                return try await runOnce(source, timeout: timeout)
+            } catch ExternalTextSurfaceError.scriptingFailed(let message)
+                where attempt < retries && isTransient(message) {
+                attempt += 1
+                try? await Task.sleep(for: .milliseconds(350))
+                continue
+            }
+        }
+    }
+
+    private static func isTransient(_ message: String) -> Bool {
+        transientErrorPatterns.contains { message.contains($0) }
+    }
+
+    private static func runOnce(_ source: String, timeout: TimeInterval) async throws -> String {
         try await withCheckedThrowingContinuation { continuation in
             let process = Process()
             process.executableURL = URL(fileURLWithPath: "/usr/bin/osascript")
