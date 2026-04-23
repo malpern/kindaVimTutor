@@ -18,10 +18,10 @@ TerminalVim: `&` repeats the last `:s` substitution with the same pattern/replac
 Related: :s — Ex substitute (not supported); . — repeat last CHANGE (different concept)
 
 Q: How do I repeat a find-and-replace in kindaVim?
-A: kindaVim's approach: search with `/pattern<Enter>`, manually change the first match with `cw<replacement><Esc>`, then alternate `n` (jump to next match) and `.` (replay the change) through the document.
+A: kindaVim doesn't support `&`, `g&`, or `:s`. The workaround: search with `/pattern<Enter>`, manually change the first match with an appropriate change operator (e.g. `cw` + replacement + `Esc`), then alternate `n` (next match) and `.` (repeat change).
 Unsupported: yes
-TerminalVim: `&` or `g&` repeat the last `:s`. Neither is available in kindaVim.
-Related: / — search (kindaVim supports it); . — repeat change; cw — change word
+TerminalVim: `&` repeats the last `:s` on the current line; `g&` repeats it across the whole buffer. kindaVim doesn't implement either because `:s` isn't available.
+Related: / — search (supported); . — repeat change; cw — change word
 
 Q: What's the difference between `.` and `&`?
 A: `.` repeats the last CHANGE (insert, delete, etc.) and IS supported in kindaVim. `&` repeats the last `:s` substitution and is NOT supported. For the search-and-change workflow use `.` — it covers most of what `&` would do.

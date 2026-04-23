@@ -29,7 +29,7 @@ A: Press `d` (or `x`) while the selection is active. The selected text is delete
 Related: c — change (delete + enter insert); y — yank (copy without deleting)
 
 Q: How do I yank a visual selection?
-A: Make the selection with `v` or `V`, then press `y`. Text goes to the default register. Visual mode exits and the cursor returns to where the selection started.
+A: Make the selection with `v` or `V`, then press `y`. The text goes to the default register and visual mode exits. Cursor position after yank depends on the direction of the selection — don't rely on it being at any specific end.
 Related: d — delete version; p — paste
 
 Q: How do I change a visual selection?
@@ -53,8 +53,10 @@ A: Press `Esc` — returns to {{normal}} with no edit. The cursor ends up at the
 Related: v — re-enter visual
 
 Q: How do I re-select the last visual selection?
-A: Press `gv` in {{normal}} — "go to visual." Restores the exact bounds of your last visual selection. Useful after an edit breaks context and you want the same region again.
-Related: v — manual entry
+A: kindaVim doesn't implement `gv`. To re-visit an area, manually re-enter visual with `v` or `V` and navigate back to it — your cursor position from before the selection is often a reasonable anchor.
+Unsupported: yes
+TerminalVim: In stock Vim, `gv` restores the bounds of your last visual selection exactly (start, end, and mode — characterwise or linewise).
+Related: v — enter visual; V — enter linewise visual
 
 Q: Does visual mode support counts?
 A: Yes — in visual mode, a count before a motion multiplies it. `v3w` selects from the cursor forward by three words. The count applies to the motion, not the operator.

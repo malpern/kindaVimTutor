@@ -35,7 +35,7 @@ Related: / — search forward (kindaVim supports it)
 Q: Do automatic marks like `'.` work?
 A: No — kindaVim doesn't track position history across edits.
 Unsupported: yes
-TerminalVim: `'.` jumps to the last modified line. `'^` to the last insert position. `'[` / `']` to the first/last characters of the last yank or delete.
+TerminalVim: `'.` jumps to the position of the last change. `'^` to the last insert-mode exit position. `'[` / `']` to the start / end of the last change or yank.
 Related: u — undo (kindaVim supports it, restores position)
 
 Q: How do I remember a position to come back to?

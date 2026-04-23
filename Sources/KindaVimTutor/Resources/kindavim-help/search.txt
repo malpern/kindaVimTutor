@@ -58,8 +58,10 @@ A: Yes — hit the end and the search wraps to the beginning. You'll see a brief
 Related: n — keep going forward; ? — search other direction
 
 Q: How do I search and replace?
-A: kindaVim doesn't support `:s` or `cgn`. The workable flow: search with `/pattern<Enter>`, manually change the first match with `cw<replacement><Esc>` (or whichever change operator fits), then `n` to jump to the next match and `.` to repeat the change.
-Related: / — forward search; . — repeat last change; cw — change word
+A: kindaVim doesn't support `:s` (substitute) or `cgn` (change-next-match). The workable flow: search with `/pattern<Enter>`, manually change the first match with an appropriate change operator (e.g. `cw` for a word), then alternate `n` (next match) and `.` (repeat change) through the document.
+Unsupported: yes
+TerminalVim: `:%s/old/new/g` substitutes throughout the buffer. With `:%s/old/new/gc` stock Vim confirms each match. The `cgn` motion is Vim's other idiom: `/pattern<Enter>cgn<replacement><Esc>` then `.` at each subsequent match.
+Related: / — forward search (supported); . — repeat change
 
 Q: How do I delete to the next match?
 A: `d/pattern<Enter>` deletes from the cursor to the start of the next match. Useful for "delete everything up to X".

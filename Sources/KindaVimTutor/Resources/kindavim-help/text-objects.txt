@@ -40,7 +40,7 @@ A: Press `ciw` to delete the inner word and drop straight into {{insert}}. Doesn
 Related: caw — change around word; cw — change from cursor to end of word
 
 Q: How do I yank a quoted string?
-A: Position the cursor anywhere inside or outside the quotes, then `yi"` to yank inside the quotes (contents only) or `ya"` to yank around (contents plus the quotes). Same pattern for `yi'` / `ya'` on single quotes.
+A: With the cursor on the line containing the quoted string, type `yi"` in {{normal}} to yank the contents (excluding the quotes) or `ya"` to include the quotes. Same pattern with `yi'` / `ya'` for single-quoted strings.
 Related: di" — delete inside quotes; ci" — change inside quotes
 
 Q: How do I delete everything inside parentheses?
@@ -52,7 +52,7 @@ A: Each bracket type has its own text object: `i(`/`i)` for `()`, `i[`/`i]` for 
 Related: ib — shortcut for i(; iB — shortcut for i{
 
 Q: What does the cursor need to be on for `di(` to work?
-A: In stock Vim, the cursor only needs to be on the LINE containing the parens — kindaVim follows the same rule for native text fields. `di(` finds the nearest enclosing parens and operates on their contents.
+A: The cursor needs to be inside (or immediately on) the enclosing parentheses. `di(` operates on the nearest enclosing pair from the cursor's position — if you're not inside any parens, the motion does nothing.
 Related: di) — identical behavior; ci( — change inside
 
 Q: What's the difference between `i"` and `a"`?
@@ -72,7 +72,7 @@ A: None — both refer to the same parenthesized text object. `b` is also a shor
 Related: dib — shorthand; diB — shorthand for di{
 
 Q: Can I use a count with text objects?
-A: Not in the usual "5iw" sense — text objects describe a single region. For multiple words, use word motions instead (e.g. `d3w`). For nested text objects, most editors don't expand to outer levels without special extensions.
+A: Stock Vim does accept counts with many text objects — e.g. `d2iw` or `d2aw` to delete across two words, and counts on block text objects expand to the next enclosing pair. kindaVim's support for counts on text objects is uneven, so prefer explicit motion counts (`d3w`) when you need consistent behavior.
 Related: d3w — delete across three words; daw — delete one word with surrounding space
 
 Q: How do I delete to the matching bracket?

@@ -30,7 +30,7 @@ A: `0` goes to column 0 no matter what — if the line starts with spaces or tab
 Related: $ — end of line
 
 Q: How do I jump to the end of a line?
-A: Press `$` in {{normal}} to jump to the last character of the current line. Combine with `A` (`$a`) to start appending at end of line, or just use the shortcut `A` which does both in one step.
+A: Press `$` in {{normal}} to jump to the last character of the current line. If you want to append at the end, use the shortcut `A` — it jumps to end-of-line AND enters {{insert}} in one step (distinct from `$a` which lands after the last character).
 Related: A — append at end of line; 0 — start of line
 
 Q: How do I go to the top of the document?
@@ -58,5 +58,7 @@ A: `|` (pipe) followed by a count moves to that column — e.g. `25|` jumps to c
 Related: 0 — column zero; $ — last column
 
 Q: How do I jump half a screen down?
-A: kindaVim doesn't have built-in half-screen scrolling (that's a Vim feature tied to the editor's own viewport). For moving around a long document use `G`, `gg`, or a line-number jump like `100G`.
-Related: gg — top; G — bottom
+A: kindaVim doesn't support `Ctrl-D` / `Ctrl-U` (half-page scroll) — those are tied to Vim's own viewport which kindaVim doesn't own. For jumping around a long document use `G`, `gg`, or a line-number jump like `100G`.
+Unsupported: yes
+TerminalVim: In stock Vim, `Ctrl-D` scrolls half a page down and `Ctrl-U` half a page up. `Ctrl-F` / `Ctrl-B` do full-page.
+Related: G — last line; gg — first line; 100G — jump to line 100

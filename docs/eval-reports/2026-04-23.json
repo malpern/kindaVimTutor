@@ -1,54 +1,54 @@
 {
   "date": "2026-04-23",
   "total": 201,
-  "flagged": 133,
+  "flagged": 127,
   "axis_counts": {
     "vim_accuracy": {
-      "pass": 135,
-      "warning": 51,
-      "fail": 9,
+      "pass": 143,
+      "warning": 49,
+      "fail": 3,
       "n/a": 6,
       "other": 0
     },
     "kindavim_accuracy": {
-      "pass": 164,
+      "pass": 174,
       "warning": 25,
-      "fail": 12,
+      "fail": 2,
       "n/a": 0,
       "other": 0
     },
     "terminalvim_accuracy": {
-      "pass": 40,
+      "pass": 49,
       "warning": 7,
-      "fail": 3,
-      "n/a": 151,
+      "fail": 1,
+      "n/a": 144,
       "other": 0
     },
     "unsupported_consistency": {
-      "pass": 189,
+      "pass": 192,
       "warning": 2,
-      "fail": 7,
-      "n/a": 3,
+      "fail": 1,
+      "n/a": 6,
       "other": 0
     },
     "token_conventions": {
-      "pass": 157,
-      "warning": 37,
+      "pass": 160,
+      "warning": 34,
       "fail": 7,
       "n/a": 0,
       "other": 0
     },
     "verb_choice": {
-      "pass": 163,
-      "warning": 25,
+      "pass": 169,
+      "warning": 19,
       "fail": 0,
       "n/a": 13,
       "other": 0
     },
     "related_quality": {
-      "pass": 146,
-      "warning": 49,
-      "fail": 6,
+      "pass": 148,
+      "warning": 46,
+      "fail": 7,
       "n/a": 0,
       "other": 0
     },
@@ -72,7 +72,7 @@
       "title": "Toggle Case",
       "status": "supported",
       "total": 6,
-      "flagged": 4,
+      "flagged": 2,
       "entries": [
         {
           "question": "How do I toggle the case of a character?",
@@ -93,19 +93,16 @@
           "question": "How do I uppercase a whole word?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Marked supported, but the answer says kindaVim doesn't implement `gU`/`gUiw`.",
-            "Related includes `u — in visual, lowercase` and `~ — in visual, toggle`, but `u` and visual `~` are not listed in the support corpus as standalone supported commands."
-          ]
+          "issues": []
         },
         {
           "question": "How do I lowercase a selection?",
@@ -129,19 +126,16 @@
           "question": "How do I toggle case of a whole word?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Marked supported, but the answer says kindaVim doesn't implement `g~iw`.",
-            "A supported entry must not present the feature as unsupported in kindaVim."
-          ]
+          "issues": []
         },
         {
           "question": "Does `gU` work in kindaVim?",
@@ -508,19 +502,20 @@
         {
           "question": "How do I delete without it being \"deleted\" — just remove it?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "pass",
+            "vim_accuracy": "warning",
+            "kindavim_accuracy": "fail",
             "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
+            "unsupported_consistency": "fail",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
+            "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Stock Vim does have a delete-without-yank mechanism via the black hole register (`\"_`), so saying there is no separate option is false.",
-            "Related includes unsupported command `\"a`; that's allowed, but the summary should more clearly reflect non-support if referenced."
+            "Marks a kindaVim-unsupported feature (`\"_`) as supported via `isUnsupported: false`",
+            "Answer explicitly says there is no equivalent of `\"_` here, conflicting with supported status",
+            "'same default as Vim' is imprecise because Vim has multiple register behaviors beyond a simple default register description"
           ]
         }
       ]
@@ -529,7 +524,7 @@
       "title": "Delete Word",
       "status": "supported",
       "total": 9,
-      "flagged": 7,
+      "flagged": 6,
       "entries": [
         {
           "question": "How do I delete a word?",
@@ -602,8 +597,8 @@
         {
           "question": "Does `dw` work at the end of a line?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "fail",
+            "vim_accuracy": "warning",
+            "kindavim_accuracy": "warning",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
@@ -613,9 +608,8 @@
             "conciseness": "pass"
           },
           "issues": [
-            "In stock Vim, `dw` at end of line has special behavior with `w` used under an operator and can cross line boundaries rather than simply acting like `D`.",
-            "The claim that kindaVim does NOT join with the next line conflicts with supported `dw`, which is described in the corpus as Vim-like 'delete next word' and gives no special non-cross-line limitation.",
-            "The phrase 'the way stock Vim does in some configurations' is misleading; this is core motion/operator behavior, not merely optional configuration."
+            "Stock Vim behavior is oversimplified: `dw` at end of line depends on exact cursor position and special word-motion rules, not just 'no next word on the current line'",
+            "kindaVim claim about typically staying within the line is not supported by the corpus"
           ]
         },
         {
@@ -671,23 +665,17 @@
         {
           "question": "What's the fastest way to delete a sentence?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
-            "token_conventions": "warning",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
+            "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Answer says kindaVim doesn't support sentence text objects, but `isUnsupported` is false.",
-            "Sentence text objects `is` and `as` are unsupported in kindaVim, so this should be an unsupported entry.",
-            "`V` + motion + `d` is not a sentence-specific substitute and doesn't answer the question directly.",
-            "Related uses `is / as` instead of separate backticked command tokens.",
-            "Related entry includes `as`, which is not listed as its own command token in the support corpus."
-          ]
+          "issues": []
         }
       ]
     },
@@ -1519,18 +1507,19 @@
           "question": "How is `J` different from pressing Backspace at the start of the next line?",
           "verdicts": {
             "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
+            "kindavim_accuracy": "warning",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
+            "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`J` does not always insert a single space; spacing depends on context and options.",
-            "Related says `gJ` as if relevant to kindaVim, but `gJ` is unsupported in kindaVim."
+            "'without a position change' is inaccurate for `J` because it is a change command that leaves the cursor on the resulting joined line",
+            "Backspace behavior at start of line is host/app-dependent and not a Vim command in {{normal}}",
+            "kindaVim corpus supports `J` but does not document host-app option-dependent separator behavior"
           ]
         }
       ]
@@ -1660,14 +1649,14 @@
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
-            "verb_choice": "warning",
+            "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`$a` is not equivalent to `A`; `$` lands on the last character and `a` appends after it, while `A` appends at end of line directly.",
-            "Uses 'Press' for a command sequence explanation involving `$a`; should use 'Type' for multi-key sequences."
+            "`A` is not distinct from `$a` in stock Vim for this purpose; both append after the last character at end of line",
+            "Saying `$a` 'lands after the last character' as a distinction is misleading because `A` does too"
           ]
         },
         {
@@ -1778,19 +1767,19 @@
           "question": "How do I jump half a screen down?",
           "verdicts": {
             "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
+            "kindavim_accuracy": "warning",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
-            "xref_validity": "pass",
+            "xref_validity": "fail",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer says kindaVim lacks half-screen scrolling but `Ctrl-D`/`Ctrl-U` are not mentioned explicitly.",
-            "This is effectively an unsupported answer while `isUnsupported` is false.",
-            "Related commands are fine but don't address the asked feature."
+            "`100G` is referenced in Related but not present as a canonical command in the support corpus",
+            "The answer claims kindaVim doesn't support `Ctrl-D` / `Ctrl-U`, but those exact tokens are not listed in the support corpus",
+            "Line-number jump like `100G` relies on count behavior not explicitly represented as a related corpus token"
           ]
         }
       ]
@@ -1872,21 +1861,18 @@
         {
           "question": "How do I record and replay a find-and-replace across a file?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "warning",
             "unsupported_consistency": "pass",
-            "token_conventions": "fail",
+            "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer recommends `n.` as the closest idiom, but `n` is supported while `cw<replacement><Esc>` uses bare `<Esc>` instead of backticks.",
-            "`terminalVim` mentions `cgn`, which is unsupported in kindaVim but valid in Vim; however the first example `:%s/old/new/gc` is fine while the macro example adds a command not central to the answer.",
-            "Because `isUnsupported` is about macros/`:s`, the answer should not imply a fully supported replacement workflow without noting limitations more carefully.",
-            "Bare `<Enter>` and `<Esc>` violate token conventions."
+            "`terminalVim` macro example uses `cgn`, which kindaVim doesn't support but stock Vim does; description is broadly correct but implies replaying `@a` can run 'across a file' without caveats."
           ]
         }
       ]
@@ -1951,9 +1937,9 @@
         {
           "question": "Do automatic marks like `'.` work?",
           "verdicts": {
-            "vim_accuracy": "fail",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
-            "terminalvim_accuracy": "fail",
+            "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
@@ -1962,9 +1948,7 @@
             "conciseness": "pass"
           },
           "issues": [
-            "`'.` jumps to the position of the last change, not specifically the last modified line.",
-            "`'[ / `']` are marks for previously changed or yanked text, not specifically the last yank or delete.",
-            "Answer overgeneralizes unsupported feature as all position history across edits, while the question is about automatic marks."
+            "Related summary 'restores position' is imprecise; undo restores text changes and may restore cursor/marks indirectly, but `u` is not an automatic-mark feature."
           ]
         },
         {
@@ -2204,7 +2188,7 @@
       "title": "Search",
       "status": "supported",
       "total": 11,
-      "flagged": 9,
+      "flagged": 8,
       "entries": [
         {
           "question": "How do I search for text?",
@@ -2352,21 +2336,16 @@
           "question": "How do I search and replace?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
-            "token_conventions": "warning",
-            "verb_choice": "warning",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
+            "token_conventions": "pass",
+            "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Marks the item supported even though the answer says kindaVim doesn't support `:s` or `cgn`",
-            "Flagging unsupported commands in a supported entry fails kindaVim accuracy per instructions",
-            "Uses `/pattern<Enter>` and `cw<replacement><Esc>` without preferred backtick tokenization",
-            "Uses a multi-key workflow description without the preferred \"Type\" phrasing"
-          ]
+          "issues": []
         },
         {
           "question": "How do I delete to the next match?",
@@ -2468,16 +2447,15 @@
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "fail",
             "unsupported_consistency": "pass",
-            "token_conventions": "warning",
-            "verb_choice": "warning",
+            "token_conventions": "fail",
+            "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer uses `Cmd+`` and `Cmd+Tab` without backticks.",
-            "Answer says 'use Cmd+…' instead of 'Press `Cmd+…`'.",
-            "Terminal Vim field uses `:bnext`, `:bprev`, `:ls`, and `:b {name}`, which are not supported by the provided authoritative Vim reference excerpt."
+            "Answer uses bare `Cmd+Tab` without backticks.",
+            "`terminalVim` lists `:bnext` / `:bprev` / `:ls` / `:b {name}`, but `:bprev` is not the canonical command in the provided Vim reference (uses `:bprevious` / `:bp`)."
           ]
         },
         {
@@ -2544,21 +2522,18 @@
         {
           "question": "How do I repeat a find-and-replace in kindaVim?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "fail",
-            "unsupported_consistency": "fail",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
             "token_conventions": "pass",
-            "verb_choice": "warning",
-            "related_quality": "pass",
+            "verb_choice": "pass",
+            "related_quality": "warning",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer does not actually state that the feature is unsupported despite `isUnsupported: true`.",
-            "`cw<replacement><Esc>` is not valid Vim notation; `cw` enters Insert mode and replacement text is typed, not a literal token.",
-            "`terminalVim` incorrectly says `&`/`g&` are unavailable in kindaVim; this field must describe stock Vim only.",
-            "Unsupported entry should explicitly say kindaVim does not support `&`/`g&`."
+            "Related includes `cw`, which is already mentioned in the answer, so it duplicates an answer command."
           ]
         },
         {
@@ -2655,21 +2630,19 @@
         {
           "question": "How do I yank a quoted string?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "warning",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
-            "token_conventions": "warning",
-            "verb_choice": "warning",
-            "related_quality": "pass",
-            "xref_validity": "pass",
+            "unsupported_consistency": "n/a",
+            "token_conventions": "fail",
+            "verb_choice": "pass",
+            "related_quality": "fail",
+            "xref_validity": "fail",
             "conciseness": "pass"
           },
           "issues": [
-            "`yi\"`/`ya\"` are not canonical key notation; should be written as `yi\"` only if JSON escaping is unavoidable, but author-facing text should render as `yi\"`? Better as backticked `yi\"` is still awkward compared with `yi\"`; current escaping makes token clarity poor.",
-            "Claims you can use quoted-string text objects from anywhere 'inside or outside the quotes'; in Vim quoted text objects require being on the object or nearby relevant context, not arbitrarily anywhere outside.",
-            "Missing kindaVim-specific caution: support corpus includes `yi\"`/`ya\"` only for double quotes, while single-quote yank variants are not listed in support corpus.",
-            "Uses 'then `yi\"`' instead of 'Type' for multi-char sequences."
+            "Uses escaped quotes inside backticks (`yi\"`, `ya\"`, `di\"`, `ci\"`) instead of canonical command tokens like `yi\"` rendered from source as `yi\"`; author convention expects backtick-wrapped keys, not backslash-escaped presentation.",
+            "Related summaries are vague/incomplete ('delete inside quotes', 'change inside') and `di\"` is not present as a corpus token; supported corpus has `di\"`/`ci\"` only conceptually via actual `di\"` text in source, but related command token as written may not match corpus exactly."
           ]
         },
         {
@@ -2712,9 +2685,9 @@
           "question": "What does the cursor need to be on for `di(` to work?",
           "verdicts": {
             "vim_accuracy": "fail",
-            "kindavim_accuracy": "warning",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
+            "unsupported_consistency": "n/a",
             "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
@@ -2722,8 +2695,7 @@
             "conciseness": "pass"
           },
           "issues": [
-            "Incorrect for Vim: `di(` does not work from anywhere on the line; for block objects the cursor must be inside the block or on one of its braces.",
-            "'Nearest enclosing parens' is an imprecise simplification of Vim's block-object behavior."
+            "In stock Vim, `i(`/`di(` can find the next `(` when the cursor is not inside a `()` block; saying it 'does nothing' is incorrect."
           ]
         },
         {
@@ -2789,10 +2761,10 @@
         {
           "question": "Can I use a count with text objects?",
           "verdicts": {
-            "vim_accuracy": "fail",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "warning",
             "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
+            "unsupported_consistency": "n/a",
             "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
@@ -2800,8 +2772,7 @@
             "conciseness": "pass"
           },
           "issues": [
-            "Incorrect for Vim: counts do work with text objects, e.g. `2iw`, `d2aw`, and many block/quote objects accept counts.",
-            "The statement that text objects describe only a single region is false in stock Vim."
+            "Claim about kindaVim count support being 'uneven' is not grounded in the support corpus, which doesn't specify partial/uneven count behavior for text objects."
           ]
         },
         {
@@ -2984,7 +2955,7 @@
       "title": "Visual Mode",
       "status": "supported",
       "total": 12,
-      "flagged": 9,
+      "flagged": 7,
       "entries": [
         {
           "question": "How do I enter visual mode?",
@@ -3039,8 +3010,8 @@
         {
           "question": "How do I yank a visual selection?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "warning",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
@@ -3049,10 +3020,7 @@
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "In Vim, after Visual `y` the cursor does not generally return to where the selection started",
-            "Cursor-resting behavior in kindaVim is not established by the corpus"
-          ]
+          "issues": []
         },
         {
           "question": "How do I change a visual selection?",
@@ -3142,19 +3110,16 @@
           "question": "How do I re-select the last visual selection?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
-            "verb_choice": "warning",
+            "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "`gv` is not supported in the kindaVim support corpus",
-            "Uses 'Press' for multi-character command `gv`"
-          ]
+          "issues": []
         },
         {
           "question": "Does visual mode support counts?",
@@ -3561,20 +3526,18 @@
         {
           "question": "Does kindaVim support named registers?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
-            "token_conventions": "fail",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
+            "token_conventions": "warning",
             "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`isUnsupported` is false but the answer says the feature is not supported.",
-            "Unsupported features should be marked with `isUnsupported: true` and explained via `terminalVim`.",
-            "`Cmd+C` and `Cmd+V` are not wrapped in backticks."
+            "Answer uses macOS shortcuts without backticks: Cmd+C and Cmd+V should be token-wrapped."
           ]
         },
         {
@@ -3669,26 +3632,6 @@
   "flagged_entries": [
     {
       "topic_id": "case-toggle",
-      "question": "How do I uppercase a whole word?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
-        "token_conventions": "pass",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Marked supported, but the answer says kindaVim doesn't implement `gU`/`gUiw`.",
-        "Related includes `u — in visual, lowercase` and `~ — in visual, toggle`, but `u` and visual `~` are not listed in the support corpus as standalone supported commands."
-      ],
-      "notes": "The workaround is fine, but claiming non-support inside a supported entry is inconsistent and conflicts with the support requirement for supported answers."
-    },
-    {
-      "topic_id": "case-toggle",
       "question": "How do I lowercase a selection?",
       "verdicts": {
         "vim_accuracy": "pass",
@@ -3706,26 +3649,6 @@
         "Related includes `~ — toggle in visual`, which is not listed as a standalone supported command in the corpus."
       ],
       "notes": "The answer is factually good for Vim, but kindaVim support for Visual `u` is not explicitly attested in the corpus and one related xref is invalid."
-    },
-    {
-      "topic_id": "case-toggle",
-      "question": "How do I toggle case of a whole word?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
-        "token_conventions": "pass",
-        "verb_choice": "pass",
-        "related_quality": "pass",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Marked supported, but the answer says kindaVim doesn't implement `g~iw`.",
-        "A supported entry must not present the feature as unsupported in kindaVim."
-      ],
-      "notes": "The visual workaround is supported, but the item should be structured as unsupported if it says `g~iw` is not implemented."
     },
     {
       "topic_id": "case-toggle",
@@ -3983,21 +3906,22 @@
       "topic_id": "delete-operator",
       "question": "How do I delete without it being \"deleted\" — just remove it?",
       "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "pass",
+        "vim_accuracy": "warning",
+        "kindavim_accuracy": "fail",
         "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
+        "unsupported_consistency": "fail",
         "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "warning",
+        "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Stock Vim does have a delete-without-yank mechanism via the black hole register (`\"_`), so saying there is no separate option is false.",
-        "Related includes unsupported command `\"a`; that's allowed, but the summary should more clearly reflect non-support if referenced."
+        "Marks a kindaVim-unsupported feature (`\"_`) as supported via `isUnsupported: false`",
+        "Answer explicitly says there is no equivalent of `\"_` here, conflicting with supported status",
+        "'same default as Vim' is imprecise because Vim has multiple register behaviors beyond a simple default register description"
       ],
-      "notes": "The kindaVim claim is fine, but the stock Vim statement incorrectly denies the black hole register workflow."
+      "notes": "The content is basically about an unsupported black-hole register, so the flag and kindaVim classification are wrong."
     },
     {
       "topic_id": "delete-word",
@@ -4062,8 +3986,8 @@
       "topic_id": "delete-word",
       "question": "Does `dw` work at the end of a line?",
       "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "fail",
+        "vim_accuracy": "warning",
+        "kindavim_accuracy": "warning",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
@@ -4073,11 +3997,10 @@
         "conciseness": "pass"
       },
       "issues": [
-        "In stock Vim, `dw` at end of line has special behavior with `w` used under an operator and can cross line boundaries rather than simply acting like `D`.",
-        "The claim that kindaVim does NOT join with the next line conflicts with supported `dw`, which is described in the corpus as Vim-like 'delete next word' and gives no special non-cross-line limitation.",
-        "The phrase 'the way stock Vim does in some configurations' is misleading; this is core motion/operator behavior, not merely optional configuration."
+        "Stock Vim behavior is oversimplified: `dw` at end of line depends on exact cursor position and special word-motion rules, not just 'no next word on the current line'",
+        "kindaVim claim about typically staying within the line is not supported by the corpus"
       ],
-      "notes": "This answer introduces a non-supported behavioral divergence and misstates stock Vim’s `dw` behavior at line ends."
+      "notes": "Mostly helpful, but both the Vim explanation and the kindaVim-specific caveat are too loose to be fully reliable."
     },
     {
       "topic_id": "delete-word",
@@ -4117,29 +4040,6 @@
         "Use “Type” instead of “Press” for multi-key command `db`."
       ],
       "notes": "The behavior description is correct, but the verb choice doesn't follow the author's convention for multi-character commands."
-    },
-    {
-      "topic_id": "delete-word",
-      "question": "What's the fastest way to delete a sentence?",
-      "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
-        "token_conventions": "warning",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Answer says kindaVim doesn't support sentence text objects, but `isUnsupported` is false.",
-        "Sentence text objects `is` and `as` are unsupported in kindaVim, so this should be an unsupported entry.",
-        "`V` + motion + `d` is not a sentence-specific substitute and doesn't answer the question directly.",
-        "Related uses `is / as` instead of separate backticked command tokens.",
-        "Related entry includes `as`, which is not listed as its own command token in the support corpus."
-      ],
-      "notes": "This entry is internally inconsistent because it presents unsupported functionality inside a supported item."
     },
     {
       "topic_id": "dot-repeat",
@@ -4678,20 +4578,21 @@
       "question": "How is `J` different from pressing Backspace at the start of the next line?",
       "verdicts": {
         "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
+        "kindavim_accuracy": "warning",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "warning",
+        "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`J` does not always insert a single space; spacing depends on context and options.",
-        "Related says `gJ` as if relevant to kindaVim, but `gJ` is unsupported in kindaVim."
+        "'without a position change' is inaccurate for `J` because it is a change command that leaves the cursor on the resulting joined line",
+        "Backspace behavior at start of line is host/app-dependent and not a Vim command in {{normal}}",
+        "kindaVim corpus supports `J` but does not document host-app option-dependent separator behavior"
       ],
-      "notes": "The contrast with Backspace is mostly fine, but it overstates `J` spacing behavior and references an unsupported kindaVim command in Related without saying so."
+      "notes": "The high-level contrast is understandable, but the specifics around cursor movement and host behavior are too shaky."
     },
     {
       "topic_id": "jumplist",
@@ -4800,16 +4701,16 @@
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
-        "verb_choice": "warning",
+        "verb_choice": "pass",
         "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`$a` is not equivalent to `A`; `$` lands on the last character and `a` appends after it, while `A` appends at end of line directly.",
-        "Uses 'Press' for a command sequence explanation involving `$a`; should use 'Type' for multi-key sequences."
+        "`A` is not distinct from `$a` in stock Vim for this purpose; both append after the last character at end of line",
+        "Saying `$a` 'lands after the last character' as a distinction is misleading because `A` does too"
       ],
-      "notes": "The core `$` description is right, but the `$a` equivalence claim is inaccurate for stock Vim."
+      "notes": "The `$` part is fine, but the comparison between `A` and `$a` is factually wrong in Vim."
     },
     {
       "topic_id": "line-motions",
@@ -4915,21 +4816,21 @@
       "question": "How do I jump half a screen down?",
       "verdicts": {
         "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
+        "kindavim_accuracy": "warning",
+        "terminalvim_accuracy": "pass",
+        "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
         "related_quality": "pass",
-        "xref_validity": "pass",
+        "xref_validity": "fail",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer says kindaVim lacks half-screen scrolling but `Ctrl-D`/`Ctrl-U` are not mentioned explicitly.",
-        "This is effectively an unsupported answer while `isUnsupported` is false.",
-        "Related commands are fine but don't address the asked feature."
+        "`100G` is referenced in Related but not present as a canonical command in the support corpus",
+        "The answer claims kindaVim doesn't support `Ctrl-D` / `Ctrl-U`, but those exact tokens are not listed in the support corpus",
+        "Line-number jump like `100G` relies on count behavior not explicitly represented as a related corpus token"
       ],
-      "notes": "The item should be marked unsupported and should name Vim's half-screen scroll command explicitly."
+      "notes": "The Vim terminal description is good, but the kindaVim support claim and related cross-reference lean on commands not explicitly listed in the corpus."
     },
     {
       "topic_id": "macros",
@@ -4994,23 +4895,20 @@
       "topic_id": "macros",
       "question": "How do I record and replay a find-and-replace across a file?",
       "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "warning",
         "unsupported_consistency": "pass",
-        "token_conventions": "fail",
+        "token_conventions": "pass",
         "verb_choice": "pass",
         "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer recommends `n.` as the closest idiom, but `n` is supported while `cw<replacement><Esc>` uses bare `<Esc>` instead of backticks.",
-        "`terminalVim` mentions `cgn`, which is unsupported in kindaVim but valid in Vim; however the first example `:%s/old/new/gc` is fine while the macro example adds a command not central to the answer.",
-        "Because `isUnsupported` is about macros/`:s`, the answer should not imply a fully supported replacement workflow without noting limitations more carefully.",
-        "Bare `<Enter>` and `<Esc>` violate token conventions."
+        "`terminalVim` macro example uses `cgn`, which kindaVim doesn't support but stock Vim does; description is broadly correct but implies replaying `@a` can run 'across a file' without caveats."
       ],
-      "notes": "The Vim-side idea is mostly fine, but the kindaVim answer overreaches and has token-formatting problems."
+      "notes": "Unsupported status and workaround are correct, with a slightly oversimplified stock-Vim macro example."
     },
     {
       "topic_id": "marks",
@@ -5056,9 +4954,9 @@
       "topic_id": "marks",
       "question": "Do automatic marks like `'.` work?",
       "verdicts": {
-        "vim_accuracy": "fail",
+        "vim_accuracy": "pass",
         "kindavim_accuracy": "pass",
-        "terminalvim_accuracy": "fail",
+        "terminalvim_accuracy": "pass",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
@@ -5067,11 +4965,9 @@
         "conciseness": "pass"
       },
       "issues": [
-        "`'.` jumps to the position of the last change, not specifically the last modified line.",
-        "`'[ / `']` are marks for previously changed or yanked text, not specifically the last yank or delete.",
-        "Answer overgeneralizes unsupported feature as all position history across edits, while the question is about automatic marks."
+        "Related summary 'restores position' is imprecise; undo restores text changes and may restore cursor/marks indirectly, but `u` is not an automatic-mark feature."
       ],
-      "notes": "The kindaVim non-support claim is fine, but the stock Vim descriptions of automatic marks are imprecise."
+      "notes": "The unsupported claim and stock Vim mark descriptions are accurate, but the related item is a bit misleading."
     },
     {
       "topic_id": "named-registers",
@@ -5372,28 +5268,6 @@
     },
     {
       "topic_id": "search",
-      "question": "How do I search and replace?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
-        "token_conventions": "warning",
-        "verb_choice": "warning",
-        "related_quality": "pass",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Marks the item supported even though the answer says kindaVim doesn't support `:s` or `cgn`",
-        "Flagging unsupported commands in a supported entry fails kindaVim accuracy per instructions",
-        "Uses `/pattern<Enter>` and `cw<replacement><Esc>` without preferred backtick tokenization",
-        "Uses a multi-key workflow description without the preferred \"Type\" phrasing"
-      ],
-      "notes": "The workaround is plausible, but this must be an unsupported entry or rewritten to discuss only supported functionality."
-    },
-    {
-      "topic_id": "search",
       "question": "How do I delete to the next match?",
       "verdicts": {
         "vim_accuracy": "pass",
@@ -5461,18 +5335,17 @@
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "fail",
         "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "warning",
+        "token_conventions": "fail",
+        "verb_choice": "pass",
         "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer uses `Cmd+`` and `Cmd+Tab` without backticks.",
-        "Answer says 'use Cmd+…' instead of 'Press `Cmd+…`'.",
-        "Terminal Vim field uses `:bnext`, `:bprev`, `:ls`, and `:b {name}`, which are not supported by the provided authoritative Vim reference excerpt."
+        "Answer uses bare `Cmd+Tab` without backticks.",
+        "`terminalVim` lists `:bnext` / `:bprev` / `:ls` / `:b {name}`, but `:bprev` is not the canonical command in the provided Vim reference (uses `:bprevious` / `:bp`)."
       ],
-      "notes": "The unsupported claim is fine, but the terminalVim description relies on commands outside the supplied reference and the answer misses key-format conventions."
+      "notes": "The kindaVim guidance is fine, but the stock-Vim field includes a non-referenced alias and the answer misses backticks on one key chord."
     },
     {
       "topic_id": "splits-and-tabs",
@@ -5520,23 +5393,20 @@
       "topic_id": "substitute-shortcuts",
       "question": "How do I repeat a find-and-replace in kindaVim?",
       "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "fail",
-        "unsupported_consistency": "fail",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "pass",
+        "unsupported_consistency": "pass",
         "token_conventions": "pass",
-        "verb_choice": "warning",
-        "related_quality": "pass",
+        "verb_choice": "pass",
+        "related_quality": "warning",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer does not actually state that the feature is unsupported despite `isUnsupported: true`.",
-        "`cw<replacement><Esc>` is not valid Vim notation; `cw` enters Insert mode and replacement text is typed, not a literal token.",
-        "`terminalVim` incorrectly says `&`/`g&` are unavailable in kindaVim; this field must describe stock Vim only.",
-        "Unsupported entry should explicitly say kindaVim does not support `&`/`g&`."
+        "Related includes `cw`, which is already mentioned in the answer, so it duplicates an answer command."
       ],
-      "notes": "The workaround may be useful, but this unsupported entry is inconsistent and its `terminalVim` field is factually wrong for the required purpose."
+      "notes": "The unsupported explanation is solid, but the related list repeats a command already used in the answer."
     },
     {
       "topic_id": "substitute-shortcuts",
@@ -5601,23 +5471,21 @@
       "topic_id": "text-objects",
       "question": "How do I yank a quoted string?",
       "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "warning",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "warning",
-        "related_quality": "pass",
-        "xref_validity": "pass",
+        "unsupported_consistency": "n/a",
+        "token_conventions": "fail",
+        "verb_choice": "pass",
+        "related_quality": "fail",
+        "xref_validity": "fail",
         "conciseness": "pass"
       },
       "issues": [
-        "`yi\"`/`ya\"` are not canonical key notation; should be written as `yi\"` only if JSON escaping is unavoidable, but author-facing text should render as `yi\"`? Better as backticked `yi\"` is still awkward compared with `yi\"`; current escaping makes token clarity poor.",
-        "Claims you can use quoted-string text objects from anywhere 'inside or outside the quotes'; in Vim quoted text objects require being on the object or nearby relevant context, not arbitrarily anywhere outside.",
-        "Missing kindaVim-specific caution: support corpus includes `yi\"`/`ya\"` only for double quotes, while single-quote yank variants are not listed in support corpus.",
-        "Uses 'then `yi\"`' instead of 'Type' for multi-char sequences."
+        "Uses escaped quotes inside backticks (`yi\"`, `ya\"`, `di\"`, `ci\"`) instead of canonical command tokens like `yi\"` rendered from source as `yi\"`; author convention expects backtick-wrapped keys, not backslash-escaped presentation.",
+        "Related summaries are vague/incomplete ('delete inside quotes', 'change inside') and `di\"` is not present as a corpus token; supported corpus has `di\"`/`ci\"` only conceptually via actual `di\"` text in source, but related command token as written may not match corpus exactly."
       ],
-      "notes": "This overstates stock Vim behavior for quote text objects and mentions single-quote yank forms that are not present in the kindaVim support list."
+      "notes": "The behavior is correct, but command token formatting and related references are not in clean canonical form."
     },
     {
       "topic_id": "text-objects",
@@ -5664,9 +5532,9 @@
       "question": "What does the cursor need to be on for `di(` to work?",
       "verdicts": {
         "vim_accuracy": "fail",
-        "kindavim_accuracy": "warning",
+        "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
+        "unsupported_consistency": "n/a",
         "token_conventions": "pass",
         "verb_choice": "pass",
         "related_quality": "pass",
@@ -5674,19 +5542,18 @@
         "conciseness": "pass"
       },
       "issues": [
-        "Incorrect for Vim: `di(` does not work from anywhere on the line; for block objects the cursor must be inside the block or on one of its braces.",
-        "'Nearest enclosing parens' is an imprecise simplification of Vim's block-object behavior."
+        "In stock Vim, `i(`/`di(` can find the next `(` when the cursor is not inside a `()` block; saying it 'does nothing' is incorrect."
       ],
-      "notes": "This overstates Vim's text-object reach and should be corrected."
+      "notes": "kindaVim support is fine, but the stock-Vim description of `di(` is wrong."
     },
     {
       "topic_id": "text-objects",
       "question": "Can I use a count with text objects?",
       "verdicts": {
-        "vim_accuracy": "fail",
+        "vim_accuracy": "pass",
         "kindavim_accuracy": "warning",
         "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
+        "unsupported_consistency": "n/a",
         "token_conventions": "pass",
         "verb_choice": "pass",
         "related_quality": "pass",
@@ -5694,10 +5561,9 @@
         "conciseness": "pass"
       },
       "issues": [
-        "Incorrect for Vim: counts do work with text objects, e.g. `2iw`, `d2aw`, and many block/quote objects accept counts.",
-        "The statement that text objects describe only a single region is false in stock Vim."
+        "Claim about kindaVim count support being 'uneven' is not grounded in the support corpus, which doesn't specify partial/uneven count behavior for text objects."
       ],
-      "notes": "This should mention that counts are supported in Vim, even if the app may not emphasize them."
+      "notes": "The stock-Vim count explanation is accurate, but the kindaVim-specific caveat is unsupported by the corpus."
     },
     {
       "topic_id": "text-objects",
@@ -5841,26 +5707,6 @@
     },
     {
       "topic_id": "visual-mode",
-      "question": "How do I yank a visual selection?",
-      "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "warning",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "pass",
-        "related_quality": "pass",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "In Vim, after Visual `y` the cursor does not generally return to where the selection started",
-        "Cursor-resting behavior in kindaVim is not established by the corpus"
-      ],
-      "notes": "The yank description is mostly fine, but the final cursor-position claim is incorrect for Vim and unsupported for kindaVim."
-    },
-    {
-      "topic_id": "visual-mode",
       "question": "Can I extend a visual selection word by word?",
       "verdicts": {
         "vim_accuracy": "pass",
@@ -5918,26 +5764,6 @@
         "Related `v — re-enter visual` summary is a bit inaccurate because `v` starts Visual mode rather than re-entering the previous selection"
       ],
       "notes": "Mostly fine, but the cursor-position claim is too specific and the related summary is slightly misleading."
-    },
-    {
-      "topic_id": "visual-mode",
-      "question": "How do I re-select the last visual selection?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "warning",
-        "related_quality": "pass",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "`gv` is not supported in the kindaVim support corpus",
-        "Uses 'Press' for multi-character command `gv`"
-      ],
-      "notes": "The Vim behavior is correct, but this should not be presented as supported in kindaVim."
     },
     {
       "topic_id": "visual-mode",
@@ -6239,22 +6065,20 @@
       "topic_id": "yank-and-put",
       "question": "Does kindaVim support named registers?",
       "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
-        "token_conventions": "fail",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "pass",
+        "unsupported_consistency": "pass",
+        "token_conventions": "warning",
         "verb_choice": "pass",
         "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`isUnsupported` is false but the answer says the feature is not supported.",
-        "Unsupported features should be marked with `isUnsupported: true` and explained via `terminalVim`.",
-        "`Cmd+C` and `Cmd+V` are not wrapped in backticks."
+        "Answer uses macOS shortcuts without backticks: Cmd+C and Cmd+V should be token-wrapped."
       ],
-      "notes": "The substance about non-support is fine, but the entry is misclassified and misses required token formatting."
+      "notes": "The unsupported registers explanation is accurate for both stock Vim and kindaVim, but the answer misses backticks around shortcut tokens."
     },
     {
       "topic_id": "yank-and-put",

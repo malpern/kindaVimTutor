@@ -27,16 +27,20 @@ A: Press `~` (tilde) in {{normal}} to flip the case of the character under the c
 Related: r — replace single character
 
 Q: How do I uppercase a whole word?
-A: kindaVim doesn't implement the `gU` operator in {{normal}}, so `gUiw` won't work. Instead select the word with `viw`, then press `U` in {{visual}} — that uppercases the selection.
-Related: viwU — select word, uppercase; u — in visual, lowercase; ~ — in visual, toggle
+A: kindaVim doesn't implement `gU` / `gUiw` in {{normal}}. Type `viwU` instead — select the inner word with `viw`, then press `U` in {{visual}} to uppercase.
+Unsupported: yes
+TerminalVim: In stock Vim, `gUiw` uppercases the inner word in one go. `gU{motion}` applies to any motion (`gU$`, `gUap`, etc.).
+Related: viwU — visual workaround (kindaVim supports it); viw~ — toggle case via visual
 
 Q: How do I lowercase a selection?
 A: Enter {{visual}} with `v` or `V`, select the text, then press `u` (lowercase in visual). This is distinct from {{normal}} mode's `u` (undo).
 Related: U — uppercase in visual; ~ — toggle in visual
 
 Q: How do I toggle case of a whole word?
-A: kindaVim doesn't implement `g~iw`. Select the word with `viw`, then press `~` in {{visual}} to toggle case across the whole selection.
-Related: viw~ — select word, toggle case; U — uppercase in visual
+A: kindaVim doesn't implement `g~iw` in {{normal}}. Type `viw~` — select the inner word with `viw`, then `~` in {{visual}} toggles case of the selection.
+Unsupported: yes
+TerminalVim: In stock Vim, `g~iw` toggles the case of the inner word directly, without entering Visual mode.
+Related: viw~ — visual workaround (kindaVim supports it); viwU — uppercase via visual
 
 Q: Does `gU` work in kindaVim?
 A: kindaVim doesn't implement `gU`, `gu`, or `g~` as operators in {{normal}}. The case operators only exist inside {{visual}} as `U`, `u`, `~`. Select first with `v`, `V`, or a text-object shortcut like `viw`, then apply.

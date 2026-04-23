@@ -47,8 +47,10 @@ A: `yi"` or `yi'` depending on the quote type. Contents only, no quotes. Use `ya
 Related: di" — delete instead; ci" — change instead
 
 Q: Does kindaVim support named registers?
-A: No — kindaVim uses a single default register. Each yank or delete replaces what was there. If you need multiple clipboards at once, use macOS's own Cmd+C / Cmd+V which is the system clipboard (separate from the kindaVim register).
-Related: "a, "0, "+ — named register prefixes (not in kindaVim)
+A: No — kindaVim uses a single default register. Each yank or delete replaces what was there. If you need multiple clipboards at once, use macOS's own Cmd+C / Cmd+V (separate from the kindaVim register).
+Unsupported: yes
+TerminalVim: In stock Vim, `"{letter}y{motion}` yanks into a named register (`a`-`z`). `"{letter}p` pastes from it. `"+` is the system clipboard; `"0` always holds the last yank.
+Related: Cmd+C — macOS copy; Cmd+V — macOS paste
 
 Q: How do I paste from the system clipboard?
 A: Use Cmd+V — kindaVim doesn't hook into the `"+` system-clipboard register, but the regular macOS paste shortcut works from {{insert}} mode. For a pure-kindaVim round-trip (yank in app, paste in app), `y` and `p` are all you need.

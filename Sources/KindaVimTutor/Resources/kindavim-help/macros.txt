@@ -47,7 +47,7 @@ TerminalVim: For genuine multi-step automation in stock Vim, record a macro: `qa
 Related: . — repeat last change (kindaVim supports it)
 
 Q: How do I record and replay a find-and-replace across a file?
-A: kindaVim doesn't support macros or `:s`. The closest idiom: `/pattern<Enter>` to search, manually change the first match with `cw<replacement><Esc>`, then `n.` (next match, repeat change) to walk through the rest.
+A: kindaVim doesn't support macros or `:s`. The closest idiom: `/pattern<Enter>` to search, manually change the first match with an appropriate change operator (e.g. `cw` + replacement + `Esc`), then `n.` (next match, repeat change) to walk through the rest.
 Unsupported: yes
-TerminalVim: In stock Vim, `:%s/old/new/gc` does this in one command (with per-match confirmation). Macros also work: `qa/pattern<Enter>cgn<replacement><Esc>q` then `@a` to replay.
+TerminalVim: In stock Vim, `:%s/old/new/gc` does this in one command (with per-match confirmation). Recorded macros work too: `qa/pattern<Enter>cgn<replacement><Esc>q` then `@a` to replay the whole sequence.
 Related: / — search (kindaVim supports it); . — repeat last change

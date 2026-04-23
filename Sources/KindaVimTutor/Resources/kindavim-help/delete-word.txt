@@ -40,8 +40,8 @@ A: `dw` deletes from wherever the cursor sits to the start of the next word, so 
 Related: diw — delete the entire word under the cursor; daw — delete the word plus its surrounding whitespace
 
 Q: Does `dw` work at the end of a line?
-A: Yes — when there's no next word on the current line, `dw` deletes to the end of the line. It does NOT join with the next line the way stock Vim does in some configurations. If you need to cross line boundaries, use `J` to join lines first, then delete.
-Related: D — delete from the cursor to the end of the line; J — join the next line onto the current one
+A: Yes. When there's no next word on the current line, `dw` deletes to the end of the current line. Stock Vim can cross line boundaries in some cases; kindaVim's behavior depends on the host text field and typically stays within the line. If you need to pull the next line up afterward, use `J`.
+Related: D — delete from the cursor to end of line; J — join the next line onto the current one
 
 Q: How do I delete just the letters of a word, not the surrounding spaces?
 A: Press `diw` in {{normal}} — "delete inner word." Works from anywhere in the word, leaves both the leading and trailing whitespace intact. Pair it with `caw` or `daw` when you DO want to consume surrounding space.
@@ -56,5 +56,7 @@ A: Press `db` in {{normal}} to delete back one word — from the cursor to the s
 Related: b — back-a-word motion alone; dge — delete back to end of previous word
 
 Q: What's the fastest way to delete a sentence?
-A: kindaVim doesn't support the sentence text object (`is`/`as` in stock Vim). For a sentence-sized delete, use motions: `dG` (delete to end of doc), `d0` (delete to start of line), or visual selection with `V` + motion + `d`.
-Related: is / as — sentence text objects (not supported); d$ — delete to end of line
+A: kindaVim doesn't implement the sentence text objects `is` / `as`. For a sentence-sized delete, use motions: `d$` (delete to end of line), or visual-select with `v` + motion + `d`.
+Unsupported: yes
+TerminalVim: In stock Vim, `das` deletes a sentence including trailing whitespace; `dis` deletes the sentence text without the whitespace.
+Related: d$ — delete to end of line; v — enter visual for freeform selection
