@@ -60,5 +60,7 @@ A: Into the default unnamed register, the same place yanks go. Paste it back wit
 Related: p — put after cursor; P — put before cursor; y — yank instead of delete
 
 Q: How do I delete without it being "deleted" — just remove it?
-A: kindaVim's delete always copies to the default register (same default as Vim). There's no equivalent of stock Vim's `"_` (black-hole register) here. If you want to preserve a previous yank, paste it somewhere first, then do the delete.
-Related: y — yank; p — paste; "_ — black-hole register (stock Vim only)
+A: kindaVim always puts deleted text into the default register, and it doesn't implement the black-hole register (`"_`) that stock Vim uses for "delete-no-yank." If you want to preserve a previous yank across a delete, paste it somewhere first.
+Unsupported: yes
+TerminalVim: In stock Vim, `"_d{motion}` deletes without copying to any register. `"_dd` deletes a whole line with no yank side effect. Useful when you don't want to clobber your clipboard or default register.
+Related: y — yank; p — paste

@@ -1,40 +1,40 @@
 {
   "date": "2026-04-23",
   "total": 201,
-  "flagged": 127,
+  "flagged": 125,
   "axis_counts": {
     "vim_accuracy": {
-      "pass": 143,
-      "warning": 49,
-      "fail": 3,
+      "pass": 148,
+      "warning": 47,
+      "fail": 0,
       "n/a": 6,
       "other": 0
     },
     "kindavim_accuracy": {
-      "pass": 174,
-      "warning": 25,
-      "fail": 2,
+      "pass": 173,
+      "warning": 27,
+      "fail": 1,
       "n/a": 0,
       "other": 0
     },
     "terminalvim_accuracy": {
-      "pass": 49,
+      "pass": 51,
       "warning": 7,
-      "fail": 1,
-      "n/a": 144,
+      "fail": 0,
+      "n/a": 143,
       "other": 0
     },
     "unsupported_consistency": {
-      "pass": 192,
+      "pass": 194,
       "warning": 2,
-      "fail": 1,
-      "n/a": 6,
+      "fail": 0,
+      "n/a": 5,
       "other": 0
     },
     "token_conventions": {
-      "pass": 160,
+      "pass": 161,
       "warning": 34,
-      "fail": 7,
+      "fail": 6,
       "n/a": 0,
       "other": 0
     },
@@ -46,8 +46,8 @@
       "other": 0
     },
     "related_quality": {
-      "pass": 148,
-      "warning": 46,
+      "pass": 147,
+      "warning": 47,
       "fail": 7,
       "n/a": 0,
       "other": 0
@@ -502,20 +502,19 @@
         {
           "question": "How do I delete without it being \"deleted\" — just remove it?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "fail",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "warning",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "pass",
+            "related_quality": "warning",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Marks a kindaVim-unsupported feature (`\"_`) as supported via `isUnsupported: false`",
-            "Answer explicitly says there is no equivalent of `\"_` here, conflicting with supported status",
-            "'same default as Vim' is imprecise because Vim has multiple register behaviors beyond a simple default register description"
+            "Answer says kindaVim doesn't implement the black-hole register `\"_`, but the unsupported feature itself is really the register prefix command, not the delete operator topic.",
+            "Related summary uses `paste`, but canonical command wording elsewhere is usually `put` for `p`."
           ]
         }
       ]
@@ -1000,7 +999,7 @@
       "title": "Find and Till Character",
       "status": "supported",
       "total": 8,
-      "flagged": 3,
+      "flagged": 2,
       "entries": [
         {
           "question": "How do I jump to a specific character on the line?",
@@ -1067,21 +1066,17 @@
         {
           "question": "How do I delete up to a character?",
           "verdicts": {
-            "vim_accuracy": "fail",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
+            "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Says to combine `d` with `f{char}` but then examples use the concrete supported forms `df)`/`dt)`; the generic `f{char}` token is not itself the operator form.",
-            "In Vim the command for deleting through a character is `d` + `f{char}` i.e. `df{char}`, not literally combining `d` with bare `f{char}` as phrased.",
-            "Related text is a bit sloppy/typo-like with extra parentheses: `(ct) / cf))` and `(yt) / yf))`."
-          ]
+          "issues": []
         },
         {
           "question": "Is `f` case-sensitive?",
@@ -1644,19 +1639,18 @@
         {
           "question": "How do I jump to the end of a line?",
           "verdicts": {
-            "vim_accuracy": "fail",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "pass",
+            "related_quality": "warning",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`A` is not distinct from `$a` in stock Vim for this purpose; both append after the last character at end of line",
-            "Saying `$a` 'lands after the last character' as a distinction is misleading because `A` does too"
+            "Related duplicates `$`, which is already the command explained in the answer."
           ]
         },
         {
@@ -2389,7 +2383,7 @@
       "title": "Splits and Tabs",
       "status": "unsupported",
       "total": 6,
-      "flagged": 4,
+      "flagged": 3,
       "entries": [
         {
           "question": "How do I split the window in kindaVim?",
@@ -2443,20 +2437,17 @@
         {
           "question": "How do I switch between files in kindaVim?",
           "verdicts": {
-            "vim_accuracy": "warning",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
-            "terminalvim_accuracy": "fail",
+            "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
-            "token_conventions": "fail",
+            "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Answer uses bare `Cmd+Tab` without backticks.",
-            "`terminalVim` lists `:bnext` / `:bprev` / `:ls` / `:b {name}`, but `:bprev` is not the canonical command in the provided Vim reference (uses `:bprevious` / `:bp`)."
-          ]
+          "issues": []
         },
         {
           "question": "How do I view two files side by side in kindaVim?",
@@ -2684,10 +2675,10 @@
         {
           "question": "What does the cursor need to be on for `di(` to work?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "pass",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "warning",
             "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "n/a",
+            "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
             "related_quality": "pass",
@@ -2695,7 +2686,7 @@
             "conciseness": "pass"
           },
           "issues": [
-            "In stock Vim, `i(`/`di(` can find the next `(` when the cursor is not inside a `()` block; saying it 'does nothing' is incorrect."
+            "kindaVim support corpus marks `di(` as supported, but the answer hedges with host-app variability instead of stating direct supported behavior"
           ]
         },
         {
@@ -3906,22 +3897,21 @@
       "topic_id": "delete-operator",
       "question": "How do I delete without it being \"deleted\" — just remove it?",
       "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "fail",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "warning",
+        "terminalvim_accuracy": "pass",
+        "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "pass",
+        "related_quality": "warning",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Marks a kindaVim-unsupported feature (`\"_`) as supported via `isUnsupported: false`",
-        "Answer explicitly says there is no equivalent of `\"_` here, conflicting with supported status",
-        "'same default as Vim' is imprecise because Vim has multiple register behaviors beyond a simple default register description"
+        "Answer says kindaVim doesn't implement the black-hole register `\"_`, but the unsupported feature itself is really the register prefix command, not the delete operator topic.",
+        "Related summary uses `paste`, but canonical command wording elsewhere is usually `put` for `p`."
       ],
-      "notes": "The content is basically about an unsupported black-hole register, so the flag and kindaVim classification are wrong."
+      "notes": "The unsupported claim and stock Vim description are basically right, but the item is slightly imprecise about what exact feature is unsupported."
     },
     {
       "topic_id": "delete-word",
@@ -4294,27 +4284,6 @@
         "Uses “Press” for `f` followed by another character; that is a multi-key sequence, so the style guide prefers “Type`."
       ],
       "notes": "The behavior of `f{char}` is described correctly for both Vim and kindaVim."
-    },
-    {
-      "topic_id": "find-character",
-      "question": "How do I delete up to a character?",
-      "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "pass",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Says to combine `d` with `f{char}` but then examples use the concrete supported forms `df)`/`dt)`; the generic `f{char}` token is not itself the operator form.",
-        "In Vim the command for deleting through a character is `d` + `f{char}` i.e. `df{char}`, not literally combining `d` with bare `f{char}` as phrased.",
-        "Related text is a bit sloppy/typo-like with extra parentheses: `(ct) / cf))` and `(yt) / yf))`."
-      ],
-      "notes": "The examples are correct, but the generic command phrasing is imprecise enough to merit a Vim-accuracy failure."
     },
     {
       "topic_id": "find-character",
@@ -4696,21 +4665,20 @@
       "topic_id": "line-motions",
       "question": "How do I jump to the end of a line?",
       "verdicts": {
-        "vim_accuracy": "fail",
+        "vim_accuracy": "pass",
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "pass",
+        "related_quality": "warning",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`A` is not distinct from `$a` in stock Vim for this purpose; both append after the last character at end of line",
-        "Saying `$a` 'lands after the last character' as a distinction is misleading because `A` does too"
+        "Related duplicates `$`, which is already the command explained in the answer."
       ],
-      "notes": "The `$` part is fine, but the comparison between `A` and `$a` is factually wrong in Vim."
+      "notes": "The command behavior is accurate for both Vim and kindaVim, but the related list should avoid repeating the main command."
     },
     {
       "topic_id": "line-motions",
@@ -5329,26 +5297,6 @@
     },
     {
       "topic_id": "splits-and-tabs",
-      "question": "How do I switch between files in kindaVim?",
-      "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "pass",
-        "terminalvim_accuracy": "fail",
-        "unsupported_consistency": "pass",
-        "token_conventions": "fail",
-        "verb_choice": "pass",
-        "related_quality": "pass",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Answer uses bare `Cmd+Tab` without backticks.",
-        "`terminalVim` lists `:bnext` / `:bprev` / `:ls` / `:b {name}`, but `:bprev` is not the canonical command in the provided Vim reference (uses `:bprevious` / `:bp`)."
-      ],
-      "notes": "The kindaVim guidance is fine, but the stock-Vim field includes a non-referenced alias and the answer misses backticks on one key chord."
-    },
-    {
-      "topic_id": "splits-and-tabs",
       "question": "How do I view two files side by side in kindaVim?",
       "verdicts": {
         "vim_accuracy": "warning",
@@ -5531,10 +5479,10 @@
       "topic_id": "text-objects",
       "question": "What does the cursor need to be on for `di(` to work?",
       "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "pass",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "warning",
         "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "n/a",
+        "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
         "related_quality": "pass",
@@ -5542,9 +5490,9 @@
         "conciseness": "pass"
       },
       "issues": [
-        "In stock Vim, `i(`/`di(` can find the next `(` when the cursor is not inside a `()` block; saying it 'does nothing' is incorrect."
+        "kindaVim support corpus marks `di(` as supported, but the answer hedges with host-app variability instead of stating direct supported behavior"
       ],
-      "notes": "kindaVim support is fine, but the stock-Vim description of `di(` is wrong."
+      "notes": "The stock Vim explanation for `di(` is accurate, but the kindaVim-specific sentence is more cautious than the support corpus suggests."
     },
     {
       "topic_id": "text-objects",

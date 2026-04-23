@@ -33,7 +33,7 @@ TerminalVim: `Ctrl-W` is the prefix for window commands. `Ctrl-W s` splits horiz
 Related: :split — explicit split command
 
 Q: How do I switch between files in kindaVim?
-A: kindaVim has no buffer concept. Switch between documents using the host app's UI — `Cmd+\`` to cycle windows in the same app, Cmd+Tab between apps.
+A: kindaVim has no buffer concept. Switch between documents using the host app's UI — `Cmd+\`` to cycle windows in the same app, `Cmd+Tab` between apps.
 Unsupported: yes
 TerminalVim: `:bnext` / `:bprev` cycle buffers. `:ls` lists them. `:b {name}` jumps to a buffer by name.
 Related: `Cmd+\`` — cycle windows in same app

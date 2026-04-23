@@ -231,19 +231,75 @@ struct VimAnswerBubble: View {
                     in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 
+    /// Related commands are split into two groups by support status.
+    /// Supported commands appear under the neutral "Related
+    /// Commands" label first. Unsupported ones fall into a red
+    /// "Not Supported in kindaVim" group so the user doesn't confuse
+    /// "works here" with "works in stock Vim only."
     private var relatedCommandsSection: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            sectionLabel("RELATED COMMANDS")
-            VStack(spacing: 6) {
-                ForEach(display.relatedCommands, id: \.command) { cmd in
-                    relatedCommandRow(cmd)
+        let corpus = KindaVimSupportCorpus.shared
+        let (supported, unsupported) = splitRelatedCommands(
+            display.relatedCommands, corpus: corpus
+        )
+        return VStack(alignment: .leading, spacing: 12) {
+            if !supported.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    sectionLabel("RELATED COMMANDS")
+                    VStack(spacing: 6) {
+                        ForEach(supported, id: \.command) { cmd in
+                            relatedCommandRow(cmd, isUnsupported: false)
+                        }
+                    }
+                }
+            }
+            if !unsupported.isEmpty {
+                VStack(alignment: .leading, spacing: 6) {
+                    unsupportedSectionLabel
+                    VStack(spacing: 6) {
+                        ForEach(unsupported, id: \.command) { cmd in
+                            relatedCommandRow(cmd, isUnsupported: true)
+                        }
+                    }
                 }
             }
         }
         .padding(.leading, 2)
     }
 
-    private func relatedCommandRow(_ cmd: VimAnswerDisplay.RelatedCommandDisplay) -> some View {
+    /// Split by explicit unsupported-corpus membership. "Unknown"
+    /// tokens stay in the supported bucket — we don't want to flag
+    /// things like `Cmd+V` or random prose tokens as unsupported.
+    private func splitRelatedCommands(
+        _ items: [VimAnswerDisplay.RelatedCommandDisplay],
+        corpus: KindaVimSupportCorpus.Corpus
+    ) -> (supported: [VimAnswerDisplay.RelatedCommandDisplay],
+          unsupported: [VimAnswerDisplay.RelatedCommandDisplay]) {
+        var sup: [VimAnswerDisplay.RelatedCommandDisplay] = []
+        var unsup: [VimAnswerDisplay.RelatedCommandDisplay] = []
+        for item in items {
+            if corpus.isExplicitlyUnsupported(item.command) {
+                unsup.append(item)
+            } else {
+                sup.append(item)
+            }
+        }
+        return (sup, unsup)
+    }
+
+    private var unsupportedSectionLabel: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "xmark.octagon.fill")
+                .font(.system(size: 11, weight: .semibold))
+            Text("Not Supported in kindaVim")
+                .font(.system(size: 12, weight: .bold))
+        }
+        .foregroundStyle(Color.red.opacity(0.9))
+    }
+
+    private func relatedCommandRow(
+        _ cmd: VimAnswerDisplay.RelatedCommandDisplay,
+        isUnsupported: Bool
+    ) -> some View {
         Button(action: { onAskAboutMotion?(cmd.command) }) {
             HStack(spacing: 14) {
                 KeyCapView(label: cmd.command, size: .small)
@@ -258,15 +314,28 @@ struct VimAnswerBubble: View {
             }
             .padding(.horizontal, 14)
             .padding(.vertical, 12)
-            .background(Color.primary.opacity(0.04),
-                        in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(
+                rowBackground(isUnsupported: isUnsupported),
+                in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+            )
             .overlay {
                 RoundedRectangle(cornerRadius: 10, style: .continuous)
-                    .strokeBorder(Color.primary.opacity(0.06), lineWidth: 0.5)
+                    .strokeBorder(rowBorder(isUnsupported: isUnsupported),
+                                  lineWidth: 0.5)
             }
         }
         .buttonStyle(.plain)
-        .help("Explain `\(cmd.command)`")
+        .help(isUnsupported
+              ? "Not supported in kindaVim — explain `\(cmd.command)`"
+              : "Explain `\(cmd.command)`")
+    }
+
+    private func rowBackground(isUnsupported: Bool) -> Color {
+        isUnsupported ? Color.red.opacity(0.08) : Color.primary.opacity(0.04)
+    }
+
+    private func rowBorder(isUnsupported: Bool) -> Color {
+        isUnsupported ? Color.red.opacity(0.22) : Color.primary.opacity(0.06)
     }
 
     private func fasterTipCard(text: String) -> some View {

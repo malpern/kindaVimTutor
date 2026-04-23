@@ -30,8 +30,8 @@ A: `0` goes to column 0 no matter what — if the line starts with spaces or tab
 Related: $ — end of line
 
 Q: How do I jump to the end of a line?
-A: Press `$` in {{normal}} to jump to the last character of the current line. If you want to append at the end, use the shortcut `A` — it jumps to end-of-line AND enters {{insert}} in one step (distinct from `$a` which lands after the last character).
-Related: A — append at end of line; 0 — start of line
+A: Press `$` in {{normal}} to jump to the last character of the current line. If you want to append text there, type `A` — a single-keystroke shortcut that jumps to the end of the line and enters {{insert}} at the append position.
+Related: A — append at end of line; 0 — start of line; $ — end of line (motion only)
 
 Q: How do I go to the top of the document?
 A: Press `gg` in {{normal}} — two `g` taps — to jump to the first line.

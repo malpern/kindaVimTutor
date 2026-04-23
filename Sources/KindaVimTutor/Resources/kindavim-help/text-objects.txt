@@ -52,7 +52,7 @@ A: Each bracket type has its own text object: `i(`/`i)` for `()`, `i[`/`i]` for 
 Related: ib — shortcut for i(; iB — shortcut for i{
 
 Q: What does the cursor need to be on for `di(` to work?
-A: The cursor needs to be inside (or immediately on) the enclosing parentheses. `di(` operates on the nearest enclosing pair from the cursor's position — if you're not inside any parens, the motion does nothing.
+A: When the cursor is inside a `()` pair, `di(` operates on that pair. In stock Vim, if the cursor is outside any parens, `di(` scans forward to find the next `()` block. In kindaVim the safe rule is to position the cursor inside the parens first — host-app behavior varies otherwise.
 Related: di) — identical behavior; ci( — change inside
 
 Q: What's the difference between `i"` and `a"`?

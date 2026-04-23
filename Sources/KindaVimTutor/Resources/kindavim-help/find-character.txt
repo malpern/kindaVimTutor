@@ -40,7 +40,7 @@ Related: n — repeat a whole-pattern search; N — reverse whole-pattern search
 
 Q: How do I delete up to a character?
 A: Combine `d` with `t{char}` to delete from the cursor up to but not including the target, or `f{char}` to delete through it. `dt)` deletes everything up to the next `)`; `df)` deletes including the `)`.
-Related: c — change operator, same grammar (ct) / cf)); y — yank operator (yt) / yf))
+Related: ct — change up to a character; yt — yank up to a character
 
 Q: Is `f` case-sensitive?
 A: Yes. `f)` matches `)` exactly; it won't also match `(`. Capital letters, digits, punctuation all match only themselves.

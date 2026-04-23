@@ -178,10 +178,28 @@ v — enter visual mode (character-wise)
 V — enter visual line mode
 U — uppercase selection (in visual)
 viw — enter visual + inner-word text object
-vi" — enter visual + inside quotes
+viW — enter visual + inner-WORD text object
+vaw — enter visual + around-word text object
+vaW — enter visual + around-WORD text object
+vi" — enter visual + inside double quotes
+va" — enter visual + around double quotes
+vi' — enter visual + inside single quotes
+va' — enter visual + around single quotes
 vi( — enter visual + inside parens
+va( — enter visual + around parens
+vi{ — enter visual + inside braces
+va{ — enter visual + around braces
+vi[ — enter visual + inside brackets
+va[ — enter visual + around brackets
+vib — enter visual + inside block (shortcut for vi()
+vab — enter visual + around block (shortcut for va()
+viB — enter visual + inside braces (shortcut)
+vaB — enter visual + around braces (shortcut)
+vip — enter visual + inside paragraph
+vap — enter visual + around paragraph
 viwU — select inner word then uppercase (visual-mode case operator fallback)
 viw~ — select inner word then toggle case
+V3j — select three lines linewise
 
 # Search
 / — forward incremental search
@@ -199,6 +217,7 @@ Cmd+T — macOS new tab (host app)
 Cmd+W — macOS close window/tab (host app)
 Cmd+N — macOS new window (host app)
 Cmd+` — macOS cycle windows in same app
+Cmd+Tab — macOS cycle between apps
 Cmd+? — kindaVim Tutor help shortcut
 Cmd+Space — Spotlight
 
