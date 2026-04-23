@@ -9,8 +9,11 @@ Follows the efficiency playbook in docs/llm-api-efficiency.md:
 - Batches 8 Q&As per call → ~25 calls for 200 Q&As.
 - Local content-hash cache under .cache/verify_eval/ so re-runs skip
   already-verified entries.
-- Uses gpt-4.1-mini — plenty for mechanical verification against
-  supplied reference material.
+- Uses gpt-4.1 (full tier) — this is a VALIDATION pass, not
+  screening. We're about to trust these verdicts as ground-truth
+  for a 200-Q&A canonical corpus. Mini gets subtle Vim semantics
+  wrong often enough to be the wrong tool here; the cost delta
+  with caching is ~$1 for the whole run.
 
 Usage:
     export OPENAI_API_KEY=sk-...
@@ -410,7 +413,7 @@ def render_report(items: list[QAItem], results: list[dict]) -> tuple[str, dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("topic_id", nargs="?", default=None)
-    parser.add_argument("--model", default="gpt-4.1-mini")
+    parser.add_argument("--model", default="gpt-4.1")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--no-cache", action="store_true")
     args = parser.parse_args()

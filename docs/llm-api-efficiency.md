@@ -136,13 +136,21 @@ Invalidate by deleting the cache directory.
 
 ### 4. Match model tier to task
 
-- **Screening / fact-checking against supplied reference:** mini
-  tier is plenty. `gpt-4.1-mini` or `claude-haiku-4-5` handle structured
-  verification well and cost ~5–10x less than full-size.
-- **Generation requiring creativity, reasoning, or long context:**
+- **Screening / first-pass triage of many items:** mini tier is
+  plenty. `gpt-4.1-mini` or `claude-haiku-4-5` handle structured
+  filtering well at ~5–10x less cost.
+- **Validation / ground-truth / anything treated as authoritative:**
   full tier — `gpt-4.1` / `claude-sonnet-4-6` / `claude-opus-4-7`.
+  If the model's verdict ships or gates a release, don't cheap out.
+  Subtle domain semantics (Vim motion nuances, API behavior
+  specifics) are where mini tiers drift. With caching, the full-tier
+  run of 200 items is ~$1; not worth sacrificing accuracy to save
+  it.
+- **Generation requiring creativity, reasoning, or long context:**
+  full tier.
 - **Two-tier pattern:** screen cheaply, escalate `warning`/`fail`
-  to the full model for confirmation.
+  to the full model for confirmation. Only worth the complexity
+  when the corpus is 5,000+ items.
 
 Current rough pricing (per 1M tokens, Q2 2026):
 
@@ -187,8 +195,11 @@ Usually caching + batching gets us ~90% there without slicing.
 - **Interpolating timestamps, UUIDs, or counters inside the cached
   prefix** — defeats caching. Keep variable content OUT of the system
   message.
-- **Using `gpt-4.1`/`opus` for mechanical verification** — mini
-  handles it fine at a fraction of the cost.
+- **Using `gpt-4.1`/`opus` to filter thousands of mostly-fine
+  items** — mini handles bulk screening. But don't invert the
+  mistake: mini on high-stakes validation of a small corpus is
+  penny-wise / pound-foolish. Match the tier to the consequence
+  of a bad verdict.
 - **Serializing items one-at-a-time when the task is idempotent** —
   batch wherever possible.
 - **Skipping the local cache** — re-running a script during
