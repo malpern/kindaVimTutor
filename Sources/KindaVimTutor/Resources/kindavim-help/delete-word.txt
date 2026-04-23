@@ -1,0 +1,44 @@
+id: delete-word
+title: Delete Word
+summary: Type `dw` in {{normal}} to delete from the cursor to the start of the next word. In KindaVim, this is the first real operator-plus-motion command most people learn.
+status: supported
+tags: dw, d2w, delete-word
+aliases: delete word, delete next word, operator plus motion
+lessons: ch2.l1, ch2.l4, ch2.l6
+related: find-character
+questions: When should I use `dw` instead of `de`? || Why does `dw` sometimes eat the trailing space? || How do counts change `dw`?
+web: vim dw delete word tutorial
+video: vim dw delete word tutorial
+
+## What It Does
+Type `dw` in {{normal}} to delete from the cursor to the start of the next word. It combines the `d` operator with the `w` motion, which makes it a good test case for the whole Vim grammar idea.
+
+## How To Use It In KindaVim
+Put the cursor at the beginning of the word you want gone, then type `dw`. If you start in the middle of a word, KindaVim still follows the motion from the current cursor position, so the exact deleted range depends on where you start.
+
+Counts work the same way conceptually: `d2w` deletes across two word motions. That makes `dw` a good bridge from one-off edits into repeatable text transformations.
+
+## Difference From Stock Vim
+The command shape is the same, but KindaVim is acting on macOS text fields rather than an editor buffer. That means host-app behavior can still affect the feel of word boundaries in edge cases, especially in rich-text controls.
+
+## Canonical QA
+Q: How do I delete a word?
+A: Type `dw` in {{normal}} to delete from the cursor through the end of the next word. Combine with a count like `3dw` to delete three words in a row.
+Related: diw — delete inside the word under the cursor; daw — delete around the word including its trailing space
+Faster: Press `D` instead if you want to delete from the cursor to the end of the line rather than just one word.
+
+Q: What's the difference between `dw` and `de`?
+A: `dw` deletes from the cursor through the end of the word AND the trailing whitespace, so "foo  bar" becomes "bar". `de` deletes through the end of the word but stops before the whitespace, leaving "  bar". Use `de` when you want to keep spacing; `dw` when you're removing the whole word unit.
+Related: daw — delete around the word including the spaces on either side; diw — delete only the word's letters, leaving surrounding spaces
+
+Q: How do I delete two words at once?
+A: Type `d2w` in {{normal}} to delete across two word motions. The count goes between the operator `d` and the motion `w`, and it works the same for any repeatable motion — `d3w`, `d4w`, etc.
+Related: d2e — delete through the end of the next two words without consuming the final trailing space
+
+Q: What if my cursor is in the middle of a word when I type `dw`?
+A: `dw` deletes from wherever the cursor sits to the start of the next word, so you'll delete just the tail of the current word plus any whitespace before the next one. If you want to remove the whole word regardless of cursor position, use `diw` instead — it deletes the word the cursor is "inside," leaving any surrounding spaces.
+Related: diw — delete the entire word under the cursor; daw — delete the word plus its surrounding whitespace
+
+Q: Does `dw` work at the end of a line?
+A: Yes — when there's no next word on the current line, `dw` deletes to the end of the line. It does NOT join with the next line the way stock Vim does in some configurations. If you need to cross line boundaries, use `J` to join lines first, then delete.
+Related: D — delete from the cursor to the end of the line; J — join the next line onto the current one

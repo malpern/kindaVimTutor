@@ -1,0 +1,34 @@
+id: undo-redo
+title: Undo & Redo
+summary: Press `u` to undo the last change, and `Ctrl-R` to redo. kindaVim leans on macOS's native edit history underneath, so the feel is close to what you'd expect from Cmd-Z / Shift-Cmd-Z.
+status: supported
+tags: u, Ctrl-R, undo, redo
+aliases: undo, redo
+lessons:
+related: delete-word
+questions: How do I undo? || How do I redo a change I just undid? || What does `u` do?
+web: vim undo redo tutorial
+video: vim undo redo
+
+## How Undo Works
+Press `u` in {{normal}} to undo the last change. kindaVim forwards this into macOS's native edit history, so it usually maps to whatever Cmd-Z would have done.
+
+## Redo
+Press `Ctrl-R` in {{normal}} to redo an undone change. This is distinct from stock Vim's `.` repeat — redo walks FORWARD in the undo history; `.` replays your last *intentional* change.
+
+## Canonical QA
+Q: What does `u` do?
+A: Press `u` in {{normal}} to undo the last change. kindaVim maps this onto macOS's native edit history, so it behaves similarly to Cmd-Z.
+Related: Ctrl-R — redo a change you just undid; . — repeat the last change (a separate concept from undo)
+
+Q: How do I undo?
+A: Press `u` in {{normal}} to undo your most recent change. Press `u` again to walk further back through the edit history.
+Related: Ctrl-R — step forward through the undo history; . — repeat the last change
+
+Q: How do I redo?
+A: Press `Ctrl-R` in {{normal}} to redo a change you just undid. It walks FORWARD in the undo history.
+Related: u — undo the last change; . — repeat the last change (different from redo)
+
+Q: What's the difference between `u` and `.`?
+A: `u` undoes changes — it walks BACKWARD through your edit history. `.` repeats your last change — if you just pressed `dw`, `.` does another `dw`. They're opposite directions: one erases history, the other replays it.
+Related: Ctrl-R — redo an undone change

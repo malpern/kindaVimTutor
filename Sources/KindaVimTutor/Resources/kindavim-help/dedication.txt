@@ -1,0 +1,17 @@
+id: dedication
+title: Dedication
+summary: A note of thanks to Bram Moolenaar, Guillaume Leclerc, the Neovim maintainers, and the teachers who keep Vim culture alive.
+status: supported
+tags: dedication, acknowledgements, credits
+aliases: thanks, tribute, inspirations
+lessons:
+related: delete-word, find-character
+questions:
+web:
+video:
+
+## Why This Page Exists
+KindaVim Tutor sits downstream of a long line of people who built the tools, culture, and teaching tradition around modal editing. This page exists to make that lineage explicit.
+
+## What To Explore Next
+After this dedication page, jump into a concrete command topic such as `dw` or `f` and then open chat when you want examples or clarification in your own workflow.

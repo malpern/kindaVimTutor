@@ -25,14 +25,27 @@ import SwiftUI
 /// re-layout when a custom `Layout` is used inside the detail pane —
 /// see 2026-04-22/23 bisection. Keeping NSV off means chips are free.
 struct AnnotatedText: View {
+    /// How mode tokens (`{{normal}}`, `{{insert}}`, `{{visual}}`) are
+    /// rendered. `.pill` uses per-view `InlineModeChip` embedded in
+    /// an `AnnotatedFlow` custom `Layout` — crisp visuals but breaks
+    /// mouse drag selection across word boundaries because each run
+    /// is a separate view. `.inlineBadge` falls back to a single
+    /// `Text(AttributedString)` with a colored background run so the
+    /// whole string stays selectable as one unit.
+    enum ChipStyle { case pill, inlineBadge }
+
     let string: String
     var font: Font = .system(size: 18, weight: .regular)
     var capSize: KeyCapView.KeyCapSize = .small
     var foregroundStyle: Color? = nil
+    var chipStyle: ChipStyle = .pill
 
     var body: some View {
         let segments = Self.segments(from: string)
-        if segments.contains(where: { if case .mode = $0 { true } else { false } }) {
+        let hasMode = segments.contains(where: {
+            if case .mode = $0 { return true } else { return false }
+        })
+        if hasMode && chipStyle == .pill {
             AnnotatedFlow(hSpacing: 0, vSpacing: 6) {
                 ForEach(Array(segments.enumerated()), id: \.offset) { _, seg in
                     switch seg {
@@ -76,18 +89,28 @@ struct AnnotatedText: View {
             return run
 
         case .key(let key):
-            var run = AttributedString(key)
+            // `.inlineBadge` chipStyle: render the key with padding
+            // spaces and a rounded neutral background so it reads
+            // as a keycap while staying inside the single selectable
+            // `Text`. Support-status no longer decorates individual
+            // command tokens — that signal moved to dedicated
+            // "Not Supported in kindaVim" / "Terminal VIM" sections
+            // in the answer bubble (less visual noise in prose).
+            var run = AttributedString(" \(key) ")
             run.font = capSize.inlineFont
-            run.foregroundColor = .primary.opacity(0.92)
+            run.foregroundColor = .white
+            run.backgroundColor = Color.primary.opacity(0.22)
             return run
 
         case .mode(let mode):
-            // Not used on this path — mode-bearing strings take the
-            // AnnotatedFlow branch — but keep the run for parser
-            // symmetry.
-            var run = AttributedString(mode.displayName)
+            // `.inlineBadge` chipStyle lands here: render the mode
+            // name as a colored, padded run with white text on a
+            // tinted background so the whole answer stays a single
+            // `Text` (and therefore drag-selectable as one block).
+            var run = AttributedString(" \(mode.displayName) ")
             run.font = .system(.caption, design: .monospaced, weight: .bold)
-            run.foregroundColor = mode.color
+            run.foregroundColor = .white
+            run.backgroundColor = mode.color.opacity(0.55)
             return run
         }
     }

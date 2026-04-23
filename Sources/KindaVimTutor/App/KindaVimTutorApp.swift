@@ -5,6 +5,14 @@ struct KindaVimTutorApp: App {
     @State private var appState = AppState()
     @State private var showStats = false
     @State private var isSidebarVisible = true
+    @State private var primaryPaneMode: PrimaryPaneMode = .lesson
+    @State private var manualNavigation = ManualNavigationState()
+    @State private var chatEngine = ChatEngine()
+    /// Set when the user navigated to a lesson FROM a help surface
+    /// (chat or manual) — gives the lesson canvas a back button to
+    /// return. Cleared on any subsequent non-help navigation (sidebar
+    /// click, next-lesson, etc.) so the trail is shallow by design.
+    @State private var returnToHelpMode: PrimaryPaneMode?
 
     init() {
         AppLogger.shared.info("app", "launch", fields: [
@@ -46,7 +54,8 @@ struct KindaVimTutorApp: App {
         .commands {
             AppMenuCommands(
                 isSidebarVisible: $isSidebarVisible,
-                showStats: $showStats
+                showStats: $showStats,
+                primaryPaneMode: $primaryPaneMode
             )
         }
 
@@ -63,6 +72,12 @@ struct KindaVimTutorApp: App {
 
 }
 
+private enum PrimaryPaneMode {
+    case lesson
+    case chat
+    case manual
+}
+
 @MainActor
 private final class DebugObserverBox {
     static let shared = DebugObserverBox()
@@ -73,6 +88,7 @@ private final class DebugObserverBox {
 private struct AppMenuCommands: Commands {
     @Binding var isSidebarVisible: Bool
     @Binding var showStats: Bool
+    @Binding var primaryPaneMode: PrimaryPaneMode
     @Environment(\.openWindow) private var openWindow
 
     var body: some Commands {
@@ -80,6 +96,17 @@ private struct AppMenuCommands: Commands {
             Button("About kindaVim Tutor") {
                 openWindow(id: "about")
             }
+        }
+
+        CommandGroup(replacing: .help) {
+            Button("kindaVim Tutor Help") {
+                primaryPaneMode = .chat
+            }
+            // Apple's standard Help shortcut: ⌘⇧/ (aka ⌘?).
+            // Binding the slash with [.command, .shift] registers it
+            // reliably on US layouts and matches the system-drawn
+            // `⌘?` glyph in the menu.
+            .keyboardShortcut("/", modifiers: [.command, .shift])
         }
 
         CommandGroup(before: .sidebar) {
@@ -214,11 +241,94 @@ private struct SidebarToggleButton: View {
     }
 }
 
+/// Pill-shaped back-chevron that appears on the lesson canvas when
+/// the user arrived via a help surface (chat or manual). One click
+/// returns them to wherever they came from. Styling matches the
+/// sidebar-toggle glass chip so they read as a pair.
+private struct BackToHelpButton: View {
+    let destination: PrimaryPaneMode
+    let onTap: () -> Void
+
+    @State private var isHovering = false
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 5) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 11, weight: .bold))
+                Text(label)
+                    .font(.system(size: 12, weight: .medium))
+            }
+            .foregroundStyle(.primary.opacity(0.88))
+            .padding(.horizontal, 10)
+            .frame(height: 24)
+            .background {
+                if #available(macOS 26, *) {
+                    Color.clear.glassEffect(
+                        .regular.interactive(),
+                        in: .rect(cornerRadius: 7)
+                    )
+                } else {
+                    RoundedRectangle(cornerRadius: 7, style: .continuous)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                        )
+                }
+            }
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .opacity(isHovering ? 1 : 0.9)
+        .animation(.easeInOut(duration: 0.15), value: isHovering)
+        .onHover { isHovering = $0 }
+        .help("Back to \(label)")
+        .accessibilityLabel("Back to \(label)")
+    }
+
+    private var label: String {
+        switch destination {
+        case .chat:   return "Help"
+        case .manual: return "Manual"
+        case .lesson: return "Lesson"
+        }
+    }
+}
+
 extension KindaVimTutorApp {
     @ViewBuilder
     fileprivate var mainUI: some View {
         HStack(spacing: 0) {
-            if isSidebarVisible {
+            if primaryPaneMode == .manual {
+                HelpBrowserView(
+                    corpus: KindaVimHelpCorpus.shared,
+                    selectedTopicID: Binding(
+                        get: { manualNavigation.selectedTopicID },
+                        set: { manualNavigation.selectedTopicID = $0 }
+                    ),
+                    currentLesson: appState.selectedLesson,
+                    chapters: appState.chapters,
+                    canGoBack: manualNavigation.canGoBack,
+                    onGoBack: popManualTopic,
+                    onSelectTopic: selectManualTopic,
+                    onOpenLesson: { id in
+                        returnToHelpMode = .manual
+                        appState.goToLesson(id)
+                        primaryPaneMode = .lesson
+                    },
+                    onAskQuestion: { topic, question in
+                        manualNavigation.selectedTopicID = topic.id
+                        returnToHelpMode = .manual
+                        primaryPaneMode = .chat
+                        chatEngine.input = question
+                        chatEngine.send()
+                    }
+                )
+                .railView
+
+                Divider()
+            } else if isSidebarVisible {
                 SidebarView(
                     chapters: appState.chapters,
                     selectedLessonId: $appState.selectedLessonId,
@@ -231,8 +341,65 @@ extension KindaVimTutorApp {
             }
 
             Group {
-                if let lesson = appState.selectedLesson,
-                   let chapter = appState.selectedChapter {
+                if primaryPaneMode == .chat {
+                    ChatView(
+                        engine: chatEngine,
+                        lesson: appState.selectedLesson,
+                        chapterTitle: appState.selectedChapter?.title,
+                        chapters: appState.chapters,
+                        helpTopicID: manualNavigation.selectedTopicID,
+                        onOpenLesson: { id in
+                            // Defer state mutation by one tick so the
+                            // Button action can finish before the
+                            // ChatView tears down. Mutating state
+                            // during the button's own view update
+                            // caused an assertion / crash.
+                            Task { @MainActor in
+                                try? await Task.sleep(for: .milliseconds(10))
+                                returnToHelpMode = .chat
+                                appState.goToLesson(id)
+                                primaryPaneMode = .lesson
+                            }
+                        },
+                        onOpenHelpTopic: { topicID in
+                            // Same deferred-mutation pattern — we're
+                            // swapping ChatView for the manual pane,
+                            // so let the button action finish first.
+                            Task { @MainActor in
+                                try? await Task.sleep(for: .milliseconds(10))
+                                manualNavigation.selectedTopicID = topicID
+                                returnToHelpMode = .chat
+                                primaryPaneMode = .manual
+                            }
+                        }
+                    )
+                } else if primaryPaneMode == .manual {
+                    HelpBrowserView(
+                        corpus: KindaVimHelpCorpus.shared,
+                        selectedTopicID: Binding(
+                            get: { manualNavigation.selectedTopicID },
+                            set: { manualNavigation.selectedTopicID = $0 }
+                        ),
+                        currentLesson: appState.selectedLesson,
+                        chapters: appState.chapters,
+                        canGoBack: manualNavigation.canGoBack,
+                        onGoBack: popManualTopic,
+                        onSelectTopic: selectManualTopic,
+                        onOpenLesson: { id in
+                            returnToHelpMode = .manual
+                            appState.goToLesson(id)
+                            primaryPaneMode = .lesson
+                        },
+                        onAskQuestion: { topic, question in
+                            manualNavigation.selectedTopicID = topic.id
+                            returnToHelpMode = .manual
+                            primaryPaneMode = .chat
+                            chatEngine.input = question
+                            chatEngine.send()
+                        }
+                    )
+                } else if let lesson = appState.selectedLesson,
+                          let chapter = appState.selectedChapter {
                     StepCanvasView(
                         lesson: lesson,
                         chapterTitle: chapter.title,
@@ -250,12 +417,49 @@ extension KindaVimTutorApp {
             .textSelection(.enabled)
         }
         .overlay(alignment: .topLeading) {
-            SidebarToggleButton(isSidebarVisible: $isSidebarVisible)
-                .padding(.leading, isSidebarVisible ? 214 : 6)
-                .padding(.top, 13)
+            HStack(spacing: 10) {
+                // Sidebar toggle is irrelevant in the manual — that
+                // pane has its own left rail. Everywhere else, show
+                // it so the student can collapse the lesson rail.
+                if primaryPaneMode != .manual {
+                    SidebarToggleButton(isSidebarVisible: $isSidebarVisible)
+                }
+                // Back-to-help chip whenever the user trailed off a
+                // help surface onto any other pane (lesson, chat, or
+                // manual — e.g. opening a canonical source from chat
+                // lands you in the manual).
+                if let returnMode = returnToHelpMode,
+                   returnMode != primaryPaneMode {
+                    BackToHelpButton(destination: returnMode) {
+                        primaryPaneMode = returnMode
+                        returnToHelpMode = nil
+                    }
+                }
+            }
+            .padding(.leading, overlayLeading)
+            .padding(.top, 13)
         }
         .overlay(alignment: .topTrailing) {
             HStack(spacing: 12) {
+                HelpChatButton(
+                    isChatActive: Binding(
+                        get: { primaryPaneMode == .chat },
+                        set: { primaryPaneMode = $0 ? .chat : .lesson }
+                    ),
+                    availability: chatEngine.availability
+                )
+                ManualHelpButton(
+                    isActive: Binding(
+                        get: { primaryPaneMode == .manual },
+                        set: { newValue in
+                            if newValue {
+                                openManual()
+                            } else {
+                                primaryPaneMode = .lesson
+                            }
+                        }
+                    )
+                )
                 ToolbarModeBadge(monitor: appState.modeMonitor)
                 ToolbarStatsButton(
                     progressStore: appState.progressStore,
@@ -267,6 +471,47 @@ extension KindaVimTutorApp {
         }
         .coordinateSpace(name: "mainUI")
         .focusEffectDisabled()
+        .onChange(of: appState.selectedLessonId) { _, _ in
+            // Sidebar selection closes help surfaces so the student
+            // lands on the clicked lesson's canvas.
+            if primaryPaneMode != .lesson {
+                primaryPaneMode = .lesson
+            }
+            // Sidebar nav is explicit forward motion — don't offer a
+            // back-to-help trail after that.
+            returnToHelpMode = nil
+        }
+    }
+
+    /// Leading inset for the top-left overlay (sidebar toggle +
+    /// back-to-help chip). Depends on which pane owns the leftmost
+    /// column at the moment so the overlay clears it.
+    private var overlayLeading: CGFloat {
+        switch primaryPaneMode {
+        case .manual:
+            return 267  // manual rail is 260 wide + ~6 breathing room
+        case .lesson, .chat:
+            return isSidebarVisible ? 214 : 6
+        }
+    }
+
+    private func openManual() {
+        let preferredTopicID = appState.selectedLesson
+            .flatMap { KindaVimHelpCorpus.shared.topic(forLessonID: $0.id)?.id }
+        let fallbackTopicID = KindaVimHelpCorpus.shared.topics.first?.id
+        manualNavigation.prepareToOpenManual(
+            preferredTopicID: preferredTopicID,
+            fallbackTopicID: fallbackTopicID,
+            preserveHistory: primaryPaneMode == .manual
+        )
+        primaryPaneMode = .manual
+    }
+
+    private func selectManualTopic(_ topicID: String) {
+        manualNavigation.selectTopic(topicID)
+    }
+
+    private func popManualTopic() {
+        manualNavigation.popBack()
     }
 }
-

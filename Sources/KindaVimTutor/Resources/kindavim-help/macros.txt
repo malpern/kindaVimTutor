@@ -1,0 +1,41 @@
+id: macros
+title: Macros (recording + playback)
+summary: Macros let you record a sequence of keystrokes and replay them. kindaVim doesn't implement macros — this entry exists as a reference for users who drop into terminal Vim.
+status: unsupported
+tags: q, @, macro, record, playback
+aliases: recording, replay
+lessons:
+related:
+questions: How do I record a macro? || How do I replay a macro? || Why doesn't `q` start recording in kindaVim?
+web: vim macros tutorial
+video: vim macros tutorial
+
+## Why It's Not Supported Here
+kindaVim is a macOS menu-bar app that layers Vim-style motions on top of native text fields. Macro recording requires an in-process editor state (a register stream + replay engine) that the system text fields don't expose. Until an editor-like surface is embedded, macros are out of scope for kindaVim.
+
+## How It Works In Stock Vim
+Type `q` followed by a register letter (`a`–`z`) in {{normal}} to start recording into that register. Perform your edits — every keystroke is captured. Press `q` again to stop.
+
+Replay the recorded sequence with `@` followed by the same register letter. For example: `qa` → some edits → `q` → `@a` replays them. Prefix with a count for repetition: `5@a` replays the macro five times.
+
+## Closest kindaVim Alternative
+For repeated single-command edits, dot-repeat (`.`) is supported and covers the common "redo last change" case. It's not a full macro engine — no multi-step sequences — but for things like "delete this word, and the next, and the next" it's the idiomatic kindaVim flow.
+
+## Canonical QA
+Q: How do I record a macro in kindaVim?
+A: kindaVim doesn't support macros. For single-step repeats, use `.` to replay your last change.
+Unsupported: yes
+TerminalVim: In {{normal}}, type `q` followed by a register letter (`a`–`z`) to start recording into that register. Perform your edits, then press `q` again to stop. Replay the recorded sequence with `@<letter>` — e.g. `qa` → edits → `q` → `@a`. Prefix with a count for repetition: `5@a`.
+Related: . — repeat the last change (kindaVim's closest alternative)
+
+Q: Why doesn't `q` start recording in kindaVim?
+A: kindaVim doesn't implement macros. `q` is unbound in kindaVim's {{normal}} mode and has no effect.
+Unsupported: yes
+TerminalVim: In stock Vim, `q<letter>` starts recording keystrokes into that register, and `q` on its own stops. The feature needs an in-process editor state that macOS text fields don't expose, which is why kindaVim can't implement it.
+Related: . — repeat the last change, the closest supported single-step equivalent
+
+Q: How do I replay a macro?
+A: kindaVim doesn't support macros, so there's nothing to replay.
+Unsupported: yes
+TerminalVim: In stock Vim, type `@` followed by the register letter you recorded into. Prefix with a count like `5@a` to replay five times.
+Related: . — repeat the last change in kindaVim

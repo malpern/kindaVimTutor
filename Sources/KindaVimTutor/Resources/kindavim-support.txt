@@ -1,0 +1,192 @@
+# kindaVim — command support
+#
+# Authoritative list of Vim commands kindaVim does and does not
+# support. Consumed at runtime by `KindaVimSupportCorpus` so the
+# chat, manual, and lesson views can render a visible badge when
+# an unsupported command is mentioned.
+#
+# Format:
+#   # comments start with `#`
+#   `supported:` and `unsupported:` section headers
+#   one command per line (token before `—`), with a free-text
+#   explanation after the em-dash
+#
+# Guidance:
+# - List canonical command tokens WITHOUT leading counts.
+#   e.g. `dw` (not `3dw`) — the matcher strips counts at lookup.
+# - Include both the operator and common operator+motion pairs
+#   when either might be referenced (e.g. `d` AND `dw`).
+# - When in doubt err on the side of "supported" for the core
+#   motion set (hjkl, word motions, operators, text objects,
+#   search, visual) so false-negative badges don't pepper the UI.
+
+supported:
+
+# Basic motion
+h — move cursor left one character
+j — move cursor down one line
+k — move cursor up one line
+l — move cursor right one character
+
+# Word motions
+w — move to start of next word
+W — move to start of next WORD (whitespace-delimited)
+b — move back to start of previous word
+B — move back to start of previous WORD
+e — move to end of current/next word
+E — move to end of current/next WORD
+ge — move back to end of previous word
+gE — move back to end of previous WORD
+
+# Line motions
+0 — move to first column of line
+^ — move to first non-blank of line
+$ — move to end of line
+gg — go to first line of document
+G — go to last line of document
+
+# Character search
+f — find next occurrence of character on line
+F — find previous occurrence of character on line
+t — move just before next occurrence of character
+T — move just after previous occurrence of character
+; — repeat last f/F/t/T forward
+, — repeat last f/F/t/T backward
+
+# Operators
+d — delete operator
+c — change operator
+y — yank operator
+p — put after cursor (default register)
+P — put before cursor (default register)
+x — delete character under cursor
+X — delete character before cursor
+
+# Operator + motion combinations
+dw — delete next word
+dW — delete next WORD
+de — delete to end of word
+db — delete to start of previous word
+dd — delete line
+d$ — delete to end of line
+D — delete to end of line (shortcut for d$)
+cw — change next word
+cc — change line
+c$ — change to end of line
+C — change to end of line (shortcut for c$)
+yw — yank word
+yy — yank line
+Y — yank line (shortcut for yy)
+~ — toggle case of character under cursor
+
+# Text objects
+diw — delete inside word
+daw — delete around word (includes surrounding space)
+ciw — change inside word
+caw — change around word
+yiw — yank inside word
+yaw — yank around word
+di( — delete inside parentheses
+da( — delete around parentheses (includes the parens)
+di) — delete inside parentheses (same as di()
+da) — delete around parentheses
+di" — delete inside double-quoted string
+da" — delete around double-quoted string (includes the quotes)
+di' — delete inside single-quoted string
+da' — delete around single-quoted string
+di{ — delete inside braces
+da{ — delete around braces
+di[ — delete inside brackets
+da[ — delete around brackets
+
+# Visual mode
+v — enter visual mode (character-wise)
+V — enter visual line mode
+
+# Search
+/ — forward incremental search
+? — backward incremental search
+n — repeat last search forward
+N — repeat last search backward
+* — search forward for word under cursor
+# — search backward for word under cursor
+
+# Misc
+. — repeat last change
+u — undo last change
+Ctrl-R — redo last undone change
+i — enter insert mode before cursor
+I — enter insert mode at first non-blank of line
+a — enter insert mode after cursor
+A — enter insert mode at end of line
+o — open new line below
+O — open new line above
+s — substitute character (delete + insert)
+S — substitute line
+r — replace single character
+J — join next line onto current line
+Esc — exit to normal mode
+
+unsupported:
+
+# Ex commands — kindaVim runs over native text fields, no command line
+# keywords: ex command, ex-command, command mode, command-mode, :w, :q, :s
+: — ex command mode (no command line available)
+:w — write file
+:q — quit
+:wq — write and quit
+:x — write if changed and quit
+:e — edit file
+:s — substitute
+:g — global command
+:v — inverse global command
+:r — read file
+:! — run shell command
+
+# Macros
+# keywords: macro, macros, recording, playback
+q — start/stop recording macro
+@ — execute macro
+
+# Registers beyond the default
+# keywords: named register, registers, clipboard register
+" — register prefix for named registers
+"a — yank/put with register "a"
+"0 — numbered register
+"+ — system clipboard register (use Cmd+C/Cmd+V instead)
+"* — selection register
+
+# Windows / splits / tabs
+# keywords: split, vsplit, splits, window split, tabpage, tabpages
+Ctrl-W — window command prefix
+:split — horizontal split
+:vsplit — vertical split
+:tabnew — new tab
+:tabnext — next tab
+
+# Marks beyond default
+m — set mark
+'' — jump to previous position (the two-single-quotes form)
+`` — jump to previous position (exact)
+'a — jump to mark "a"
+
+# Folds
+# keywords: fold, folds, folding, code folding
+zf — create fold
+za — toggle fold
+zo — open fold
+zc — close fold
+zr — reduce fold level
+zm — more fold level
+
+# Substitute shortcuts
+# keywords: substitute, :substitute
+& — repeat last substitution
+g& — repeat substitution over whole file
+
+# Advanced jumps
+# keywords: jumplist, tags file, ctags, go to definition
+Ctrl-O — jump back (jumplist)
+Ctrl-I — jump forward (jumplist)
+gd — go to local definition
+gD — go to global definition

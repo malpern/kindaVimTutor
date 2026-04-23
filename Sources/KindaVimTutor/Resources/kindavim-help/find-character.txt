@@ -1,0 +1,22 @@
+id: find-character
+title: Find and Till Character
+summary: Type `f{char}` or `t{char}` in {{normal}} to jump on the current line. `f` lands on the character; `t` stops just before it.
+status: supported
+tags: f, F, t, T, ;, ,
+aliases: find character, till character, repeat find
+lessons: ch4.l1, ch4.l2, ch4.l3
+related: delete-word
+questions: When should I reach for `f` instead of `w`? || Why would I use `t` instead of `f`? || How do `;` and `,` work after a find?
+web: vim find character f t tutorial
+video: vim f t repeat find tutorial
+
+## What It Does
+Type `f` followed by a character to jump forward to that character on the current line. `F` searches backward. Type `t` or `T` when you want to stop just before the target instead of landing on it.
+
+## How To Use It In KindaVim
+These commands are strongest when you can already see the target on the current line. They let you jump directly to punctuation, delimiters, or a specific letter without tapping `l` ten times. After one `f` or `t`, use `;` to repeat in the same direction and `,` to reverse it.
+
+`t` is especially useful before operators. A shape like `dt)` deletes everything up to the closing paren without deleting the paren itself.
+
+## Difference From Stock Vim
+The mental model is the same as Vim, but the scope is KindaVim's supported text surfaces. There is no full-screen editor buffer, so the value here is precise line-local navigation inside native macOS controls.
