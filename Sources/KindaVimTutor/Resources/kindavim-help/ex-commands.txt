@@ -1,0 +1,86 @@
+id: ex-commands
+title: Ex Commands
+summary: Ex commands (`:w`, `:q`, `:s`, `:e`, etc.) need a command line — kindaVim runs inside native macOS text fields with no command-line UI, so the entire Ex surface is unsupported. This entry exists so `:`-prefixed questions get a clear answer.
+status: unsupported
+tags: :, :w, :q, :wq, :x, :e, :s, :g, :v, :r, :!
+aliases: command line, ex command, colon command
+lessons:
+related: macros
+questions: How do I save a file in kindaVim? || How do I quit? || Does kindaVim support `:s` substitute?
+web:
+video:
+
+## Why It's Not Supported
+Ex commands are Vim's scripting and file-management layer — entered via `:` to open the command line. kindaVim runs inside native macOS text fields, which have no command-line UI and no file concept to save or quit. Saving is the host application's job (Cmd+S); quitting is Cmd+Q on the host app.
+
+## How It Works In Stock Vim
+`:{command}` in {{normal}} opens the command line. Common ones:
+- `:w` — write file to disk
+- `:q` — quit (fails if unsaved changes)
+- `:wq` or `:x` — write and quit
+- `:e {file}` — edit another file
+- `:s/old/new/g` — substitute on the current line
+- `:%s/old/new/g` — substitute throughout
+- `:g/pattern/cmd` — run a command on every line matching
+- `:!{shell}` — run a shell command
+
+## Canonical QA
+Q: How do I save a file in kindaVim?
+A: kindaVim doesn't support Ex commands like `:w`. Use the host application's save shortcut — Cmd+S in most macOS apps.
+Unsupported: yes
+TerminalVim: In terminal Vim, type `:w` in {{normal}} and press Enter to write the current buffer to disk. `:w {file}` writes to a different filename.
+Related: Cmd+S — macOS save (native shortcut)
+
+Q: How do I quit in kindaVim?
+A: kindaVim isn't an editor — it's a motion layer over native text fields. There's no file to quit. Use Cmd+Q to quit the host app.
+Unsupported: yes
+TerminalVim: In terminal Vim, type `:q` to quit (requires saved changes), `:q!` to force-quit discarding changes, or `:wq` / `:x` to save-and-quit in one step.
+Related: Cmd+Q — macOS quit
+
+Q: Does kindaVim support `:s` (substitute)?
+A: kindaVim doesn't support Ex commands. For find-and-replace, use `/pattern` to find, then `cgn` (change next match) + `.` to replay.
+Unsupported: yes
+TerminalVim: `:s/old/new/` replaces the first match on the current line; `:s/old/new/g` all on the line; `:%s/old/new/g` across the whole buffer. Add `c` flag (`:%s/old/new/gc`) to confirm each.
+Related: / — search; cgn — change next match; . — repeat last change
+
+Q: How do I run a shell command from kindaVim?
+A: kindaVim doesn't support `:!` (no command line). Run shell commands from Terminal directly, or from your editor's integrated terminal.
+Unsupported: yes
+TerminalVim: `:!{cmd}` in stock Vim runs `{cmd}` in a shell and shows the output. `:r !{cmd}` inserts the output into the buffer.
+Related: Cmd+Space — Spotlight to launch Terminal
+
+Q: How do I open another file in kindaVim?
+A: kindaVim doesn't have a file concept — it works with whatever native text field is focused. Switch between apps / documents using the host app's open-file mechanism (Cmd+O in most apps).
+Unsupported: yes
+TerminalVim: `:e {filename}` opens a file for editing. `:e!` reloads from disk discarding unsaved changes. `:bnext` / `:bprev` cycle through open buffers.
+Related: Cmd+O — macOS open-file shortcut
+
+Q: Does kindaVim support `:set` options?
+A: No — there's no Ex layer and no Vim-level configuration inside kindaVim. kindaVim's preferences live in its own Settings window, not `:set` commands.
+Unsupported: yes
+TerminalVim: `:set number` shows line numbers, `:set ignorecase` makes search case-insensitive, `:set shiftwidth=4` sets indent, etc. Options persist for the session; put them in `~/.vimrc` to keep them.
+Related: kindaVim Settings — native preferences pane
+
+Q: Can I run `:%s/old/new/g` in kindaVim?
+A: No — kindaVim doesn't implement Ex commands. For multi-match substitution within one native text field, use `/old<Enter>` then `cgn` and `.` to change each match one at a time.
+Unsupported: yes
+TerminalVim: `:%s/old/new/g` substitutes throughout the buffer. `%` is the "all lines" range; `g` means every match per line. Add `c` to confirm each match.
+Related: / — forward search; cgn — change next match; . — repeat
+
+Q: How do I yank into a specific register with `:reg`?
+A: kindaVim supports only a single default register — no named registers, no `:reg` view. Each yank replaces the register contents.
+Unsupported: yes
+TerminalVim: `:reg` lists every named register and its contents. `"{letter}y` yanks into register `{letter}`. `"{letter}p` pastes from it.
+Related: y — yank (default register); p — put
+
+Q: How do I enter command-line mode?
+A: You can't — kindaVim has no command-line. The `:` key doesn't open anything. If you type `:` in {{normal}}, nothing happens (it's unbound in kindaVim).
+Unsupported: yes
+TerminalVim: `:` in {{normal}} opens the command line. Type the command, press Enter to execute. Press `Esc` to cancel.
+Related: / — search DOES work (kindaVim supports it)
+
+Q: How do I open help with `:help`?
+A: Use kindaVim Tutor's Manual button (top-right) or press `⌘⇧/` for this chat. Ex-command-based `:help` isn't available.
+Unsupported: yes
+TerminalVim: `:help {topic}` opens the help window for the given topic. `:help` alone opens the main help.
+Related: Cmd+? — kindaVim Tutor help shortcut

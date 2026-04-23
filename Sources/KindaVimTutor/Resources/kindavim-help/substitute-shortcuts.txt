@@ -1,0 +1,34 @@
+id: substitute-shortcuts
+title: Substitute Shortcuts
+summary: `&` and `g&` repeat a prior `:s` substitution. kindaVim doesn't support `:s`, so these shortcuts don't work either.
+status: unsupported
+tags: &, g&, substitute
+aliases: repeat substitute, substitute shortcut
+lessons:
+related: ex-commands
+questions: Does `&` repeat the last substitution? || How do I repeat a find-and-replace?
+web:
+video:
+
+## Canonical QA
+Q: Does `&` work in kindaVim?
+A: No — `&` repeats the last `:s` substitution, and kindaVim doesn't implement Ex commands including `:s`. `&` is unbound.
+Unsupported: yes
+TerminalVim: `&` repeats the last `:s` substitution with the same pattern/replacement, on the current line. `g&` repeats it across the entire buffer.
+Related: :s — Ex substitute (not supported); . — repeat last CHANGE (different concept)
+
+Q: How do I repeat a find-and-replace in kindaVim?
+A: kindaVim's approach: search with `/pattern`, then change the first match with `cgn`, type the replacement, `Esc`, then `.` to replay that change at each subsequent match (combined with `n` to jump).
+Unsupported: yes
+TerminalVim: `&` or `g&` repeat the last `:s`. With the search-change pattern, `.` after `cgn` repeats across matches similarly.
+Related: / — search; cgn — change next match; . — repeat change
+
+Q: What's the difference between `.` and `&`?
+A: `.` repeats the last CHANGE (insert, delete, etc.). `&` specifically repeats the last `:s` substitution. kindaVim only supports `.` — it does the job of `&` for the search-and-change workflow.
+Related: . — repeat change (kindaVim supports it)
+
+Q: Can I repeat a substitution across multiple lines in kindaVim?
+A: Not via `:s` — that's the unsupported Ex mechanism. The kindaVim workflow is `/pattern<Enter>`, then `cgn{replacement}<Esc>`, then press `.` (repeat) after each `n` (next match).
+Unsupported: yes
+TerminalVim: `:%s/old/new/g` hits every match in the buffer. `:%s/old/new/gc` asks for confirmation per match.
+Related: cgn — change next search match

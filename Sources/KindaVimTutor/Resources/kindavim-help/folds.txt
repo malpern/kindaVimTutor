@@ -1,0 +1,45 @@
+id: folds
+title: Folds
+summary: Vim can fold regions of text to collapse them visually (`zf`, `za`, `zo`). kindaVim doesn't implement folding — the host text field doesn't expose a folding API.
+status: unsupported
+tags: zf, za, zo, zc, zr, zm, fold
+aliases: fold, code folding, collapse
+lessons:
+related:
+questions: How do I fold a block of code in kindaVim? || Does `za` work?
+web:
+video:
+
+## Why It's Not Supported
+Folding is a rendering feature of Vim's own buffer view — the editor collapses lines and redraws without them. Native macOS text fields don't expose a folding API, so kindaVim has nothing to hook into.
+
+## Canonical QA
+Q: How do I fold a block in kindaVim?
+A: kindaVim doesn't support folding. `zf` and all the `z` fold commands are unbound.
+Unsupported: yes
+TerminalVim: `zf{motion}` creates a fold over the motion's range. `zfap` folds a paragraph; `zf}` folds to the next paragraph break. Visual-mode version: select lines, then `zf`.
+Related: zo — open fold; zc — close fold
+
+Q: How do I collapse sections of my file?
+A: Folding isn't available in kindaVim. If your host editor has its own collapse feature (Xcode has code folding, BBEdit has markers), use that app's shortcuts.
+Unsupported: yes
+TerminalVim: `zc` closes a fold under the cursor; `zo` opens it. `za` toggles. `zM` closes all; `zR` opens all.
+Related: Xcode code folding — host-app alternative
+
+Q: Does `za` do anything in kindaVim?
+A: No — `za` (toggle fold) is unbound. The `z` prefix in general is mostly unavailable in kindaVim since its commands are folds and view-scrolling.
+Unsupported: yes
+TerminalVim: `za` toggles a single fold open/closed. `zA` toggles recursively.
+Related: za — toggle fold (not supported)
+
+Q: Can I hide parts of my file without folding?
+A: Not via kindaVim. Some host apps (Xcode, VS Code, Sublime) have their own fold/collapse UI — use that app's shortcuts or menu item.
+Unsupported: yes
+TerminalVim: Folds are the idiomatic solution. Set `foldmethod` (manual/indent/syntax/marker) first, then use `zf` or rely on automatic folds.
+Related: host-app code folding
+
+Q: Does kindaVim support fold markers?
+A: No — kindaVim doesn't implement any of the fold-related commands or settings.
+Unsupported: yes
+TerminalVim: With `:set foldmethod=marker`, fold markers like `{{{` and `}}}` (configurable via `foldmarker`) define fold regions automatically.
+Related: :set foldmethod — Ex command (not supported)

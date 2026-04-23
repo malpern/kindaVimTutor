@@ -1,0 +1,45 @@
+id: marks
+title: Marks
+summary: Vim marks let you bookmark positions in a buffer and jump back. kindaVim doesn't implement the mark system — there's no persistent buffer to mark across.
+status: unsupported
+tags: m, ', `, mark
+aliases: bookmark, mark position, jump mark
+lessons:
+related: ex-commands
+questions: How do I set a mark? || Can I jump back to where I was? || Does `''` work in kindaVim?
+web:
+video:
+
+## Why It's Not Supported
+Marks live in the editor buffer's own state. kindaVim operates on native text fields that come and go with window focus, so there's no stable place to hang marks on. The jumplist, jumps-to-previous-position, and named marks all depend on this buffer state.
+
+## Canonical QA
+Q: How do I set a mark in kindaVim?
+A: kindaVim doesn't support marks. The `m` key is unbound.
+Unsupported: yes
+TerminalVim: `m{letter}` sets a mark. Lowercase letters (`ma`-`mz`) are buffer-local; uppercase (`mA`-`mZ`) are global and persist across files.
+Related: m — set mark (not supported)
+
+Q: How do I jump back to a mark?
+A: kindaVim doesn't support marks or the mark-jumping operators (`'`, `\``).
+Unsupported: yes
+TerminalVim: `'{letter}` jumps to the START of the line containing the mark. `` `{letter} `` jumps to the exact column. `''` jumps back to the line before the last jump; `` `` `` jumps to exact previous position.
+Related: Ctrl-O — jump back in jumplist (also not supported)
+
+Q: Can I jump back to where I was before a search?
+A: kindaVim doesn't implement the jumplist, so `Ctrl-O` / `Ctrl-I` (jump back/forward) and `''` (jump to previous location) don't work.
+Unsupported: yes
+TerminalVim: `Ctrl-O` steps back through the jumplist (after searches, jumps, `gg`, etc.); `Ctrl-I` steps forward.
+Related: / — search forward (kindaVim supports it)
+
+Q: Do automatic marks like `'.` work?
+A: No — kindaVim doesn't track position history across edits.
+Unsupported: yes
+TerminalVim: `'.` jumps to the last modified line. `'^` to the last insert position. `'[` / `']` to the first/last characters of the last yank or delete.
+Related: u — undo (kindaVim supports it, restores position)
+
+Q: How do I remember a position to come back to?
+A: Without marks, there's no built-in way. Reliable alternatives: save your place using the host app's own scroll position, or use `/unique-text` to search back to a known pattern later.
+Unsupported: yes
+TerminalVim: Marks are the idiomatic answer. `ma` to set, `'a` or `` `a `` to return.
+Related: / — search (workaround)
