@@ -1,0 +1,88 @@
+id: text-objects
+title: Text Objects
+summary: Text objects describe "the word," "the quoted string," "the parenthesized expression" — letting you operate on them with `i` (inside) or `a` (around) prefixes. Paired with `d`, `c`, `y` they're the highest-leverage edit in Vim.
+status: supported
+tags: iw, aw, i(, a(, i", a", i{, a{, i[, a[, i', a', text-object
+aliases: text object, inside word, around word, inner, outer
+lessons: ch3.l2, ch3.l3
+related: delete-word, change-line
+questions: What's the difference between `iw` and `aw`? || How do I delete a quoted string? || Does `i(` work on any brackets?
+web: vim text objects iw i( tutorial
+video: vim text objects iw aw beginner
+
+## The Grammar
+Text objects are used AFTER an operator (`d`, `c`, `y`). The form is:
+
+`{operator}{i or a}{object}`
+
+- `i` stands for **inner** — the object's contents, excluding delimiters/surrounding space.
+- `a` stands for **around** — the contents INCLUDING delimiters or trailing whitespace.
+
+## The Objects (kindaVim-supported)
+- `w` / `W` — word / WORD
+- `(` `)` `b` — parenthesized expression
+- `{` `}` `B` — brace-delimited block
+- `[` `]` — bracketed block
+- `"` — double-quoted string
+- `'` — single-quoted string
+
+## Canonical QA
+Q: What's the difference between `iw` and `aw`?
+A: `iw` is the word WITHOUT surrounding whitespace — just the letters. `aw` is the word AROUND — includes the trailing (or leading) space. `diw` on the middle word of "foo bar baz" leaves "foo  baz" (double space); `daw` leaves "foo baz".
+Related: ciw — change inner word; caw — change around word; yiw — yank inner word
+
+Q: How do I delete the word the cursor is on?
+A: Press `diw` in {{normal}} — works no matter where in the word the cursor sits. `diw` deletes inner word (just letters); `daw` deletes around word (letters + one surrounding space).
+Related: dw — delete from cursor forward to next word (cursor-position-dependent); daw — delete word + surrounding space
+
+Q: How do I change the word the cursor is on?
+A: Press `ciw` to delete the inner word and drop straight into {{insert}}. Doesn't matter where in the word the cursor sits — `ciw` replaces the whole thing.
+Related: caw — change around word; cw — change from cursor to end of word
+
+Q: How do I yank a quoted string?
+A: Position the cursor anywhere inside or outside the quotes, then `yi"` to yank inside the quotes (contents only) or `ya"` to yank around (contents plus the quotes). Same pattern for `yi'` / `ya'` on single quotes.
+Related: di" — delete inside quotes; ci" — change inside quotes
+
+Q: How do I delete everything inside parentheses?
+A: `di(` or `di)` — both work, same result. The cursor can be anywhere on the line containing the parens. `da(` or `da)` deletes including the parens themselves.
+Related: ci( — change inside parens; c% — change to matching bracket (stock Vim only)
+
+Q: Does `i(` work on any type of bracket?
+A: Each bracket type has its own text object: `i(`/`i)` for `()`, `i[`/`i]` for `[]`, `i{`/`i}` for `{}`. There's also `iB` as a shortcut for `i{`. Use the one matching the delimiters you want.
+Related: ib — shortcut for i(; iB — shortcut for i{
+
+Q: What does the cursor need to be on for `di(` to work?
+A: In stock Vim, the cursor only needs to be on the LINE containing the parens — kindaVim follows the same rule for native text fields. `di(` finds the nearest enclosing parens and operates on their contents.
+Related: di) — identical behavior; ci( — change inside
+
+Q: What's the difference between `i"` and `a"`?
+A: `i"` gives you the string CONTENTS (between the quotes, excluding them). `a"` includes the quotes themselves. So on `"hello"`: `di"` leaves `""`; `da"` leaves nothing.
+Related: di' — single-quoted version; ci" — change inside quotes
+
+Q: How do I change the contents of a string without removing the quotes?
+A: `ci"` in {{normal}} — deletes just the contents and drops you into {{insert}}, with the quotes preserved. Reach for this any time you're retyping a string literal.
+Related: ci' — single-quote version; diw — for unquoted word
+
+Q: How do I select text using a text object?
+A: In {{visual}} mode, apply a text object to extend the selection. `viw` enters visual, then selects the inner word. `vi(` selects everything inside parens. Press an operator to act on the selection or `Esc` to cancel.
+Related: v — enter visual mode first; V — linewise visual
+
+Q: What's the difference between `di(` and `di)`?
+A: None — both refer to the same parenthesized text object. `b` is also a shortcut for `(` / `)` (so `dib` = `di(`). Pick whichever is ergonomic.
+Related: dib — shorthand; diB — shorthand for di{
+
+Q: Can I use a count with text objects?
+A: Not in the usual "5iw" sense — text objects describe a single region. For multiple words, use word motions instead (e.g. `d3w`). For nested text objects, most editors don't expand to outer levels without special extensions.
+Related: d3w — delete across three words; daw — delete one word with surrounding space
+
+Q: How do I delete to the matching bracket?
+A: `di{` or `di}` deletes inside the enclosing braces. If you want to include the braces, use `da{`. To match opening to closing without using a text object, stock Vim's `%` motion works but text objects are usually clearer.
+Related: da{ — delete braces included; di} — same inside
+
+Q: My cursor is after the word. Will `diw` still work?
+A: `diw` operates on the word the cursor is ON or the nearest word if the cursor is on whitespace between words. If the cursor is truly past all content, nothing matches.
+Related: daw — similar rules but includes trailing space
+
+Q: Which text object is the most useful one to learn first?
+A: `ciw` and `ci"`. "Change inner word" rewrites a variable or identifier from anywhere on it; "change inner string" retypes a literal without touching the quotes. These two cover a huge share of everyday edits.
+Related: ci( — change inside parens; yiw — yank inner word

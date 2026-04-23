@@ -20,3 +20,36 @@ These commands are strongest when you can already see the target on the current 
 
 ## Difference From Stock Vim
 The mental model is the same as Vim, but the scope is KindaVim's supported text surfaces. There is no full-screen editor buffer, so the value here is precise line-local navigation inside native macOS controls.
+
+## Canonical QA
+Q: How do I jump to a specific character on the line?
+A: Press `f` in {{normal}} followed by the character you want. The cursor lands ON that character. For example, `f)` jumps to the next `)` on the line.
+Related: F — jump backward to a character; t — jump to just before a character; ; — repeat the last f/F/t/T forward
+
+Q: What's the difference between `f` and `t`?
+A: `f` lands ON the target character; `t` stops just BEFORE it. So if the line is `foo(bar)` and the cursor is at the start, `f(` puts you on the `(`, while `t(` puts you on the `o` just before it.
+Related: F — backward version of f; T — backward version of t
+
+Q: How do I search backward on the line?
+A: Press `F` in {{normal}} to find a character BEFORE the cursor on the current line. It's the backward counterpart to `f`. Same for `T` which stops just after the target instead of on it.
+Related: f — forward find; T — backward till; , — repeat last f/F/t/T in the reverse direction
+
+Q: How do I repeat a find?
+A: Press `;` to repeat the last `f`/`F`/`t`/`T` in the same direction, or `,` to repeat it in the opposite direction. Useful for skipping from match to match without retyping the character.
+Related: n — repeat a whole-pattern search; N — reverse whole-pattern search
+
+Q: How do I delete up to a character?
+A: Combine `d` with `t{char}` to delete from the cursor up to but not including the target, or `f{char}` to delete through it. `dt)` deletes everything up to the next `)`; `df)` deletes including the `)`.
+Related: c — change operator, same grammar (ct) / cf)); y — yank operator (yt) / yf))
+
+Q: Is `f` case-sensitive?
+A: Yes. `f)` matches `)` exactly; it won't also match `(`. Capital letters, digits, punctuation all match only themselves.
+Related: / — forward full search (also case-sensitive by default)
+
+Q: What happens if the character isn't on the line?
+A: Nothing — the cursor stays where it is. `f` is line-local in kindaVim and doesn't wrap to the next line. Pick a character you can see on the current line for reliable results.
+Related: / — forward search that CAN cross lines
+
+Q: What's the difference between `f` and `w`?
+A: `f` jumps to a specific character you name; `w` jumps to the start of the next word regardless of what character is there. Use `f` when you know the exact character you want to land on ("that closing paren"); `w` when you want the next word unit.
+Related: e — end of current/next word; b — back a word

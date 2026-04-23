@@ -1,0 +1,88 @@
+id: word-motions
+title: Word Motions
+summary: Jump by word with `w`, `b`, `e`. Capitals (`W`, `B`, `E`) jump by WORD — a bigger, whitespace-delimited chunk. These motions are the backbone of kindaVim navigation.
+status: supported
+tags: w, W, b, B, e, E, ge, gE, word, WORD
+aliases: word motion, next word, previous word, end of word
+lessons: ch1.l5, ch1.l6
+related: find-character
+questions: What's the difference between `w` and `W`? || How do I move back a word? || Does `w` treat punctuation as its own word?
+web: vim word motions w b e tutorial
+video: vim word motion w b e beginner
+
+## word vs WORD
+Vim distinguishes two kinds of word:
+
+- **word** (lowercase motions): stops at punctuation. `foo.bar` is three words: `foo`, `.`, `bar`.
+- **WORD** (capital motions): only stops at whitespace. `foo.bar` is one WORD.
+
+Same motions, different granularity. Lowercase for fine-grained; uppercase for quick jumps across punctuation-heavy text.
+
+## The Six Motions
+- `w` / `W` — forward to the start of the next word / WORD
+- `b` / `B` — backward to the start of the previous word / WORD
+- `e` / `E` — forward to the end of the current / next word / WORD
+- `ge` / `gE` — backward to the end of the previous word / WORD
+
+Counts work on all of them: `3w` = three words forward, `5b` = five back.
+
+## Canonical QA
+Q: How do I jump forward by a word?
+A: Press `w` in {{normal}} to move to the start of the next word. Counts work too: `3w` jumps forward three words in one keystroke.
+Related: b — jump back a word; e — end of current/next word; W — jump by WORD (skips punctuation as word boundary)
+
+Q: How do I jump back a word?
+A: Press `b` in {{normal}} to move to the start of the previous word. `2b` goes back two words.
+Related: w — forward a word; ge — end of previous word
+
+Q: What's the difference between `w` and `W`?
+A: `w` treats punctuation as its own word, so `foo.bar` is three jumps. `W` only stops at whitespace, so `foo.bar` is one jump. Use `W` when you want to blast through code or punctuation-heavy text.
+Related: b / B — mirror pair going backward; e / E — end-of-word counterparts
+
+Q: What's the difference between `w` and `e`?
+A: `w` lands at the START of the next word. `e` lands at the END of the current (or next) word. If you want to operate on the current word (like `cw`), `e`-anchored thinking often helps; if you're navigating, `w` reads more naturally.
+Related: W — WORD version of w; b — back a word
+
+Q: How do I get to the end of the current word?
+A: Press `e` in {{normal}}. If you're already at the end, `e` takes you to the end of the next word.
+Related: w — start of next word; ge — end of previous word
+
+Q: Does `w` skip punctuation?
+A: No — `w` TREATS punctuation as word boundaries, so `foo.bar` is three stops (`foo`, `.`, `bar`). Use `W` (capital) if you want to skip punctuation and only stop at whitespace.
+Related: W — WORD motion that treats punctuation as part of the WORD
+
+Q: How do counts work with word motions?
+A: Prefix any motion with a number to repeat it. `5w` moves forward five words; `3b` moves back three; `2e` to the end of the word two forward. All word motions accept counts the same way.
+Related: dw vs d3w — counts also apply to operator+motion combos
+
+Q: How do I delete a word using word motions?
+A: Combine `d` with a word motion: `dw` deletes to the start of the next word (eats trailing space), `de` deletes to the end of the word (keeps trailing space), `db` deletes back to the start of the previous word. Same grammar for `c` (change) and `y` (yank).
+Related: diw — delete inside a word (text object, different shape); daw — delete around a word
+
+Q: What's `ge` for?
+A: `ge` goes BACKWARD to the end of the previous word — handy when you want to position right after a word without overshooting. Mirror of `e` but in reverse.
+Related: b — go back to START of previous word; e — forward end
+
+Q: How do I move to the start of the line?
+A: `w` doesn't do that — it moves word-by-word. For the start of the line, press `0` (move to column 0) or `^` (move to first non-blank). See the line-motions topic for the full set.
+Related: 0 — first column; ^ — first non-blank
+
+Q: Why does `w` sometimes seem to skip characters?
+A: `w` skips WHITESPACE between words. It lands on the first character of the NEXT word, so any intervening spaces get crossed over. That's usually what you want for navigation; for fine-grained cursor movement use `l` instead.
+Related: l — move right one character; W — skips more (punctuation + whitespace)
+
+Q: Does `b` include the current character?
+A: `b` goes to the start of the CURRENT word if you're in the middle of one, otherwise to the start of the PREVIOUS word. So repeatedly pressing `b` at the middle of "foobar" puts you at the `f`, then jumps back.
+Related: ge — to the END of the previous word instead
+
+Q: Which word motion should I learn first?
+A: `w` and `b` — forward and backward by word. Those two cover the vast majority of navigation. Add `e` when you start using operators (it pairs better with some edits than `w`).
+Related: w — forward; b — back; e — end of word
+
+Q: What's the WORD motion useful for?
+A: `W`, `B`, `E` jump by whitespace-delimited chunks. They shine in code: `my_variable.someMethod(arg)` is ONE WORD to `W` but five separate words to `w`. Reach for `W` when lowercase motions feel too granular.
+Related: w / b / e — finer-grained word motions
+
+Q: How do I jump multiple words at once?
+A: Prefix any motion with a count. `5w` moves forward five words; `4b` back four. Works with all motions in this family.
+Related: dw vs d3w — counts also apply when combined with operators

@@ -1,0 +1,71 @@
+id: yank-and-put
+title: Yank and Put
+summary: `y` copies, `p` pastes after the cursor, `P` pastes before. `yy` yanks a whole line. In kindaVim, yank and put work with a single default register — no named registers.
+status: supported
+tags: y, yy, Y, p, P, yiw, yaw, yank, put, paste
+aliases: yank, paste, put, copy, copy line
+lessons: ch5.l1
+related: delete-operator, text-objects
+questions: What's the difference between `p` and `P`? || How do I copy a whole line? || Why does my paste end up on a new line sometimes?
+web: vim yank put copy paste tutorial
+video: vim y p paste tutorial
+
+## The Grammar
+`y{motion}` yanks (copies) the covered text into the default register. `p` puts it after the cursor; `P` puts it before.
+
+- `yw` yank to next word
+- `yiw` / `yaw` yank inner / around word
+- `yy` yank the whole line
+- `Y` yank the whole line (same as `yy` in kindaVim/Vim 8+)
+- `y$` yank to end of line
+- `p` put after cursor (or below line if yanked linewise)
+- `P` put before cursor (or above line if yanked linewise)
+
+## Canonical QA
+Q: How do I copy text in kindaVim?
+A: Press `y` in {{normal}} followed by a motion. `yw` yanks to the next word; `yy` yanks the whole line; `y$` yanks to end of line. The yanked text lives in the default register until your next yank or delete.
+Related: p — paste after cursor; yy — yank line; diw — delete (also copies to register)
+
+Q: What's the difference between `p` and `P`?
+A: `p` puts (pastes) the register AFTER the cursor (for character text) or BELOW the current line (for linewise text). `P` puts BEFORE the cursor or ABOVE the line. Same content, different position.
+Related: yy — yank line; y — yank operator
+
+Q: How do I copy a whole line?
+A: Press `yy` in {{normal}}. For multiple lines, prefix with a count: `3yy` yanks three lines starting from the current one.
+Related: Y — same as yy; p — paste below
+
+Q: Why does `p` sometimes paste on a new line?
+A: Because yanks preserve line-vs-character context. If you yanked with `yy` (linewise), `p` pastes on a new line below. If you yanked with `yw` (characterwise), `p` pastes inline after the cursor. That's by design — paste matches the shape of the yank.
+Related: P — paste before instead of after; y — characterwise yank
+
+Q: How do I copy a word?
+A: Press `yiw` in {{normal}} — "yank inner word". Works anywhere in the word. `yaw` includes the trailing space (useful when pasting into a list).
+Related: yw — yank from cursor to next word; yaw — include surrounding space
+
+Q: How do I copy everything inside quotes?
+A: `yi"` or `yi'` depending on the quote type. Contents only, no quotes. Use `ya"` if you want the quotes included.
+Related: di" — delete instead; ci" — change instead
+
+Q: Does kindaVim support named registers?
+A: No — kindaVim uses a single default register. Each yank or delete replaces what was there. If you need multiple clipboards at once, use macOS's own Cmd+C / Cmd+V which is the system clipboard (separate from the kindaVim register).
+Related: "a, "0, "+ — named register prefixes (not in kindaVim)
+
+Q: How do I paste from the system clipboard?
+A: Use Cmd+V — kindaVim doesn't hook into the `"+` system-clipboard register, but the regular macOS paste shortcut works from {{insert}} mode. For a pure-kindaVim round-trip (yank in app, paste in app), `y` and `p` are all you need.
+Related: Cmd+C — macOS copy; "+ — system clipboard register (not supported)
+
+Q: How do I copy from where I am to the end of the line?
+A: Press `y$` in {{normal}}. There's no single-character shortcut like `D`/`C`/`Y` — `y$` is the form. (`Y` is aliased to `yy` in modern Vim.)
+Related: y0 — yank back to column zero; y^ — yank back to first non-blank
+
+Q: How do I yank multiple lines?
+A: Prefix `yy` with a count: `5yy` yanks five lines. Or use a linewise motion like `yG` (yank to end of document).
+Related: dG — delete version; p — paste
+
+Q: How do I paste the last thing I deleted?
+A: Same way — press `p` or `P`. Both yanks and deletes go to the same default register in kindaVim. If you deleted something with `dw`, `p` pastes it back.
+Related: u — undo (different concept from paste)
+
+Q: Where does the yanked text go when I yank something new?
+A: The default register holds only the most recent yank or delete. Yanking something new replaces what was there. kindaVim has no yank history beyond that.
+Related: macOS pasteboard history — separate; "0 — the yank-only register (not supported)

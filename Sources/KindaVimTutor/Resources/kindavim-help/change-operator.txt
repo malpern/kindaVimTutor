@@ -1,0 +1,61 @@
+id: change-operator
+title: Change Operator
+summary: `c` deletes the covered text AND drops you into {{insert}} to retype it. It's delete + insert in one keystroke — the highest-leverage "replace this" pattern.
+status: supported
+tags: c, cc, C, c$, cw, ciw, caw
+aliases: change, change line, change word
+lessons: ch3.l4
+related: delete-operator, insert-mode-entry
+questions: What's the difference between `c` and `d`? || How do I change a whole line? || Does `cw` include the trailing space?
+web: vim change operator cc C cw tutorial
+video: vim change word line tutorial
+
+## The Grammar
+`c{motion}` deletes the covered text and enters {{insert}}. Everything that works with `d` works with `c` — same grammar, different ending state.
+
+- `cw` change to next word
+- `ce` change to end of word
+- `cc` change the whole line (clears it, cursor on empty line in insert)
+- `c$` or `C` change to end of line
+- `ciw` / `caw` change inner / around word
+
+## Canonical QA
+Q: What's the difference between `c` and `d`?
+A: Both delete the covered text, but `c` then enters {{insert}} so you can retype immediately. `d` leaves you in {{normal}}. Reach for `c` when you know you're about to retype; `d` when you're just removing.
+Related: cc — change line; dc — nothing (operators don't compose); x — delete one char
+
+Q: How do I change a whole line?
+A: Press `cc` in {{normal}} — deletes the line's contents, leaves the line itself in place, and drops you into {{insert}} with the cursor on the (now empty) line. Same visual outcome as `S`.
+Related: S — identical to cc; dd — delete line without entering insert
+
+Q: What's the difference between `cc` and `C`?
+A: `cc` clears the WHOLE line. `C` clears only from the cursor to the end of the line — leaves text before the cursor intact. Same relationship as `dd` vs `D`.
+Related: c$ — explicit form of C; dd — delete whole line
+
+Q: How do I change from here to the end of the line?
+A: Press `C` in {{normal}} — shortcut for `c$`. Deletes from cursor to end of line and enters {{insert}}.
+Related: cc — change whole line; D — delete to end of line without entering insert
+
+Q: What's the difference between `cw` and `ciw`?
+A: `cw` changes from the CURSOR to the end of the word — if the cursor is in the middle of "foobar", `cw` only changes "bar". `ciw` always changes the WHOLE word, no matter where the cursor sits on it.
+Related: caw — change around word (includes trailing space); dw — same cursor-position behavior but for delete
+
+Q: Does `cw` include the trailing whitespace?
+A: Interestingly no — `cw` is treated like `ce` by Vim. It deletes through the end of the word but leaves the trailing space (unlike `dw` which consumes it). This is a quirk of the operator, not a bug.
+Related: ce — equivalent of cw in this quirk; caw — includes surrounding space
+
+Q: How do I change a word regardless of cursor position?
+A: Use `ciw` — "change inner word." Works from anywhere in the word, deletes just the letters, enters {{insert}}. The go-to for renaming a variable or retyping a token.
+Related: caw — includes surrounding space; ci" — change inside string
+
+Q: How do I change everything inside quotes?
+A: `ci"` for double-quoted; `ci'` for single-quoted. Deletes the contents, leaves the quotes, enters {{insert}}. Essential for editing string literals.
+Related: ca" — change including the quotes; di" — delete without entering insert
+
+Q: How do I change to the next instance of a character?
+A: `ct{char}` changes up to (not including) the next char; `cf{char}` changes through it. `ct)` → change to next `)`, leave paren in place, enter insert. `cf)` → change through the paren.
+Related: dt — delete version; yt — yank version
+
+Q: Is `s` the same as `cl`?
+A: Yes. `s` (substitute character) is a shortcut for "change one character to the right": delete the character under the cursor and enter insert. `cl` is the spelled-out version.
+Related: S — shortcut for cc; r — replace char without entering insert

@@ -1,0 +1,75 @@
+id: insert-mode-entry
+title: Entering Insert Mode
+summary: Press `i`, `I`, `a`, `A`, `o`, or `O` in {{normal}} to start typing. Each one puts the cursor in a different spot — choosing the right entry saves a motion.
+status: supported
+tags: i, I, a, A, o, O, s, S
+aliases: insert, append, open line
+lessons: ch1.l1, ch1.l3
+related: undo-redo
+questions: When should I use `a` instead of `i`? || What's the difference between `o` and `O`? || How do I start a new line while in {{normal}}?
+web: vim insert append open line tutorial
+video: vim i a o insert mode tutorial
+
+## Six Ways In
+Every insert-mode entry puts you in {{insert}} but at a different cursor position:
+
+- `i` — insert BEFORE the cursor
+- `I` — insert at the first non-blank character of the line
+- `a` — append AFTER the cursor
+- `A` — append at the end of the line
+- `o` — open a new line BELOW and start inserting
+- `O` — open a new line ABOVE and start inserting
+
+Pick the one that lands where you want to type. Often one capital letter saves three motions.
+
+## When To Use Which
+If you're already on the character you want to type before, `i`. If you want to type after (most common at end of word), `a`. If you want the start of the line, `I` is faster than `0i`. End of the line, `A` beats `$a`. New blank line, `o` or `O` — no need to position first.
+
+## Canonical QA
+Q: How do I start typing in kindaVim?
+A: Press `i` in {{normal}} to enter {{insert}} before the cursor. Press `Esc` when you're done typing to return to {{normal}}.
+Related: a — enter insert AFTER the cursor; o — open a new line below and insert; I — insert at the first non-blank of the line
+
+Q: What's the difference between `i` and `a`?
+A: `i` inserts BEFORE the cursor character; `a` inserts AFTER it. If the cursor is on the `l` in "world" and you press `a`, you type between the `l` and the `d`. With `i`, you type between the `r` and the `l`.
+Related: I — insert at line start; A — append at line end
+
+Q: How do I append to the end of a line?
+A: Press `A` in {{normal}} to jump to the end of the line AND enter {{insert}} in one step. It's a shortcut for `$a` — faster when you want to keep typing at the end.
+Related: I — the mirror-image shortcut for line start; a — append one char after cursor; o — open next line below
+
+Q: How do I insert at the beginning of a line?
+A: Press `I` (capital) in {{normal}} to jump to the first non-blank character AND enter {{insert}} in one step. Shortcut for `^i`.
+Related: A — append at end of line; i — insert at exact cursor position
+
+Q: How do I start a new line while in normal mode?
+A: Press `o` in {{normal}} to open a new line BELOW the current line and enter {{insert}}. Press `O` (capital) to open a new line ABOVE. Both drop you into {{insert}} ready to type.
+Related: a — append after cursor; A — append at end of current line
+
+Q: What's the difference between `o` and `O`?
+A: `o` opens a new line BELOW the current line and enters {{insert}} on it. `O` opens a new line ABOVE the current line instead. Both leave you in {{insert}} with the cursor on the fresh line.
+Related: a — append after cursor; Esc — leave {{insert}} back to {{normal}}
+
+Q: How do I get back to normal mode?
+A: Press `Esc` in {{insert}} to return to {{normal}}. Once there, keystrokes become commands again instead of typed characters.
+Related: i — re-enter insert; . — repeat the last change
+
+Q: What does `s` do?
+A: Press `s` in {{normal}} to delete the character under the cursor AND enter {{insert}} — same as `xi` in one step. Useful for replacing a single character with possibly multiple characters.
+Related: r — replace one character without entering insert; S — substitute the entire line
+
+Q: What does `S` do?
+A: Press `S` in {{normal}} to delete the whole current line AND enter {{insert}} on an empty line. Same as `cc`.
+Related: cc — equivalent to S; dd — delete line without entering insert
+
+Q: How do I add text without erasing what's there?
+A: Any of `i`, `I`, `a`, `A`, `o`, `O` keep existing text and let you insert new text at the chosen position. Only `s`, `S`, `r`, and change operators like `cw` delete first.
+Related: cw — change a word (delete + insert); r — replace one character
+
+Q: My cursor disappeared after typing — am I still in insert mode?
+A: Check the mode indicator in the top-right of kindaVim Tutor. If it shows {{insert}}, you're still in insert mode. Press `Esc` to get back to {{normal}} where motions like `hjkl` work again.
+Related: Esc — return to normal mode
+
+Q: How do I undo accidentally entering insert mode?
+A: Press `Esc` to return to {{normal}} first, then `u` to undo anything you typed. Insert mode itself doesn't record as a change — only the text you entered while there.
+Related: u — undo; Ctrl-R — redo

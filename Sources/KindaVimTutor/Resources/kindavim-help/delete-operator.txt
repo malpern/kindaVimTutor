@@ -1,0 +1,64 @@
+id: delete-operator
+title: Delete Operator
+summary: `d` is the delete operator. Combined with a motion it deletes the covered text. `dd` deletes the whole line. `D` deletes to end of line.
+status: supported
+tags: d, dd, D, d$, d0, de, db
+aliases: delete, delete line, delete to end of line
+lessons: ch2.l2, ch2.l3
+related: delete-word, change-operator
+questions: What's the difference between `dd` and `D`? || How do I delete from here to the end of the line? || How do I delete multiple lines?
+web: vim delete operator dd D tutorial
+video: vim delete line tutorial
+
+## The Grammar
+`d{motion}` deletes from the cursor to wherever the motion would land. Pair with anything you know:
+
+- `dw` delete to start of next word
+- `de` delete to end of current word
+- `db` delete back a word
+- `d$` or `D` delete to end of line
+- `d0` delete back to column zero
+- `dG` delete to the end of the document
+- `dgg` delete to the top
+- `dd` delete the whole current line (a special linewise shortcut)
+
+## Canonical QA
+Q: What's the difference between `dd` and `D`?
+A: `dd` deletes the ENTIRE current line (including the newline). `D` deletes from the cursor to the END of the line — leaves the line itself in place as an empty line.
+Related: d$ — same as D; cc — change entire line; S — substitute entire line
+
+Q: How do I delete a whole line?
+A: Press `dd` in {{normal}} to delete the current line. Prefix with a count for multiple: `5dd` deletes five lines starting from the current one.
+Related: D — delete to end of line (doesn't remove line break); dj — delete current line + next
+
+Q: How do I delete from the cursor to the end of the line?
+A: Press `D` in {{normal}} — shortcut for `d$`. Leaves the current line as whatever was before the cursor.
+Related: dd — delete the whole line; d$ — explicit form of D
+
+Q: How do I delete multiple lines?
+A: Prefix `dd` with a count. `3dd` deletes three lines. Alternatively `dG` deletes from the current line to the end of the document, and `dgg` deletes to the top.
+Related: dj — delete current + next; d{count}j — delete N lines down
+
+Q: How do I delete the character under the cursor?
+A: Press `x` in {{normal}} — a shorthand for `dl` (delete one character right). Prefix with a count: `5x` deletes five characters.
+Related: X — delete char BEFORE cursor; r — replace one char without deleting
+
+Q: How do I delete back a word?
+A: Press `db` in {{normal}} — delete operator + back-a-word motion. Deletes from the cursor back to the start of the previous word.
+Related: dw — delete forward a word; dge — delete back to end of previous word
+
+Q: What's the difference between `dw` and `de`?
+A: `dw` deletes from the cursor through the end of the word AND the trailing whitespace. `de` stops before the whitespace, leaving the space in place. Use `de` to preserve spacing; `dw` to remove the whole word unit.
+Related: daw — delete around word (includes surrounding space); diw — delete inner word only
+
+Q: How do I delete from here to a specific character?
+A: Combine `d` with `t{char}` or `f{char}`. `dt)` deletes up to (not including) the next `)`. `df)` deletes through the `)`. Great for removing arguments, values, etc.
+Related: ct) — change instead of delete; yt) — yank instead
+
+Q: Where does deleted text go?
+A: Into the default unnamed register, the same place yanks go. Paste it back with `p` or `P`. kindaVim's register model is simplified — just the one default register.
+Related: p — put after cursor; P — put before cursor; y — yank instead of delete
+
+Q: How do I delete without it being "deleted" — just remove it?
+A: In kindaVim, every delete also copies to the default register (same as Vim). There's no separate "delete-no-yank" option without named registers. If you want to keep the previous yank, do your edit first, then re-yank what you need.
+Related: y — yank; "a — named register (not supported in kindaVim)
