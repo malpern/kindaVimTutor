@@ -66,15 +66,50 @@ X — delete character before cursor
 dw — delete next word
 dW — delete next WORD
 de — delete to end of word
+dE — delete to end of WORD
 db — delete to start of previous word
-dd — delete line
+dB — delete back a WORD
+dge — delete back to end of previous word
+dgE — delete back to end of previous WORD
+dh — delete one character left
+dj — delete current and next line (linewise)
+dk — delete current and previous line
+dl — delete one character right (same as x)
 d$ — delete to end of line
+d0 — delete to column zero
+d^ — delete to first non-blank of line
+dd — delete line
 D — delete to end of line (shortcut for d$)
+dG — delete from current line through end of document
+dgg — delete from current line back to top
+dt — delete up to a character (pair with {char})
+df — delete through a character (pair with {char})
+dT — delete back up to a character (pair with {char})
+dF — delete back through a character (pair with {char})
 cw — change next word
+cW — change next WORD
+cb — change back a word
+cB — change back a WORD
+ce — change to end of word (same quirk as cw — keeps trailing space)
+cE — change to end of WORD
+cl — change one character (same as s)
 cc — change line
 c$ — change to end of line
+c0 — change back to column zero
 C — change to end of line (shortcut for c$)
+ct — change up to a character (pair with {char})
+cf — change through a character (pair with {char})
+cT — change back up to a character
+cF — change back through a character
 yw — yank word
+yW — yank WORD
+yb — yank back a word
+ye — yank to end of word
+y$ — yank to end of line
+y0 — yank back to column zero
+y^ — yank to first non-blank
+yt — yank up to a character (pair with {char})
+yf — yank through a character (pair with {char})
 yy — yank line
 Y — yank line (shortcut for yy)
 ~ — toggle case of character under cursor
@@ -82,32 +117,90 @@ Y — yank line (shortcut for yy)
 # Text objects
 diw — delete inside word
 daw — delete around word (includes surrounding space)
+diW — delete inside WORD
+daW — delete around WORD
 ciw — change inside word
 caw — change around word
+ciW — change inside WORD
+caW — change around WORD
 yiw — yank inside word
 yaw — yank around word
+yiW — yank inside WORD
+yaW — yank around WORD
+diw — delete inside word
 di( — delete inside parentheses
 da( — delete around parentheses (includes the parens)
 di) — delete inside parentheses (same as di()
 da) — delete around parentheses
+dib — delete inside block (shortcut for di()
+dab — delete around block (shortcut for da()
+ci( — change inside parentheses
+ca( — change around parentheses
+ci) — change inside parentheses (same as ci()
+ca) — change around parentheses
+cib — change inside block (shortcut for ci()
+cab — change around block
+yi( — yank inside parentheses
+ya( — yank around parentheses
+yib — yank inside block
+yab — yank around block
 di" — delete inside double-quoted string
 da" — delete around double-quoted string (includes the quotes)
+ci" — change inside double-quoted string
+ca" — change around double-quoted string
+yi" — yank inside double-quoted string
+ya" — yank around double-quoted string
 di' — delete inside single-quoted string
 da' — delete around single-quoted string
+ci' — change inside single-quoted string
+ca' — change around single-quoted string
 di{ — delete inside braces
 da{ — delete around braces
+diB — delete inside braces (shortcut for di{)
+daB — delete around braces
+ci{ — change inside braces
+ca{ — change around braces
+ciB — change inside braces (shortcut)
+caB — change around braces
 di[ — delete inside brackets
 da[ — delete around brackets
+ci[ — change inside brackets
+ca[ — change around brackets
+yi[ — yank inside brackets
+ya[ — yank around brackets
+ip — inside paragraph (text object)
+ap — around paragraph
+dip — delete inside paragraph
+dap — delete around paragraph
 
 # Visual mode
 v — enter visual mode (character-wise)
 V — enter visual line mode
+U — uppercase selection (in visual)
+viw — enter visual + inner-word text object
+vi" — enter visual + inside quotes
+vi( — enter visual + inside parens
+viwU — select inner word then uppercase (visual-mode case operator fallback)
+viw~ — select inner word then toggle case
 
 # Search
 / — forward incremental search
 ? — backward incremental search
 n — repeat last search forward
 N — repeat last search backward
+
+# System shortcuts (macOS — referenced for context; not Vim commands)
+Cmd+S — macOS save (host app)
+Cmd+Q — macOS quit (host app)
+Cmd+O — macOS open (host app)
+Cmd+C — macOS copy
+Cmd+V — macOS paste
+Cmd+T — macOS new tab (host app)
+Cmd+W — macOS close window/tab (host app)
+Cmd+N — macOS new window (host app)
+Cmd+` — macOS cycle windows in same app
+Cmd+? — kindaVim Tutor help shortcut
+Cmd+Space — Spotlight
 
 # Misc
 . — repeat last change
@@ -124,6 +217,8 @@ S — substitute line
 r — replace single character
 J — join next line onto current line
 Esc — exit to normal mode
+Enter — confirm / commit (used in search prompts, etc.)
+| — move to specific column (prefixed with count)
 
 unsupported:
 
@@ -200,3 +295,31 @@ g# — loose word search backward
 # keywords: change next match, cgn workflow
 cgn — change next search match
 cgN — change previous search match
+
+# Join without space
+# keywords: gJ, join without space
+gJ — join next line without inserting the separator space
+
+# Match-bracket change
+# keywords: c%, change to matching bracket
+c% — change from cursor to matching bracket
+
+# Sentence / tag text objects
+# keywords: sentence text object, tag text object
+is — inside sentence (text object)
+as — around sentence (text object)
+it — inside tag
+at — around tag
+
+# Case operators
+# keywords: gU, gu, g~, case operator, uppercase operator, lowercase operator
+gU — uppercase operator (pair with motion or text object)
+gu — lowercase operator
+g~ — toggle case operator
+gUiw — uppercase inner word
+guiw — lowercase inner word
+g~iw — toggle case of inner word
+
+# Invalid operator composition
+# keywords: operator composition
+dc — does nothing (operators don't compose)
