@@ -20,3 +20,11 @@ Related: viw~ — visual-mode case toggle
 Q: How do I uppercase a whole word?
 A: `gUiw` in stock Vim (uppercase inner word). `gU`/`gu` operators can behave differently on native text fields. A reliable approach is `viwU` (visual + uppercase).
 Related: gu — lowercase operator; ~ — toggle only
+
+Q: How do I lowercase a selection?
+A: Enter visual with `v` or `V`, select the text, then press `u` to lowercase it. (Note: this `u` is a visual-mode operator, different from {{normal}}'s undo `u`.)
+Related: U — uppercase in visual; ~ — toggle case
+
+Q: Can I use `~` with a count?
+A: Yes — `5~` toggles the case of the next five characters, advancing the cursor five spots.
+Related: viw~ — toggle case of a word via visual selection

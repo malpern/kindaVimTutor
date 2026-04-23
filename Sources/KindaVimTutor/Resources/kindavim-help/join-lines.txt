@@ -26,3 +26,7 @@ Related: J — single join; V3j — select lines and combine
 Q: What happens if I join a line with an empty line?
 A: `J` on a line followed by a blank one appends the blank — result is the original line with a trailing space (where the blank line would have been).
 Related: dd — delete blank line instead of joining
+
+Q: How is `J` different from pressing Backspace at the start of the next line?
+A: Functionally similar — both merge two lines. `J` is available in {{normal}} mode without leaving the mode; Backspace requires being in {{insert}} at the exact position. `J` also always inserts a single space between the joined content, which Backspace doesn't.
+Related: gJ — join without the space (stock Vim)

@@ -32,3 +32,15 @@ Related: u — undo the last change; . — repeat the last change (different fro
 Q: What's the difference between `u` and `.`?
 A: `u` undoes changes — it walks BACKWARD through your edit history. `.` repeats your last change — if you just pressed `dw`, `.` does another `dw`. They're opposite directions: one erases history, the other replays it.
 Related: Ctrl-R — redo an undone change
+
+Q: How do I undo multiple changes at once?
+A: Prefix `u` with a count: `3u` undoes three changes. Or just press `u` repeatedly — each press walks one step further back.
+Related: Ctrl-R — redo; U — undo all changes on current line (stock Vim)
+
+Q: Can I undo past the start of an edit session?
+A: In kindaVim, undo is bounded by the host app's own undo history. Once that history is full or cleared, `u` has nothing left to undo. Behavior varies by host — Notes, Mail, TextEdit each have different history limits.
+Related: Ctrl-R — redo; host app undo (Cmd-Z equivalent)
+
+Q: What if I undo too far by mistake?
+A: Press `Ctrl-R` (redo) to step forward through the same history. Each press re-applies one change in the direction you originally made them.
+Related: u — undo step; . — repeat last change (not redo)

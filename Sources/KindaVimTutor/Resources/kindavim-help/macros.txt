@@ -39,3 +39,11 @@ A: kindaVim doesn't support macros, so there's nothing to replay.
 Unsupported: yes
 TerminalVim: In stock Vim, type `@` followed by the register letter you recorded into. Prefix with a count like `5@a` to replay five times.
 Related: . — repeat the last change in kindaVim
+
+Q: Can I chain commands without a macro?
+A: Yes — for simple multi-step edits that you want to reuse, chain them into one change where possible (e.g. `ciwNewText<Esc>`), then repeat with `.`. `.` replays the entire change as a unit.
+Related: . — repeat last change; cgn — change next search match (useful for search-then-repeat)
+
+Q: How do I record and replay a find-and-replace across a file?
+A: Without macros, the kindaVim idiom is: `/pattern<Enter>` to search, `cgn<replacement><Esc>` to change the first match, then `.` (repeat change) after each `n` (next match). It's not automated but it's predictable and visible.
+Related: / — search; cgn — change next search match; . — repeat change
