@@ -1,0 +1,65 @@
+id: visual-mode
+title: Visual Mode
+summary: Press `v` to enter {{visual}} — extend a selection with any motion, then apply an operator to act on it. `V` enters linewise visual for whole-line selections.
+status: supported
+tags: v, V, visual, visual-line
+aliases: visual mode, selection, highlight
+lessons: ch6.l1, ch6.l2
+related: text-objects, delete-operator
+questions: What's the difference between `v` and `V`? || How do I delete a visual selection? || Can I extend a visual selection by word?
+web: vim visual mode tutorial
+video: vim visual mode v V tutorial
+
+## Three Steps
+1. Press `v` in {{normal}} to start a character-wise selection, or `V` for line-wise.
+2. Use any motion to extend the selection: `w`, `e`, `$`, `f)`, `iw`, `2j`, etc.
+3. Press an operator (`d`, `c`, `y`) to act on the selection. Or press `Esc` to cancel.
+
+## Canonical QA
+Q: How do I enter visual mode?
+A: Press `v` in {{normal}} to start a character-wise visual selection. Move with any motion to extend it. Press `Esc` to cancel, or an operator (`d`, `c`, `y`) to act on it.
+Related: V — linewise visual; Esc — cancel
+
+Q: What's the difference between `v` and `V`?
+A: `v` is CHARACTERWISE — selection starts at a single character and grows character by character. `V` is LINEWISE — selection is always whole lines, no matter how far you move within a line.
+Related: Esc — return to normal
+
+Q: How do I delete a visual selection?
+A: Press `d` (or `x`) while the selection is active. The selected text is deleted and you return to {{normal}}. The deleted text lands in the default register; paste it back with `p`.
+Related: c — change (delete + enter insert); y — yank (copy without deleting)
+
+Q: How do I yank a visual selection?
+A: Make the selection with `v` or `V`, then press `y`. Text goes to the default register. Visual mode exits and the cursor returns to where the selection started.
+Related: d — delete version; p — paste
+
+Q: How do I change a visual selection?
+A: Make the selection, then press `c`. The selected text is deleted and you enter {{insert}} ready to retype.
+Related: d — delete only; s — substitute one character
+
+Q: Can I extend a visual selection word by word?
+A: Yes — while in visual mode, `w` extends by one word, `b` extends backward, `e` to end of word. Any motion works; the selection grows or shrinks to match.
+Related: $ — extend to end of line; 0 — extend to start
+
+Q: How do I select a whole line?
+A: Press `V` (capital) in {{normal}} to enter linewise visual. The current line is selected. Press `j` / `k` to extend to adjacent lines.
+Related: v — characterwise; yy — yank line without visual
+
+Q: How do I select text inside parens in visual mode?
+A: Press `v` first, then apply a text object: `vi(` selects inside parens, `va(` includes the parens. Same grammar as operators — text objects extend the selection.
+Related: viw — select inner word; vi" — select inside quotes
+
+Q: How do I cancel a visual selection?
+A: Press `Esc` — returns to {{normal}} with no edit. The cursor ends up at the last position of the selection.
+Related: v — re-enter visual
+
+Q: How do I re-select the last visual selection?
+A: Press `gv` in {{normal}} — "go to visual." Restores the exact bounds of your last visual selection. Useful after an edit breaks context and you want the same region again.
+Related: v — manual entry
+
+Q: Does visual mode support counts?
+A: Yes — in visual mode, a count before a motion multiplies it. `v3w` selects from the cursor forward by three words. The count applies to the motion, not the operator.
+Related: 3w — counts work on motions outside visual too
+
+Q: How do I select from here to the end of the line?
+A: Press `v`, then `$` — character-wise selection to end of line. Or in linewise visual (`V`), the current line is selected and you can extend.
+Related: V — linewise from the start

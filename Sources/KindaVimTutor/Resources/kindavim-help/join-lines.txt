@@ -1,0 +1,28 @@
+id: join-lines
+title: Join Lines
+summary: Press `J` in {{normal}} to join the next line onto the current one. Whitespace between them collapses to a single space.
+status: supported
+tags: J, join
+aliases: join line, merge line
+lessons:
+related: delete-operator
+questions: How do I join two lines? || Does `J` remove all the whitespace? || Can I join multiple lines at once?
+web: vim J join lines tutorial
+video: vim join lines J tutorial
+
+## Canonical QA
+Q: How do I join two lines?
+A: Press `J` (capital) in {{normal}}. The next line is appended to the current one, separated by a single space. Leading whitespace on the joined line is removed.
+Related: dd — delete line; o — open new line below
+
+Q: Does `J` remove all whitespace between the lines?
+A: It collapses trailing-of-line-one + leading-of-line-two into a single space. So "foo   " joined to "    bar" becomes "foo bar" — one space in between regardless of what was there.
+Related: gJ — join without inserting the space (stock Vim; behavior varies in kindaVim)
+
+Q: How do I join multiple lines at once?
+A: Prefix with a count: `3J` joins the current line plus the next two (so three lines become one). Works for any count.
+Related: J — single join; V3j — select lines and combine
+
+Q: What happens if I join a line with an empty line?
+A: `J` on a line followed by a blank one appends the blank — result is the original line with a trailing space (where the blank line would have been).
+Related: dd — delete blank line instead of joining

@@ -1,0 +1,41 @@
+id: replace-characters
+title: Replace Characters
+summary: `r{char}` replaces the single character under the cursor without entering {{insert}}. `s` deletes the character AND enters {{insert}} to retype. `S` does the same for a whole line.
+status: supported
+tags: r, s, S, replace, substitute
+aliases: replace character, substitute character
+lessons: ch5.l2
+related: change-operator
+questions: What's the difference between `r` and `s`? || How do I replace a character without going into insert mode? || Can `r` replace multiple characters?
+web: vim replace substitute character tutorial
+video: vim r s replace character tutorial
+
+## Three Operations
+- `r{char}` — replace the single character under the cursor with `{char}`. Cursor stays, no mode change.
+- `s` — delete the character under the cursor and enter {{insert}} (same as `cl`).
+- `S` — delete the whole line and enter {{insert}} on an empty line (same as `cc`).
+
+## Canonical QA
+Q: How do I replace a single character?
+A: Press `r` in {{normal}} followed by the replacement character. No mode change — you stay in {{normal}} with the new character in place.
+Related: s — delete char and enter insert; R — replace mode (stock Vim, limited in kindaVim)
+
+Q: What's the difference between `r` and `s`?
+A: `r` swaps ONE character and keeps you in {{normal}}. `s` deletes the character and puts you in {{insert}} so you can type ONE OR MORE replacement characters. Use `r` for a single-character swap, `s` when the replacement might be longer.
+Related: cw — change a whole word; S — substitute whole line
+
+Q: Can `r` replace multiple characters at once?
+A: Not directly — `r` takes one replacement character. But counts work: `5ra` replaces the next 5 characters with `aaaaa`. For varying replacement, use `cw`, `cl`, or `s`.
+Related: cl — change one character (same as s); cw — change word
+
+Q: How do I replace a whole word?
+A: Use `cw` (change word from cursor) or `ciw` (change inner word — anywhere in the word). Both delete the word and drop you into {{insert}}. `ciw` is usually what you want because it works no matter where the cursor sits on the word.
+Related: caw — change around word (includes space); s — single character
+
+Q: What does `S` do?
+A: Press `S` in {{normal}} to clear the whole current line AND enter {{insert}}. Shortcut for `cc`. Useful when you know you're retyping a line from scratch.
+Related: cc — identical behavior; dd — delete line without entering insert
+
+Q: How do I replace the character under the cursor with a newline?
+A: `r` followed by Enter (literally pressing Enter as the replacement character) replaces the character with a line break. Same way any character works with `r`.
+Related: J — join lines; o — open new line below

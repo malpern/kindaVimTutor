@@ -1,0 +1,22 @@
+id: case-toggle
+title: Toggle Case
+summary: Press `~` in {{normal}} to toggle the case of the character under the cursor. The cursor moves forward one character after.
+status: supported
+tags: ~, tilde, case
+aliases: toggle case, swap case
+lessons:
+related:
+questions: How do I toggle case of a character? || How do I change case of a word?
+
+## Canonical QA
+Q: How do I toggle the case of a character?
+A: Press `~` (tilde) in {{normal}} to flip the case of the character under the cursor. Uppercase becomes lowercase and vice-versa. The cursor advances one character after.
+Related: r — replace single character
+
+Q: How do I toggle case of a whole word?
+A: Stock Vim supports `g~iw` (toggle inner word case). Support varies in kindaVim — if it doesn't respond, the reliable fallback is to select the word with `viw` and press `~` in {{visual}}.
+Related: viw~ — visual-mode case toggle
+
+Q: How do I uppercase a whole word?
+A: `gUiw` in stock Vim (uppercase inner word). `gU`/`gu` operators can behave differently on native text fields. A reliable approach is `viwU` (visual + uppercase).
+Related: gu — lowercase operator; ~ — toggle only

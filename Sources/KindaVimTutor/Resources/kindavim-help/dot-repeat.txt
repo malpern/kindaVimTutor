@@ -1,0 +1,39 @@
+id: dot-repeat
+title: Dot Repeat
+summary: `.` repeats your last change. It's Vim's "do that again" button and one of the highest-leverage habits to build — edits become composable.
+status: supported
+tags: ., dot, repeat
+aliases: repeat, do it again
+lessons: ch5.l3
+related: undo-redo
+questions: What counts as "a change" for `.`? || Does `.` repeat motions? || How do I undo a `.` repeat?
+web: vim dot repeat command tutorial
+video: vim dot repeat power tutorial
+
+## What It Repeats
+`.` in {{normal}} replays your LAST CHANGE. A change is anything that modifies the document — inserts, deletes, replaces, etc. It doesn't record pure motions (`j`, `w`, `$`) or searches.
+
+## Canonical QA
+Q: What does `.` do?
+A: Press `.` in {{normal}} to repeat your last change. If you just deleted a word with `dw`, `.` deletes another. If you appended "foo" with `afoo<Esc>`, `.` appends "foo" again. It's the single most powerful habit in Vim.
+Related: u — undo; Ctrl-R — redo
+
+Q: What counts as "a change" for `.`?
+A: Anything that modifies the text: inserts (`i`, `a`, `o`), deletes (`d`, `x`), changes (`c`, `s`), replaces (`r`), and insert-mode typing. Pure motions and searches don't count — `.` is for edits only.
+Related: u — undo a change
+
+Q: Does `.` repeat motions like `w` or `$`?
+A: No — motions alone don't change the document. `.` only repeats the last CHANGE. If the change included a motion as part of an operator (`dw`), the whole `dw` gets repeated, not just `w`.
+Related: ; — repeat last f/F/t/T motion; n — repeat last search
+
+Q: How do I undo a `.` repeat?
+A: Same as any other change — press `u` to undo. Each `.` counts as its own undo step, so you can step back through several repeats.
+Related: u — undo; Ctrl-R — redo
+
+Q: How is `.` different from macros?
+A: `.` repeats ONE change — the most recent one. Macros (not supported in kindaVim) record a sequence of keystrokes and can replay many steps. For single-command repetition, `.` is simpler and always there.
+Related: u — undo; q — macro record (not supported)
+
+Q: Does `.` know how many times I repeated before?
+A: No — it repeats the last change once. Prefix with a count to multiply: `5.` repeats the change five times.
+Related: 5dw — counts work on most commands
