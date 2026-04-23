@@ -4,7 +4,7 @@ import SwiftUI
 struct KindaVimTutorApp: App {
     @State private var appState = AppState()
     @State private var showStats = false
-    @State private var columnVisibility: NavigationSplitViewVisibility = .automatic
+    @State private var isSidebarVisible = true
 
     init() {
         AppLogger.shared.info("app", "launch", fields: [
@@ -16,19 +16,6 @@ struct KindaVimTutorApp: App {
     var body: some Scene {
         Window("kindaVim Tutor", id: "main") {
             mainUI
-            .toolbar {
-                toolbarContent
-            }
-            // macOS 26's window toolbar transitions between a
-            // "scrolled under" (opaque) and "at top" (transparent)
-            // appearance based on what's under it in the detail
-            // pane. That state change ripples into a shared
-            // window-level safe-area inset shift, which in turn
-            // slides the sidebar's top content up into the title-
-            // bar strip on every step advance. Pinning the toolbar
-            // background to always visible stops the inset from
-            // shifting.
-            .toolbarBackground(.visible, for: .windowToolbar)
             .frame(minWidth: 900, minHeight: 600)
             .environment(appState.modeMonitor)
             .onAppear {
@@ -57,7 +44,10 @@ struct KindaVimTutorApp: App {
             }
         }
         .commands {
-            AppMenuCommands(columnVisibility: $columnVisibility, showStats: $showStats)
+            AppMenuCommands(
+                isSidebarVisible: $isSidebarVisible,
+                showStats: $showStats
+            )
         }
 
         Window("About kindaVim Tutor", id: "about") {
@@ -81,7 +71,7 @@ private final class DebugObserverBox {
 }
 
 private struct AppMenuCommands: Commands {
-    @Binding var columnVisibility: NavigationSplitViewVisibility
+    @Binding var isSidebarVisible: Bool
     @Binding var showStats: Bool
     @Environment(\.openWindow) private var openWindow
 
@@ -92,17 +82,10 @@ private struct AppMenuCommands: Commands {
             }
         }
 
-        // Put sidebar toggle in the View menu at the standard slot
-        // (CommandGroup(before: .sidebar) replaces the empty system
-        // sidebar slot). `⌘⌃S` matches Xcode's toggle-navigator
-        // shortcut, which is the closest established convention for
-        // dev-tool apps on macOS.
         CommandGroup(before: .sidebar) {
-            Button(columnVisibility == .detailOnly ? "Show Sidebar" : "Hide Sidebar") {
-                withAnimation(.easeInOut(duration: 0.25)) {
-                    columnVisibility = (columnVisibility == .detailOnly)
-                        ? .automatic
-                        : .detailOnly
+            Button(isSidebarVisible ? "Hide Sidebar" : "Show Sidebar") {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    isSidebarVisible.toggle()
                 }
             }
             .keyboardShortcut("s", modifiers: [.command, .control])
@@ -191,30 +174,62 @@ private struct AppMenuCommands: Commands {
     }
 }
 
-extension KindaVimTutorApp {
-    @ToolbarContentBuilder
-    fileprivate var toolbarContent: some ToolbarContent {
-        ToolbarItem(placement: .automatic) {
-            ToolbarModeBadge(monitor: appState.modeMonitor)
-        }
-        ToolbarItem(placement: .automatic) {
-            ToolbarStatsButton(
-                progressStore: appState.progressStore,
-                showStats: $showStats
-            )
-        }
-    }
+/// Sidebar toggle rendered as a glass-chip icon button. Sits as an
+/// overlay on the content (no NavigationSplitView), so it needs its own
+/// container styling to not look like a floating icon.
+private struct SidebarToggleButton: View {
+    @Binding var isSidebarVisible: Bool
+    @State private var isHovering = false
 
+    var body: some View {
+        Button {
+            withAnimation(.easeInOut(duration: 0.2)) {
+                isSidebarVisible.toggle()
+            }
+        } label: {
+            Image(systemName: "sidebar.leading")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.secondary)
+                .frame(width: 28, height: 24)
+                .background {
+                    if #available(macOS 26, *) {
+                        Color.clear.glassEffect(.regular.interactive(), in: .rect(cornerRadius: 7))
+                    } else {
+                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .strokeBorder(Color.primary.opacity(0.08), lineWidth: 0.5)
+                            )
+                    }
+                }
+        }
+        .buttonStyle(.plain)
+        .focusable(false)
+        .opacity(isHovering ? 1 : 0.9)
+        .animation(.easeInOut(duration: 0.15), value: isHovering)
+        .onHover { isHovering = $0 }
+        .help(isSidebarVisible ? "Hide sidebar" : "Show sidebar")
+        .accessibilityLabel(isSidebarVisible ? "Hide sidebar" : "Show sidebar")
+    }
+}
+
+extension KindaVimTutorApp {
     @ViewBuilder
-    private var mainUI: some View {
-        NavigationSplitView(columnVisibility: $columnVisibility) {
-            SidebarView(
-                chapters: appState.chapters,
-                selectedLessonId: $appState.selectedLessonId,
-                progressStore: appState.progressStore,
-                inspectorState: appState.inspectorState
-            )
-        } detail: {
+    fileprivate var mainUI: some View {
+        HStack(spacing: 0) {
+            if isSidebarVisible {
+                SidebarView(
+                    chapters: appState.chapters,
+                    selectedLessonId: $appState.selectedLessonId,
+                    progressStore: appState.progressStore,
+                    inspectorState: appState.inspectorState
+                )
+                .frame(width: 260)
+
+                Divider()
+            }
+
             Group {
                 if let lesson = appState.selectedLesson,
                    let chapter = appState.selectedChapter {
@@ -232,11 +247,26 @@ extension KindaVimTutorApp {
                     WelcomeView(onStartLearning: { appState.goToFirstLesson() })
                 }
             }
-            // Text throughout the detail view — lesson titles, prose,
-            // instructions, tips, drill captions — is selectable and
-            // copyable with ⌘C. Doesn't affect buttons/links or the
-            // NSTextView drill editor (which has its own selection).
             .textSelection(.enabled)
         }
+        .overlay(alignment: .topLeading) {
+            SidebarToggleButton(isSidebarVisible: $isSidebarVisible)
+                .padding(.leading, isSidebarVisible ? 214 : 6)
+                .padding(.top, 13)
+        }
+        .overlay(alignment: .topTrailing) {
+            HStack(spacing: 12) {
+                ToolbarModeBadge(monitor: appState.modeMonitor)
+                ToolbarStatsButton(
+                    progressStore: appState.progressStore,
+                    showStats: $showStats
+                )
+            }
+            .padding(.top, 14)
+            .padding(.trailing, 18)
+        }
+        .coordinateSpace(name: "mainUI")
+        .focusEffectDisabled()
     }
 }
+

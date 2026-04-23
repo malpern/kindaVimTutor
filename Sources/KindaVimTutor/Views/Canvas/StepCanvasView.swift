@@ -27,11 +27,6 @@ struct StepCanvasView: View {
                                           onAdvance: { advanceForward() })
 
                         case .content(let contentId, let blocks):
-                            // The first content step of a lesson (id suffix
-                            // ".c0") immediately follows the lesson title,
-                            // which already typewrites. We skip the typewriter
-                            // + staggered reveal there so the student isn't
-                            // made to sit through two typewriters back-to-back.
                             ContentStepView(
                                 blocks: blocks,
                                 revealStyle: contentId.hasSuffix(".c0") ? .instant : .typewriter,
@@ -80,11 +75,13 @@ struct StepCanvasView: View {
                         }
                     }
                     .id(step.id)
-                    .transition(stepTransition)
+                    // DIAGNOSTIC: `.transition` stripped to test sidebar-jump trigger
+                    // .transition(stepTransition)
                 }
 
             }
-            .animation(.easeInOut(duration: 0.3), value: controller.currentStepIndex)
+            // DIAGNOSTIC: animation stripped to test sidebar-jump trigger
+            // .animation(.easeInOut(duration: 0.3), value: controller.currentStepIndex)
             .frame(maxWidth: .infinity)
             .layoutPriority(1)  // step content flexes; chrome stays fixed
 

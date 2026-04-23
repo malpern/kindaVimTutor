@@ -27,6 +27,10 @@ struct ToolbarStatsButton: View {
             )
         }
         .buttonStyle(.plain)
+        // Suppress keyboard-focus ring. Without a system toolbar wrapper,
+        // this button receives focus on every lesson advance and shows a
+        // blue rectangle around the rings.
+        .focusable(false)
         .animation(.spring(duration: 0.25, bounce: 0.15), value: isHovering)
         .onHover { hovering in
             isHovering = hovering

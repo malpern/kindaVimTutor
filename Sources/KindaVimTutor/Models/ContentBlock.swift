@@ -27,6 +27,16 @@ enum ContentBlock: Sendable {
     /// mode concept to the concrete UI element the learner will
     /// reference forever.
     case modeIndicatorSpotlight
+    /// Renders the QWERTY home row with specified keys highlighted as
+    /// active. Used to anchor "the keys are right under your hand"
+    /// claims to actual key placement.
+    case homeRow(highlighted: [String])
+    /// Visualizes the operator × motion grammar as a 2D grid so the
+    /// compositional nature of Vim commands becomes concrete.
+    case grammarGrid
+    /// Side-by-side comparison of `f` and `t` on identical text to
+    /// show that f lands ON the target while t stops just BEFORE it.
+    case findVsTill
     /// External link rendered in a tip-style container. Opens in the
     /// user's default browser.
     case linkTip(sfSymbol: String, accent: LinkAccent, label: String, url: String)

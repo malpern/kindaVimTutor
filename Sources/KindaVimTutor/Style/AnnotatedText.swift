@@ -1,16 +1,29 @@
 import SwiftUI
 
-/// Renders a string with inline tokens expanded into small styled
-/// views that flow with the surrounding prose.
+/// Renders a string with inline tokens expanded into styled runs that
+/// flow with surrounding prose.
 ///
 ///     AnnotatedText("Press `j` to move left")
 ///     AnnotatedText("Switch to {{normal}} — keys become commands")
 ///
 /// Supported tokens:
-///   `<key>`         → KeyCapView for a key like `Esc`, `i`, `dd`
+///   `key`           → bold monospace run for a key like `Esc`, `i`, `dd`
 ///   {{normal}},
 ///   {{insert}},
-///   {{visual}}      → InlineModeChip for the named kindaVim mode
+///   {{visual}}      → `InlineModeChip` (rounded pill) for the named
+///                    kindaVim mode
+///
+/// Two rendering paths:
+///   - If the string has no mode tokens, builds a single
+///     `Text(AttributedString)` — native line-break, no custom layout.
+///   - If it has a mode token, uses `AnnotatedFlow` (a custom `Layout`)
+///     so the pill-shaped chip can flow inline with text runs.
+///
+/// The custom `Layout` is safe here because our app shell is a plain
+/// `HStack { Sidebar | Divider | Detail }` rather than a
+/// `NavigationSplitView`. macOS 26's NSV will cascade window-level
+/// re-layout when a custom `Layout` is used inside the detail pane —
+/// see 2026-04-22/23 bisection. Keeping NSV off means chips are free.
 struct AnnotatedText: View {
     let string: String
     var font: Font = .system(size: 18, weight: .regular)
@@ -18,23 +31,64 @@ struct AnnotatedText: View {
     var foregroundStyle: Color? = nil
 
     var body: some View {
-        // hSpacing is 0 because the per-word segmentation already keeps
-        // trailing space glyphs inside each Text chunk. Anything higher
-        // stacks with those glyphs and makes the text look justified.
-        WrapLayout(hSpacing: 0, vSpacing: 6) {
-            ForEach(Array(Self.segments(from: string).enumerated()), id: \.offset) { _, seg in
-                switch seg {
-                case .text(let s):
-                    Text(s)
-                        .font(font)
-                        .lineSpacing(6)
-                        .foregroundStyle(foregroundStyle ?? .primary)
-                case .key(let k):
-                    KeyCapView(label: k, size: capSize)
-                case .mode(let m):
-                    InlineModeChip(mode: m)
+        let segments = Self.segments(from: string)
+        if segments.contains(where: { if case .mode = $0 { true } else { false } }) {
+            AnnotatedFlow(hSpacing: 0, vSpacing: 6) {
+                ForEach(Array(segments.enumerated()), id: \.offset) { _, seg in
+                    switch seg {
+                    case .text(let s):
+                        Text(s)
+                            .font(font)
+                            .lineSpacing(6)
+                            .foregroundStyle(foregroundStyle ?? .primary)
+                    case .key(let k):
+                        Text(k)
+                            .font(capSize.inlineFont)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.primary.opacity(0.88))
+                    case .mode(let m):
+                        InlineModeChip(mode: m)
+                    }
                 }
             }
+            .fixedSize(horizontal: false, vertical: true)
+        } else {
+            Text(attributedString(for: segments))
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private func attributedString(for segments: [Segment]) -> AttributedString {
+        var out = AttributedString("")
+        for segment in segments {
+            out.append(run(for: segment))
+        }
+        return out
+    }
+
+    private func run(for segment: Segment) -> AttributedString {
+        switch segment {
+        case .text(let string):
+            var run = AttributedString(string)
+            run.font = font
+            run.foregroundColor = foregroundStyle ?? .primary
+            return run
+
+        case .key(let key):
+            var run = AttributedString(key)
+            run.font = capSize.inlineFont
+            run.foregroundColor = .primary.opacity(0.92)
+            return run
+
+        case .mode(let mode):
+            // Not used on this path — mode-bearing strings take the
+            // AnnotatedFlow branch — but keep the run for parser
+            // symmetry.
+            var run = AttributedString(mode.displayName)
+            run.font = .system(.caption, design: .monospaced, weight: .bold)
+            run.foregroundColor = mode.color
+            return run
         }
     }
 
@@ -94,8 +148,6 @@ struct AnnotatedText: View {
         }
         flushBuffer()
 
-        // Split text segments on word boundaries so the flow layout can
-        // wrap naturally between words, not just between tokens.
         return out.flatMap { seg -> [Segment] in
             guard case .text(let s) = seg else { return [seg] }
             return explodeWords(s)
@@ -130,6 +182,16 @@ struct AnnotatedText: View {
     }
 }
 
+private extension KeyCapView.KeyCapSize {
+    var inlineFont: Font {
+        switch self {
+        case .small: .system(size: 13, weight: .semibold, design: .monospaced)
+        case .regular: .system(size: 15, weight: .semibold, design: .monospaced)
+        case .large: .system(size: 20, weight: .semibold, design: .monospaced)
+        }
+    }
+}
+
 /// Compact inline chip used inside prose. Smaller than the toolbar
 /// badge so it sits on a normal text line without dominating it.
 struct InlineModeChip: View {
@@ -156,9 +218,12 @@ struct InlineModeChip: View {
     }
 }
 
-/// Lays out subviews in a horizontal row, wrapping to the next row when
-/// the proposed width is exceeded.
-struct WrapLayout: Layout {
+/// Inline flow layout used by AnnotatedText for mode-chip strings.
+/// Each subview is asked for its intrinsic size once and then placed
+/// with wrap-on-overflow. Safe to use here because the app shell is
+/// a plain `HStack`, not a `NavigationSplitView` — the layout cascade
+/// macOS 26 produces under NSV with custom `Layout` is not in play.
+struct AnnotatedFlow: Layout {
     var hSpacing: CGFloat = 4
     var vSpacing: CGFloat = 6
 

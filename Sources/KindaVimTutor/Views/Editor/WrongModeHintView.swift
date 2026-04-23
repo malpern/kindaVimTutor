@@ -8,14 +8,19 @@ struct WrongModeHintView: View {
             Image(systemName: "exclamationmark.triangle.fill")
                 .foregroundStyle(.orange)
                 .font(.system(size: 14))
-            VStack(alignment: .leading, spacing: 1) {
-                Text("You're in Insert mode")
-                    .font(.system(size: 13, weight: .semibold))
-                Text("Press Esc to enter Normal mode, then try the motion again")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 3) {
+                AnnotatedText(
+                    string: "You're in {{insert}} mode",
+                    font: .system(size: 13, weight: .semibold),
+                    capSize: .small
+                )
+                AnnotatedText(
+                    string: "Press `Esc` to enter {{normal}} mode, then try the motion again",
+                    font: .system(size: 12),
+                    capSize: .small,
+                    foregroundStyle: Color.secondary
+                )
             }
-            KeyCapView(label: "Esc", size: .small)
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 10)

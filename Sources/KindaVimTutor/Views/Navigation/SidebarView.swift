@@ -2,15 +2,11 @@ import SwiftUI
 
 /// Navigation rail for the lesson browser.
 ///
-/// Implemented with `ScrollView { LazyVStack }` instead of `List` on
-/// purpose: macOS 26's `List(selection:)` auto-scrolls the selected
-/// row to the top of the viewport whenever the containing window
-/// re-lays out (detail-view transitions, `.id()` swaps, toolbar
-/// changes). For our tutor that means the expanded chapter's
-/// selected lesson row gets shoved into the title-bar strip on every
-/// `]` step-advance — see 2026-04-21 bug investigation. There is no
-/// public API to suppress `List`'s auto-scroll, so we render the
-/// rail by hand and keep selection styling local.
+/// Rendered as a plain fixed-width rail instead of a `List` or
+/// `NavigationSplitView` sidebar. On macOS 26 those container types
+/// repeatedly shifted, culled, or hid the selected lesson rows during
+/// detail-view layout changes; this view keeps selection styling local
+/// and leaves column ownership to the app shell.
 struct SidebarView: View {
     let chapters: [Chapter]
     @Binding var selectedLessonId: String?
@@ -29,7 +25,7 @@ struct SidebarView: View {
 
     var body: some View {
         ScrollView {
-            LazyVStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
                 if inspectorState.isVisible {
                     DrillSidebarSection(state: inspectorState)
                         .padding(.horizontal, 8)
@@ -42,9 +38,10 @@ struct SidebarView: View {
             }
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
         }
-        .frame(minWidth: 200)
-        .navigationTitle("kindaVim Tutor")
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Color(nsColor: .windowBackgroundColor))
         .onAppear {
             expandedChapterId = selectedChapterId
         }
@@ -128,6 +125,7 @@ private struct SidebarLessonRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .focusable(false)
     }
 }
 
@@ -150,7 +148,7 @@ private struct ChapterHeader: View {
                     .textCase(.uppercase)
                     .tracking(0.6)
                     .lineLimit(1)
-                if isComplete {
+                if isComplete && chapter.number != 1 {
                     Image(systemName: "checkmark.circle.fill")
                         .font(.system(size: 10, weight: .semibold))
                         .foregroundStyle(.green.opacity(0.75))
@@ -167,6 +165,7 @@ private struct ChapterHeader: View {
             .padding(.bottom, 2)
         }
         .buttonStyle(.plain)
+        .focusable(false)
         .animation(.easeInOut(duration: 0.2), value: isComplete)
     }
 }

@@ -14,14 +14,18 @@ struct KindaVimInstallStatusBlock: View {
                 Image(systemName: "checkmark.seal.fill")
                     .font(.system(size: 20))
                     .foregroundStyle(.green)
-                    .scaleEffect(sealPulse ? 1.08 : 1.0)
+                    .scaleEffect(sealPulse ? 1.18 : 1.0)
                     .shadow(color: .green.opacity(sealPulse ? 0.55 : 0.15),
-                            radius: sealPulse ? 8 : 3)
-                    .animation(
-                        .easeInOut(duration: 1.2).repeatForever(autoreverses: true),
-                        value: sealPulse
-                    )
-                    .onAppear { sealPulse = true }
+                            radius: sealPulse ? 10 : 3)
+                    .onAppear {
+                        // One-shot attention pulse: bloom up, settle back.
+                        withAnimation(.easeOut(duration: 0.22).delay(0.15)) {
+                            sealPulse = true
+                        }
+                        withAnimation(.easeInOut(duration: 0.5).delay(0.4)) {
+                            sealPulse = false
+                        }
+                    }
                 VStack(alignment: .leading, spacing: 2) {
                     Text("kindaVim is installed")
                         .font(.system(size: 15, weight: .semibold))

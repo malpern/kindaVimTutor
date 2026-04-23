@@ -11,22 +11,47 @@ struct ToolbarModeBadge: View {
     @State private var isHovering = false
 
     var body: some View {
-        ModeIndicatorView(
-            mode: monitor.currentMode,
-            isKindaVimRunning: monitor.isKindaVimRunning
-        )
-        // Subtle lift on hover — this is a status indicator, not a
-        // button, so the treatment stays very quiet: no scale change,
-        // just a slightly brighter capsule ring.
-        .overlay {
-            Capsule()
-                .strokeBorder(monitor.currentMode.color.opacity(isHovering ? 0.55 : 0),
-                              lineWidth: 1)
-        }
+        toolbarContent
+            .opacity(isHovering ? 1 : 0.92)
         .animation(.easeInOut(duration: 0.15), value: isHovering)
         .onHover { isHovering = $0 }
         .help(tooltip)
         .accessibilityLabel(tooltip)
+    }
+
+    @ViewBuilder
+    private var toolbarContent: some View {
+        if monitor.isKindaVimRunning {
+            HStack(spacing: 5) {
+                Circle()
+                    .fill(monitor.currentMode.color)
+                    .frame(width: 7, height: 7)
+                Text(monitor.currentMode.displayName)
+                    .font(.system(.caption, design: .monospaced, weight: .bold))
+                    .foregroundStyle(.white)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background {
+                Capsule().fill(monitor.currentMode.color.opacity(0.15))
+            }
+            .contentTransition(.numericText())
+            .animation(.spring(duration: 0.25), value: monitor.currentMode)
+        } else {
+            HStack(spacing: 5) {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.caption2)
+                    .foregroundStyle(.orange)
+                Text("kindaVim not detected")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background {
+                Capsule().fill(.orange.opacity(0.08))
+            }
+        }
     }
 
     private var tooltip: String {

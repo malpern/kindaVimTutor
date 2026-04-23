@@ -43,10 +43,6 @@ struct ModeSequenceStepView: View {
                 .multilineTextAlignment(.leading)
 
             // Visual preview chip (if this lesson wants to mention it).
-            // Not part of the drill sequence, but if the student happens
-            // to press `v` while on this page it acknowledges the
-            // discovery with a green check — a quiet easter-egg nod,
-            // not a required step.
             if let target = visualPreviewLessonId {
                 VisualPreviewPill(
                     discovered: visualDiscovered,
@@ -61,9 +57,6 @@ struct ModeSequenceStepView: View {
         .padding(.horizontal, 48)
         .padding(.vertical, 24)
         .onChange(of: monitor.currentMode) { _, newMode in
-            // Mark the Visual preview pill as discovered if the student
-            // happens to flip into Visual mode — regardless of whether
-            // the main sequence is finished.
             if newMode == .visual { visualDiscovered = true }
 
             guard !didComplete else { return }
@@ -76,9 +69,6 @@ struct ModeSequenceStepView: View {
             }
         }
         .onAppear {
-            // If the student happens to be starting in the first expected
-            // mode already, count it immediately so they don't have to
-            // transition out and back in.
             if let first = expected.first, monitor.currentMode == first {
                 progressIndex = 1
                 if expected.count == 1 {

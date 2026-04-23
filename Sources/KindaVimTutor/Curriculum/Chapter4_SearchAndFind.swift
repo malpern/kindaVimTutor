@@ -60,12 +60,14 @@ extension Curriculum {
         subtitle: "Stop just before with t and T",
         explanation: [
             .heading("Jump to Just Before a Character"),
-            .text("t is like f but stops one character before the target. Especially useful with delete: dt) deletes everything up to the closing paren."),
+            .text("`t` is like `f` but stops one character before the target. Especially useful with delete: `dt)` deletes everything up to the closing paren."),
+            .spacer,
+            .findVsTill,
             .spacer,
             .keyCommand(keys: ["t", "x"], description: "Move to just before 'x'"),
             .keyCommand(keys: ["T", "x"], description: "Move to just after 'x' (backward)"),
             .spacer,
-            .tip("f = find (land on it). t = till (stop just before)."),
+            .tip("`f` = find (land on it). `t` = till (stop just before)."),
         ],
         exercises: [
             Exercise(

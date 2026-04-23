@@ -90,6 +90,15 @@ struct ExplanationView: View {
             ModeIndicatorSpotlightView()
                 .frame(minHeight: 260)
 
+        case .homeRow(let highlighted):
+            HomeRowView(highlighted: highlighted)
+
+        case .grammarGrid:
+            GrammarGridView()
+
+        case .findVsTill:
+            FindVsTillView()
+
         case .linkTip(_, _, let label, let url):
             HStack(alignment: .top, spacing: 12) {
                 Image(systemName: "lightbulb")
