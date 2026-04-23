@@ -39,6 +39,15 @@ per-model bias that either one might let through alone.
 
     pip install anthropic openai
 
+## Token efficiency
+
+Before adding new bulk-LLM scripts here — or anywhere else in this
+repo — read [`docs/llm-api-efficiency.md`](../../docs/llm-api-efficiency.md).
+The baseline mistake is sending the same reference material on every
+call; at 200 items that's $10+ wasted. The playbook (stable cacheable
+prefix + batched requests + local content-hash cache + mini model
+tier) cuts a full verification run to ~$0.20.
+
 ## File layout
 
 - `generate_eval.py`: Claude-powered Q&A drafter.
