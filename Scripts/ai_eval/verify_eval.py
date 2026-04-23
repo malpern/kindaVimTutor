@@ -9,11 +9,12 @@ Follows the efficiency playbook in docs/llm-api-efficiency.md:
 - Batches 8 Q&As per call → ~25 calls for 200 Q&As.
 - Local content-hash cache under .cache/verify_eval/ so re-runs skip
   already-verified entries.
-- Uses gpt-4.1 (full tier) — this is a VALIDATION pass, not
+- Uses gpt-5.4 (full tier) — this is a VALIDATION pass, not
   screening. We're about to trust these verdicts as ground-truth
-  for a 200-Q&A canonical corpus. Mini gets subtle Vim semantics
-  wrong often enough to be the wrong tool here; the cost delta
-  with caching is ~$1 for the whole run.
+  for a 200-Q&A canonical corpus. Subtle Vim semantics (dw vs de,
+  text-object nuance, register model) justify the strongest model
+  we can point at the task. With caching the cost delta is a few
+  dollars for the whole run.
 
 Usage:
     export OPENAI_API_KEY=sk-...
@@ -34,9 +35,22 @@ import json
 import os
 import re
 import sys
+import time
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
+
+# Stdout needs to be unbuffered when piped (e.g. through Claude's
+# bash tool) — otherwise progress lines don't appear until the
+# buffer fills or the process exits. Reconfigure line-buffering on
+# startup and back it up with flush=True on every print.
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(line_buffering=True)
+
+
+def log(msg: str) -> None:
+    """Timestamped, always-flushed progress line."""
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}", flush=True)
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 HELP_DIR = REPO_ROOT / "Sources/KindaVimTutor/Resources/kindavim-help"
@@ -269,6 +283,8 @@ def build_batch_user_message(items: list[QAItem]) -> str:
 
 
 def verify_batch(client, model: str, items: list[QAItem], system_prompt: str) -> list[dict]:
+    start = time.monotonic()
+    log(f"  → calling {model} ({len(items)} items)...")
     response = client.chat.completions.create(
         model=model,
         response_format={"type": "json_object"},
@@ -277,6 +293,7 @@ def verify_batch(client, model: str, items: list[QAItem], system_prompt: str) ->
             {"role": "user", "content": build_batch_user_message(items)},
         ],
     )
+    elapsed = time.monotonic() - start
     content = response.choices[0].message.content or "{}"
     usage = response.usage
     cached = getattr(
@@ -284,16 +301,24 @@ def verify_batch(client, model: str, items: list[QAItem], system_prompt: str) ->
         "cached_tokens",
         0,
     )
-    print(f"    batch of {len(items)} | "
-          f"prompt={usage.prompt_tokens} cached={cached} "
-          f"output={usage.completion_tokens}")
+    log(f"  ← {elapsed:.1f}s | prompt={usage.prompt_tokens} "
+        f"cached={cached} output={usage.completion_tokens}")
     try:
         parsed = json.loads(content)
     except json.JSONDecodeError:
-        print(f"    WARNING: response not valid JSON: {content[:200]}")
+        log(f"  WARNING: response not valid JSON: {content[:200]}")
         return [{"error": "invalid JSON response"} for _ in items]
     verdicts = parsed.get("verdicts", [])
     by_id = {v.get("id"): v for v in verdicts if isinstance(v, dict)}
+    # Quick per-item summary so progress is visible at sub-batch granularity.
+    pass_count = sum(
+        1 for v in verdicts
+        if isinstance(v, dict)
+        and not any(str(v.get(ax, "")).lower() in ("fail", "warning")
+                    for ax in LOAD_BEARING_AXES)
+    )
+    flagged = len(verdicts) - pass_count
+    log(f"    verdicts: {pass_count} clean, {flagged} flagged")
     results = []
     for i, qa in enumerate(items):
         v = dict(by_id.get(i) or {"error": "no verdict returned"})
@@ -318,6 +343,31 @@ def save_result(qa: QAItem, result: dict) -> None:
     topic_dir.mkdir(parents=True, exist_ok=True)
     (topic_dir / f"{qa.cache_key()}.json").write_text(
         json.dumps(result, indent=2, ensure_ascii=False)
+    )
+
+
+def write_partial_report(items: list[QAItem], fresh: list[dict],
+                         cached: list[tuple[QAItem, dict]], total_processed: int) -> None:
+    """Drops a running report to disk while the run is in progress.
+    Lets the user see partial results if they interrupt the script.
+    """
+    to_verify_items = [qa for qa in items if all(qa.cache_key() != c[0].cache_key() for c in cached)]
+    fresh_by = {qa.cache_key(): r for qa, r in zip(to_verify_items, fresh)}
+    cached_by = {qa.cache_key(): r for qa, r in cached}
+    partial_items = []
+    partial_results = []
+    for qa in items:
+        r = fresh_by.get(qa.cache_key()) or cached_by.get(qa.cache_key())
+        if r is not None:
+            partial_items.append(qa)
+            partial_results.append(r)
+    if not partial_items:
+        return
+    report_md, _ = render_report(partial_items, partial_results)
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    today = date.today().isoformat()
+    (REPORT_DIR / f"{today}-partial.md").write_text(
+        f"_Partial report — {total_processed}/{len(items)} processed._\n\n" + report_md
     )
 
 
@@ -413,7 +463,7 @@ def render_report(items: list[QAItem], results: list[dict]) -> tuple[str, dict]:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("topic_id", nargs="?", default=None)
-    parser.add_argument("--model", default="gpt-4.1")
+    parser.add_argument("--model", default="gpt-5.4")
     parser.add_argument("--batch-size", type=int, default=8)
     parser.add_argument("--no-cache", action="store_true")
     args = parser.parse_args()
@@ -430,8 +480,9 @@ def main() -> int:
     items = load_topics(args.topic_id)
     if not items:
         sys.exit("No canonical Q&As found.")
-    print(f"Loaded {len(items)} Q&As across "
-          f"{len({i.topic_id for i in items})} topics.")
+    log(f"Loaded {len(items)} Q&As across "
+        f"{len({i.topic_id for i in items})} topics.")
+    log(f"Model: {args.model} | batch size: {args.batch_size}")
 
     system_prompt = SYSTEM_PROMPT_TEMPLATE.format(
         vim_reference=load_vim_reference(),
@@ -449,18 +500,34 @@ def main() -> int:
                 cached.append((qa, prior))
             else:
                 to_verify.append(qa)
-    print(f"{len(cached)} cached, {len(to_verify)} need verification.")
+    log(f"{len(cached)} cached, {len(to_verify)} need verification.")
 
     client = OpenAI(api_key=api_key)
+    total_batches = (len(to_verify) + args.batch_size - 1) // args.batch_size
+    run_start = time.monotonic()
     fresh: list[dict] = []
     for start in range(0, len(to_verify), args.batch_size):
         batch = to_verify[start:start + args.batch_size]
         n = start // args.batch_size + 1
-        print(f"Batch {n} ({len(batch)} items)...")
+        elapsed = time.monotonic() - run_start
+        if n > 1:
+            avg = elapsed / (n - 1)
+            remaining = avg * (total_batches - n + 1)
+            eta = f" | elapsed {elapsed:.0f}s | ~{remaining:.0f}s remaining"
+        else:
+            eta = ""
+        log(f"Batch {n}/{total_batches} ({len(batch)} items){eta}")
         results = verify_batch(client, args.model, batch, system_prompt)
+        # Persist each result immediately so interrupts preserve
+        # work done so far — next run will pick these up from cache.
         for qa, r in zip(batch, results):
             save_result(qa, r)
         fresh.extend(results)
+
+        # Drop a partial report to disk every 5 batches so
+        # progress is visible even on interrupt.
+        if n % 5 == 0 or n == total_batches:
+            write_partial_report(items, fresh, cached, total_processed=start + len(batch))
 
     fresh_by = {qa.cache_key(): r for qa, r in zip(to_verify, fresh)}
     cached_by = {qa.cache_key(): r for qa, r in cached}
@@ -474,7 +541,7 @@ def main() -> int:
     (REPORT_DIR / f"{today}.json").write_text(
         json.dumps(report_json, indent=2, ensure_ascii=False)
     )
-    print(f"\nReport: {REPORT_DIR / f'{today}.md'}")
+    log(f"Report: {REPORT_DIR / f'{today}.md'}")
 
     any_fail = any(
         str(r.get(axis, "")).lower() == "fail"
