@@ -41,9 +41,13 @@ TerminalVim: In stock Vim, type `@` followed by the register letter you recorded
 Related: . — repeat the last change in kindaVim
 
 Q: Can I chain commands without a macro?
-A: Yes — for simple multi-step edits that you want to reuse, chain them into one change where possible (e.g. `ciwNewText<Esc>`), then repeat with `.`. `.` replays the entire change as a unit.
-Related: . — repeat last change; cgn — change next search match (useful for search-then-repeat)
+A: kindaVim doesn't support macros, but you can get far with `.` (repeat last change). Chain multi-step edits into one composite change where possible (e.g. `ciwNewText<Esc>`), then `.` replays the whole thing.
+Unsupported: yes
+TerminalVim: For genuine multi-step automation in stock Vim, record a macro: `qa{keystrokes}q`, then replay with `@a`.
+Related: . — repeat last change (kindaVim supports it); cgn — change next search match
 
 Q: How do I record and replay a find-and-replace across a file?
-A: Without macros, the kindaVim idiom is: `/pattern<Enter>` to search, `cgn<replacement><Esc>` to change the first match, then `.` (repeat change) after each `n` (next match). It's not automated but it's predictable and visible.
-Related: / — search; cgn — change next search match; . — repeat change
+A: kindaVim doesn't support macros or `:s`. The closest idiom: `/pattern<Enter>` to search, `cgn<replacement><Esc>` to change the first match, then `.` after each `n` to replay.
+Unsupported: yes
+TerminalVim: In stock Vim, `:%s/old/new/gc` does this in one command (with per-match confirmation). Macros also work: `qa/pattern<Enter>cgn<replacement><Esc>q` then `@a` to replay.
+Related: / — search (kindaVim supports it); cgn — change next match; . — repeat

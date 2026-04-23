@@ -24,8 +24,10 @@ TerminalVim: `&` or `g&` repeat the last `:s`. With the search-change pattern, `
 Related: / — search; cgn — change next match; . — repeat change
 
 Q: What's the difference between `.` and `&`?
-A: `.` repeats the last CHANGE (insert, delete, etc.). `&` specifically repeats the last `:s` substitution. kindaVim only supports `.` — it does the job of `&` for the search-and-change workflow.
-Related: . — repeat change (kindaVim supports it)
+A: `.` repeats the last CHANGE (insert, delete, etc.) and IS supported in kindaVim. `&` repeats the last `:s` substitution and is NOT supported. For the search-and-change workflow use `.` — it covers most of what `&` would do.
+Unsupported: yes
+TerminalVim: In stock Vim, `.` and `&` coexist — `&` is specifically for replaying `:s` with the same pattern, while `.` replays any change.
+Related: . — repeat change (supported); :s — substitute (not supported)
 
 Q: Can I repeat a substitution across multiple lines in kindaVim?
 A: Not via `:s` — that's the unsupported Ex mechanism. The kindaVim workflow is `/pattern<Enter>`, then `cgn{replacement}<Esc>`, then press `.` (repeat) after each `n` (next match).
