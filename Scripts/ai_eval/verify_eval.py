@@ -217,7 +217,7 @@ kindaVim tutor app. Each Q&A is one of two shapes:
 
 Format conventions the author follows:
 - Keys wrapped in backticks: `dw`, `Esc`, `ci"`.
-- Modes in double-braces: {{normal}}, {{insert}}, {{visual}}.
+- Modes in DOUBLE-curly-braces: {{{{normal}}}}, {{{{insert}}}}, {{{{visual}}}}. (These render as single braces in this prompt because Python `.format()` escapes them, but the actual author convention is DOUBLE braces on each side — `{{{{normal}}}}`. If the Q&A uses `{{{{normal}}}}`, that's correct; `{{normal}}` on its own is wrong.)
 - "Press" for a single keypress, "Type" for multi-char sequences.
 - Answers 1-3 sentences per item.
 

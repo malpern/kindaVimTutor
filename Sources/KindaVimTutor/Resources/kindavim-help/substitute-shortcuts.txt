@@ -18,10 +18,10 @@ TerminalVim: `&` repeats the last `:s` substitution with the same pattern/replac
 Related: :s — Ex substitute (not supported); . — repeat last CHANGE (different concept)
 
 Q: How do I repeat a find-and-replace in kindaVim?
-A: kindaVim's approach: search with `/pattern`, then change the first match with `cgn`, type the replacement, `Esc`, then `.` to replay that change at each subsequent match (combined with `n` to jump).
+A: kindaVim's approach: search with `/pattern<Enter>`, manually change the first match with `cw<replacement><Esc>`, then alternate `n` (jump to next match) and `.` (replay the change) through the document.
 Unsupported: yes
-TerminalVim: `&` or `g&` repeat the last `:s`. With the search-change pattern, `.` after `cgn` repeats across matches similarly.
-Related: / — search; cgn — change next match; . — repeat change
+TerminalVim: `&` or `g&` repeat the last `:s`. Neither is available in kindaVim.
+Related: / — search (kindaVim supports it); . — repeat change; cw — change word
 
 Q: What's the difference between `.` and `&`?
 A: `.` repeats the last CHANGE (insert, delete, etc.) and IS supported in kindaVim. `&` repeats the last `:s` substitution and is NOT supported. For the search-and-change workflow use `.` — it covers most of what `&` would do.
@@ -30,7 +30,7 @@ TerminalVim: In stock Vim, `.` and `&` coexist — `&` is specifically for repla
 Related: . — repeat change (supported); :s — substitute (not supported)
 
 Q: Can I repeat a substitution across multiple lines in kindaVim?
-A: Not via `:s` — that's the unsupported Ex mechanism. The kindaVim workflow is `/pattern<Enter>`, then `cgn{replacement}<Esc>`, then press `.` (repeat) after each `n` (next match).
+A: Not via `:s` — that's the unsupported Ex mechanism. The kindaVim workflow is `/pattern<Enter>`, manually change the first match (e.g. `cw<replacement><Esc>`), then `n.` (next match, repeat change) to walk down the document.
 Unsupported: yes
 TerminalVim: `:%s/old/new/g` hits every match in the buffer. `:%s/old/new/gc` asks for confirmation per match.
-Related: cgn — change next search match
+Related: / — forward search (supported); . — repeat change

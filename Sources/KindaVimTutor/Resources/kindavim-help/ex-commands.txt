@@ -38,10 +38,10 @@ TerminalVim: In terminal Vim, type `:q` to quit (requires saved changes), `:q!` 
 Related: Cmd+Q — macOS quit
 
 Q: Does kindaVim support `:s` (substitute)?
-A: kindaVim doesn't support Ex commands. For find-and-replace, use `/pattern` to find, then `cgn` (change next match) + `.` to replay.
+A: kindaVim doesn't support Ex commands. For find-and-replace, use `/pattern` to locate matches, manually change the first one (e.g. `cw<replacement><Esc>`), then `n` to jump to the next match and `.` to replay the change.
 Unsupported: yes
 TerminalVim: `:s/old/new/` replaces the first match on the current line; `:s/old/new/g` all on the line; `:%s/old/new/g` across the whole buffer. Add `c` flag (`:%s/old/new/gc`) to confirm each.
-Related: / — search; cgn — change next match; . — repeat last change
+Related: / — search (kindaVim supports); . — repeat last change; cw — change word
 
 Q: How do I run a shell command from kindaVim?
 A: kindaVim doesn't support `:!` (no command line). Run shell commands from Terminal directly, or from your editor's integrated terminal.
@@ -62,10 +62,10 @@ TerminalVim: `:set number` shows line numbers, `:set ignorecase` makes search ca
 Related: kindaVim Settings — native preferences pane
 
 Q: Can I run `:%s/old/new/g` in kindaVim?
-A: No — kindaVim doesn't implement Ex commands. For multi-match substitution within one native text field, use `/old<Enter>` then `cgn` and `.` to change each match one at a time.
+A: No — kindaVim doesn't implement Ex commands. For multi-match substitution within one native text field, use `/old<Enter>` to search, manually change the first match with `cw<replacement><Esc>`, then `n.n.n.` (next match + repeat change) to apply across the document.
 Unsupported: yes
 TerminalVim: `:%s/old/new/g` substitutes throughout the buffer. `%` is the "all lines" range; `g` means every match per line. Add `c` to confirm each match.
-Related: / — forward search; cgn — change next match; . — repeat
+Related: / — forward search (supported); . — repeat last change
 
 Q: How do I yank into a specific register with `:reg`?
 A: kindaVim supports only a single default register — no named registers, no `:reg` view. Each yank replaces the register contents.

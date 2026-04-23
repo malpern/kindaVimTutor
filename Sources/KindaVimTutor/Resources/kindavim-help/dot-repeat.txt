@@ -39,8 +39,8 @@ A: No — it repeats the last change once. Prefix with a count to multiply: `5.`
 Related: 5dw — counts work on most commands
 
 Q: What's the "dot formula" for efficient edits?
-A: The idiom is: pair a motion you can `n`-repeat (`/pattern`, `f{char}`, word motion) with an operator that makes a single change (`cgn`, `cw`, `ciw`). Then `n.n.n.` walks through the document applying the change at each match. One change + one motion, repeated.
-Related: n — repeat search; cgn — change next match; / — forward search
+A: The idiom is: pair a motion you can repeat (`/pattern`, `f{char}`, or a word motion) with a single-change operator (`cw`, `ciw`, `dw`). Make the change once, then walk through the document with `n.` (or `;.` / `,.`) — each `n` jumps to the next match, each `.` replays the change.
+Related: n — repeat search; / — forward search; cw — change word
 
 Q: Can I combine `.` with a motion?
 A: Not directly — `.` only repeats the last CHANGE. You can use motions to GET somewhere first, then press `.` to repeat the change at the new cursor. Common flow: `cw new<Esc>`, navigate (`w`, `5j`, `/target<Enter>`), press `.`.

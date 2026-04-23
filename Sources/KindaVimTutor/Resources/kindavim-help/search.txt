@@ -1,13 +1,13 @@
 id: search
 title: Search
-summary: Press `/` to search forward, `?` to search backward. `n` repeats the last search, `N` reverses it. `*` and `#` find the word under the cursor.
+summary: Press `/` to search forward, `?` to search backward. `n` repeats the last search, `N` reverses it. The word-search shortcuts `*` and `#` are not implemented in kindaVim — use a manual `/word<Enter>` instead.
 status: supported
-tags: /, ?, n, N, *, #, search, find
+tags: /, ?, n, N, search, find
 aliases: search, find, forward search, backward search
 lessons: ch4.l4, ch4.l5
 related: find-character
-questions: How do I repeat a search? || What's the difference between `/` and `f`? || How do I search for the word under the cursor?
-web: vim search / n * tutorial
+questions: How do I repeat a search? || What's the difference between `/` and `f`? || Why doesn't `*` work?
+web: vim search / n tutorial
 video: vim search forward backward tutorial
 
 ## The Basics
@@ -15,21 +15,31 @@ video: vim search forward backward tutorial
 - `?{pattern}` then Enter — search backward
 - `n` — repeat the last search in the same direction
 - `N` — repeat the last search in the opposite direction
-- `*` — search forward for the word under the cursor
-- `#` — search backward for the word under the cursor
+
+## Not Supported
+- `*` / `#` (word-search shortcuts) — use `/word<Enter>` instead
+- `cgn` (change-next-match) — see the "How do I search and replace?" entry below for the kindaVim workflow
 
 ## Canonical QA
 Q: How do I search for text?
 A: Press `/` in {{normal}}, type the text, press Enter. The cursor jumps to the first match forward of its current position. Press `n` to go to the next match, `N` to go to the previous.
-Related: ? — search backward; n — next match; * — search word under cursor
+Related: ? — search backward; n — next match
 
 Q: How do I search backward?
 A: Press `?` instead of `/`, type your query, press Enter. Same semantics as `/` but in reverse. `n` and `N` follow the original direction (so after `?`, `n` still goes backward).
 Related: / — forward search; N — reverse last search
 
 Q: How do I search for the word my cursor is on?
-A: Press `*` in {{normal}} to search forward for the exact word under the cursor, `#` to search backward. Matches whole words — "foo" won't match "foobar".
-Related: g* — looser match (matches substrings); / — manual search
+A: kindaVim doesn't support `*` / `#`. Type the word manually with `/word<Enter>` (forward) or `?word<Enter>` (backward). `n` and `N` still repeat the search from there.
+Unsupported: yes
+TerminalVim: In stock Vim, `*` searches forward for the whole word under the cursor, `#` searches backward. `g*` and `g#` are looser substring versions.
+Related: / — forward search (kindaVim supports it); ? — backward search
+
+Q: Why doesn't `*` work in kindaVim?
+A: kindaVim doesn't implement the word-search shortcuts. `*` is unbound. Use `/` with the word typed out instead.
+Unsupported: yes
+TerminalVim: `*` and `#` are core Vim motions — `*` searches forward for the word under the cursor (whole-word match), `#` backward.
+Related: / — manual search (works)
 
 Q: What's the difference between `/` and `f`?
 A: `/` searches the WHOLE document (and can span multiple lines). `f` only searches the current line and only for a single character. Use `f` for precise line-local jumps, `/` for finding text anywhere.
@@ -37,27 +47,23 @@ Related: f — line-local single char; n — repeat / search
 
 Q: How do I repeat my last search?
 A: Press `n` in {{normal}} to repeat in the original direction, `N` to reverse. If your last search was `/foo`, `n` goes forward; if it was `?foo`, `n` goes backward.
-Related: * — search-word shortcut also sets the search; # — backward search word
+Related: ? — backward search; / — forward search
 
 Q: Is search case-sensitive?
 A: By default yes — `/Foo` won't match "foo". Stock Vim has `:set ignorecase` and `:set smartcase` to change this, but kindaVim doesn't support Ex `:set` commands, so the default sensitivity is what you get.
-Related: :set ignorecase — Ex command, not supported in kindaVim
+Related: / — forward search (kindaVim supports it)
 
 Q: Does search wrap around the document?
 A: Yes — hit the end and the search wraps to the beginning. You'll see a brief "search hit BOTTOM, continuing at TOP" indication in stock Vim; kindaVim's behavior inside native text fields follows the host app's search mechanics.
 Related: n — keep going forward; ? — search other direction
 
 Q: How do I search and replace?
-A: kindaVim doesn't support `:s` (substitute). To replace: search with `/`, then `cgn` to change the next match — repeat with `.` to quickly change subsequent matches.
-Related: :s — Ex substitute (not supported); gn — motion to next match; . — repeat last change
+A: kindaVim doesn't support `:s` or `cgn`. The workable flow: search with `/pattern<Enter>`, manually change the first match with `cw<replacement><Esc>` (or whichever change operator fits), then `n` to jump to the next match and `.` to repeat the change.
+Related: / — forward search; . — repeat last change; cw — change word
 
 Q: How do I delete to the next match?
 A: `d/pattern<Enter>` deletes from the cursor to the start of the next match. Useful for "delete everything up to X".
 Related: c/pattern — change version; y/pattern — yank version
-
-Q: What's the difference between `*` and `/word<Enter>`?
-A: `*` does an automatic whole-word search for the word under the cursor — no typing required. `/word<Enter>` is manual and matches substrings. `*` is faster when you're already on the word you want to search for.
-Related: g* — substring match version of *; # — backward
 
 Q: How do I cancel a search I'm typing?
 A: Press `Esc` or `Ctrl-C` during `/` input to cancel without searching. The cursor stays where it was.

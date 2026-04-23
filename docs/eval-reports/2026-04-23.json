@@ -1,66 +1,66 @@
 {
   "date": "2026-04-23",
-  "total": 200,
-  "flagged": 148,
+  "total": 201,
+  "flagged": 145,
   "axis_counts": {
     "vim_accuracy": {
-      "pass": 133,
-      "warning": 48,
-      "fail": 15,
+      "pass": 137,
+      "warning": 47,
+      "fail": 13,
       "n/a": 4,
       "other": 0
     },
     "kindavim_accuracy": {
-      "pass": 136,
-      "warning": 37,
-      "fail": 27,
+      "pass": 140,
+      "warning": 39,
+      "fail": 22,
       "n/a": 0,
       "other": 0
     },
     "terminalvim_accuracy": {
-      "pass": 37,
-      "warning": 7,
+      "pass": 41,
+      "warning": 6,
       "fail": 1,
-      "n/a": 155,
+      "n/a": 153,
       "other": 0
     },
     "unsupported_consistency": {
-      "pass": 195,
-      "warning": 1,
-      "fail": 4,
+      "pass": 193,
+      "warning": 2,
+      "fail": 6,
       "n/a": 0,
       "other": 0
     },
     "token_conventions": {
-      "pass": 158,
-      "warning": 32,
-      "fail": 10,
+      "pass": 156,
+      "warning": 31,
+      "fail": 14,
       "n/a": 0,
       "other": 0
     },
     "verb_choice": {
-      "pass": 156,
-      "warning": 31,
+      "pass": 163,
+      "warning": 25,
       "fail": 3,
       "n/a": 10,
       "other": 0
     },
     "related_quality": {
-      "pass": 109,
-      "warning": 54,
-      "fail": 37,
+      "pass": 120,
+      "warning": 49,
+      "fail": 32,
       "n/a": 0,
       "other": 0
     },
     "xref_validity": {
-      "pass": 125,
+      "pass": 136,
       "warning": 4,
-      "fail": 71,
+      "fail": 61,
       "n/a": 0,
       "other": 0
     },
     "conciseness": {
-      "pass": 197,
+      "pass": 198,
       "warning": 3,
       "fail": 0,
       "n/a": 0,
@@ -71,8 +71,8 @@
     "case-toggle": {
       "title": "Toggle Case",
       "status": "supported",
-      "total": 5,
-      "flagged": 4,
+      "total": 6,
+      "flagged": 5,
       "entries": [
         {
           "question": "How do I toggle the case of a character?",
@@ -90,61 +90,81 @@
           "issues": []
         },
         {
-          "question": "How do I toggle case of a whole word?",
-          "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
-            "token_conventions": "warning",
-            "verb_choice": "warning",
-            "related_quality": "fail",
-            "xref_validity": "fail",
-            "conciseness": "pass"
-          },
-          "issues": [
-            "`g~iw` is valid in Vim, but `viw` + `~` is not the canonical stock-Vim way to toggle case in Visual mode; `~` is not listed as supported for Visual mode in kindaVim corpus",
-            "Claims support 'varies in kindaVim' instead of stating supported vs unsupported clearly",
-            "Related command `viw~` duplicates the answer's fallback and is not a corpus command token",
-            "Uses raw 'visual' instead of `{{visual}}`"
-          ]
-        },
-        {
           "question": "How do I uppercase a whole word?",
           "verdicts": {
-            "vim_accuracy": "warning",
+            "vim_accuracy": "fail",
             "kindavim_accuracy": "fail",
             "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
-            "token_conventions": "warning",
-            "verb_choice": "warning",
+            "unsupported_consistency": "fail",
+            "token_conventions": "fail",
+            "verb_choice": "pass",
             "related_quality": "fail",
             "xref_validity": "fail",
             "conciseness": "pass"
           },
           "issues": [
-            "`gUiw` is accurate for Vim, but `viwU` is not established by the support corpus for kindaVim",
-            "Says `gU`/`gu` can behave differently on native text fields instead of stating kindaVim support clearly",
-            "Related summary for `~` is accurate, but `gu` is not a supported corpus token by itself",
-            "Related includes unsupported/non-corpus token `gu`"
+            "Marks `gU` as unsupported even though stock Vim supports `gU{motion}` and `gUiw`.",
+            "Marks the entry supported while the answer says kindaVim doesn't implement the feature.",
+            "Uses `{{normal}}`/`{{visual}}` instead of required `{normal}`/`{visual}` format.",
+            "Related includes `viwU`, which is not a corpus command token.",
+            "Related summary `u — in visual, lowercase` is inaccurate for kindaVim support corpus, which does not list visual `u` support separately."
           ]
         },
         {
           "question": "How do I lowercase a selection?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
+            "kindavim_accuracy": "warning",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
-            "token_conventions": "pass",
+            "token_conventions": "fail",
             "verb_choice": "pass",
             "related_quality": "warning",
             "xref_validity": "fail",
             "conciseness": "pass"
           },
           "issues": [
-            "Visual `u` lowercasing is not in the kindaVim support corpus",
-            "Related `U` and `~` in Visual context are not supported corpus entries"
+            "Uses `{{visual}}` and `{{normal}}` instead of required `{visual}` and `{normal}`.",
+            "Related includes `U` and `~`, which are not listed as standalone supported corpus tokens."
+          ]
+        },
+        {
+          "question": "How do I toggle case of a whole word?",
+          "verdicts": {
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "fail",
+            "terminalvim_accuracy": "n/a",
+            "unsupported_consistency": "fail",
+            "token_conventions": "fail",
+            "verb_choice": "pass",
+            "related_quality": "fail",
+            "xref_validity": "fail",
+            "conciseness": "pass"
+          },
+          "issues": [
+            "Marks the entry supported while the answer says kindaVim doesn't implement `g~iw`.",
+            "Uses `{{visual}}` instead of required `{visual}` format.",
+            "Related includes `viw~`, which is not a corpus command token.",
+            "Related includes `U`, which is not a corpus command token."
+          ]
+        },
+        {
+          "question": "Does `gU` work in kindaVim?",
+          "verdicts": {
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "warning",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
+            "token_conventions": "fail",
+            "verb_choice": "pass",
+            "related_quality": "fail",
+            "xref_validity": "fail",
+            "conciseness": "pass"
+          },
+          "issues": [
+            "Uses `{{normal}}` instead of required `{normal}` format.",
+            "Claims visual case commands `U`, `u`, `~` exist in kindaVim, but those tokens are not explicitly in the support corpus.",
+            "Related includes `viwU` and `viw~`, which are not corpus command tokens."
           ]
         },
         {
@@ -713,7 +733,7 @@
       "title": "Dot Repeat",
       "status": "supported",
       "total": 8,
-      "flagged": 7,
+      "flagged": 6,
       "entries": [
         {
           "question": "What does `.` do?",
@@ -821,21 +841,17 @@
         {
           "question": "What's the \"dot formula\" for efficient edits?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "fail",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Mentions `cgn`, which is not in the kindaVim support corpus for supported entries.",
-            "Claims a general 'dot formula' using `cgn`; stock Vim supports it, but the supported answer must stay within kindaVim-supported commands.",
-            "Related includes `cgn`, which is not in the support corpus."
-          ]
+          "issues": []
         },
         {
           "question": "Can I combine `.` with a motion?",
@@ -860,7 +876,7 @@
       "title": "Ex Commands",
       "status": "unsupported",
       "total": 10,
-      "flagged": 10,
+      "flagged": 9,
       "entries": [
         {
           "question": "How do I save a file in kindaVim?",
@@ -902,20 +918,16 @@
           "question": "Does kindaVim support `:s` (substitute)?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
-            "token_conventions": "warning",
+            "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Says to use `cgn`, which is not in the kindaVim support corpus.",
-            "Uses bare `c` in 'Add `c` flag' instead of backtick-wrapped key/token style.",
-            "Related includes `cgn`, which is not in the support corpus."
-          ]
+          "issues": []
         },
         {
           "question": "How do I run a shell command from kindaVim?",
@@ -976,21 +988,18 @@
         {
           "question": "Can I run `:%s/old/new/g` in kindaVim?",
           "verdicts": {
-            "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
+            "vim_accuracy": "warning",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
-            "token_conventions": "warning",
+            "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "fail",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer recommends `cgn`, which is not in the kindaVim support corpus.",
-            "Related includes `cgn`, which is not in the support corpus.",
-            "Related duplicates `/`, which is already mentioned in the answer.",
-            "Uses `Enter` instead of backticked `Enter`/`<CR>` token styling."
+            "Uses `/old<Enter>`; stock Vim accepts `<CR>` to execute search, not `<Enter>` in the provided token convention/examples."
           ]
         },
         {
@@ -1842,7 +1851,7 @@
       "title": "Macros (recording + playback)",
       "status": "unsupported",
       "total": 5,
-      "flagged": 3,
+      "flagged": 2,
       "entries": [
         {
           "question": "How do I record a macro in kindaVim?",
@@ -1895,41 +1904,34 @@
         {
           "question": "Can I chain commands without a macro?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "warning",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "fail",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Mentions `cgn`, which is not in the support corpus",
-            "Implies a kindaVim workflow using `cgn`, but kindaVim support for `cgn` is not listed",
-            "Related commands include unsupported/unknown `cgn` with an inaccurate summary by omission"
-          ]
+          "issues": []
         },
         {
           "question": "How do I record and replay a find-and-replace across a file?",
           "verdicts": {
-            "vim_accuracy": "fail",
-            "kindavim_accuracy": "fail",
-            "terminalvim_accuracy": "warning",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
-            "token_conventions": "pass",
+            "token_conventions": "warning",
             "verb_choice": "pass",
-            "related_quality": "fail",
-            "xref_validity": "fail",
+            "related_quality": "warning",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Uses `/pattern<Enter>` instead of Vim's documented `/pattern<CR>` notation",
-            "Mentions unsupported/unstated `cgn` as a kindaVim idiom",
-            "Suggests a kindaVim workflow that relies on `cgn`, which is not in the support corpus",
-            "Related includes `cgn`, which is not in the support corpus",
-            "`terminalVim` says `:%s/old/new/gc` does this in one command, but the question mentions both record and replay and the answer mixes substitute and macros"
+            "Uses `Enter` instead of backticked `Enter`/`<Enter>`.",
+            "Related summary for `.` is too vague and not command-specific."
           ]
         }
       ]
@@ -2245,25 +2247,25 @@
       "title": "Search",
       "status": "supported",
       "total": 11,
-      "flagged": 11,
+      "flagged": 10,
       "entries": [
         {
           "question": "How do I search for text?",
           "verdicts": {
-            "vim_accuracy": "pass",
+            "vim_accuracy": "warning",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "warning",
             "verb_choice": "warning",
-            "related_quality": "fail",
+            "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "The key `Enter` should be wrapped in backticks per conventions.",
-            "Use 'Type' for `/` followed by search text rather than 'Press' because this is a multi-character sequence.",
-            "Related duplicates commands already mentioned in the answer (`n`)."
+            "Uses `Enter` without backticks and not as `<Enter>`.",
+            "Says the cursor jumps to the first match forward; in Vim `/` searches for the pattern and lands on the next match, not necessarily meaningfully 'first'.",
+            "Uses 'Press' for multi-key action including typing text and Enter; should use 'Type' for `/...<Enter>`."
           ]
         },
         {
@@ -2289,17 +2291,34 @@
           "verdicts": {
             "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
-            "terminalvim_accuracy": "n/a",
+            "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
-            "token_conventions": "pass",
-            "verb_choice": "warning",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "token_conventions": "warning",
+            "verb_choice": "pass",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Uses 'Press' for mentioning two alternative keypresses (`*`, `#`).",
-            "Related includes `g*`, which is not present in the kindaVim support corpus."
+            "Uses `Enter` instead of backticked `Enter`/`<Enter>`."
+          ]
+        },
+        {
+          "question": "Why doesn't `*` work in kindaVim?",
+          "verdicts": {
+            "vim_accuracy": "warning",
+            "kindavim_accuracy": "warning",
+            "terminalvim_accuracy": "pass",
+            "unsupported_consistency": "pass",
+            "token_conventions": "pass",
+            "verb_choice": "pass",
+            "related_quality": "pass",
+            "xref_validity": "pass",
+            "conciseness": "pass"
+          },
+          "issues": [
+            "`*` is unsupported, but calling it 'unbound' may be too specific relative to the corpus, which only says unsupported.",
+            "Stock Vim description omits `g*`/`g#`, making it slightly incomplete for the asked shortcut family."
           ]
         },
         {
@@ -2327,14 +2346,12 @@
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
-            "verb_choice": "warning",
+            "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": [
-            "Uses 'Press' for mentioning two alternative keypresses (`n`, `N`)."
-          ]
+          "issues": []
         },
         {
           "question": "Is search case-sensitive?",
@@ -2345,14 +2362,13 @@
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Claims default search is case-sensitive without support from the provided Vim reference.",
-            "Mentions `:set` non-support inside a supported answer, but `:set` is not listed in the kindaVim support corpus.",
-            "Related includes `:set ignorecase`, which is not present in the kindaVim support corpus."
+            "Claims case-sensitive search 'by default' for stock Vim, but Vim search behavior depends on options like `ignorecase` and `smartcase`; the provided reference does not establish this default here.",
+            "Mentions `:set` behavior for stock Vim accurately enough, but kindaVim support for case sensitivity itself is not established by the corpus."
           ]
         },
         {
@@ -2377,21 +2393,20 @@
         {
           "question": "How do I search and replace?",
           "verdicts": {
-            "vim_accuracy": "fail",
+            "vim_accuracy": "warning",
             "kindavim_accuracy": "fail",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "fail",
-            "token_conventions": "pass",
+            "token_conventions": "warning",
             "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`cgn` is presented as supported behavior, but `gn`/`cgn` are not in the kindaVim support corpus.",
-            "Entry says kindaVim doesn't support `:s` but `isUnsupported` is false.",
-            "Related includes `gn`, which is not present in the kindaVim support corpus.",
-            "Supported-answer shape is wrong for an unsupported feature-focused answer."
+            "Marks the item as supported while explicitly saying kindaVim doesn't support `:s` or `cgn`.",
+            "For an unsupported entry, stock Vim behavior should be in `terminalVim`, but `terminalVim` is null.",
+            "Uses `Enter` instead of backticked `Enter`/`<Enter>`."
           ]
         },
         {
@@ -2411,24 +2426,6 @@
             "Search command should use `<CR>` per Vim notation rather than `<Enter>`.",
             "Uses `c/pattern` and `y/pattern` as related commands, but these exact commands are not in the support corpus.",
             "Related summaries are thin and reference unsupported/non-corpus command forms."
-          ]
-        },
-        {
-          "question": "What's the difference between `*` and `/word<Enter>`?",
-          "verdicts": {
-            "vim_accuracy": "pass",
-            "kindavim_accuracy": "pass",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
-            "token_conventions": "warning",
-            "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "fail",
-            "conciseness": "pass"
-          },
-          "issues": [
-            "Uses unbackticked `*` in related summary text.",
-            "Related includes `g*`, which is not present in the kindaVim support corpus."
           ]
         },
         {
@@ -2601,20 +2598,19 @@
         {
           "question": "How do I repeat a find-and-replace in kindaVim?",
           "verdicts": {
-            "vim_accuracy": "warning",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "pass",
-            "unsupported_consistency": "pass",
-            "token_conventions": "pass",
-            "verb_choice": "warning",
-            "related_quality": "fail",
-            "xref_validity": "fail",
+            "unsupported_consistency": "warning",
+            "token_conventions": "warning",
+            "verb_choice": "pass",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer recommends `cgn`, which is not in the provided support corpus.",
-            "`cgn` is a multi-key sequence but isn't introduced with “Type”.",
-            "Related includes `cgn`, which is not in the support corpus."
+            "Answer never explicitly says kindaVim does not support `&`/`g&`; that only appears in `terminalVim`.",
+            "Uses `Enter` instead of backticked `Enter`/`<Enter>`."
           ]
         },
         {
@@ -2635,21 +2631,18 @@
         {
           "question": "Can I repeat a substitution across multiple lines in kindaVim?",
           "verdicts": {
-            "vim_accuracy": "warning",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "pass",
             "unsupported_consistency": "pass",
             "token_conventions": "warning",
-            "verb_choice": "warning",
-            "related_quality": "fail",
-            "xref_validity": "fail",
+            "verb_choice": "pass",
+            "related_quality": "pass",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Answer uses `cgn`, which is not in the provided support corpus.",
-            "`<Enter>` should be backtick-wrapped per token conventions.",
-            "The multi-key sequence `/pattern<Enter>` should be introduced with “Type”, not described generically.",
-            "Related includes `cgn`, which is not in the support corpus."
+            "Uses `<Enter>` instead of the app's preferred `Enter` key token style in backticks."
           ]
         }
       ]
@@ -3751,67 +3744,89 @@
   "flagged_entries": [
     {
       "topic_id": "case-toggle",
-      "question": "How do I toggle case of a whole word?",
-      "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "warning",
-        "related_quality": "fail",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "`g~iw` is valid in Vim, but `viw` + `~` is not the canonical stock-Vim way to toggle case in Visual mode; `~` is not listed as supported for Visual mode in kindaVim corpus",
-        "Claims support 'varies in kindaVim' instead of stating supported vs unsupported clearly",
-        "Related command `viw~` duplicates the answer's fallback and is not a corpus command token",
-        "Uses raw 'visual' instead of `{{visual}}`"
-      ],
-      "notes": "The answer is ambiguous about kindaVim support and its fallback is not grounded in the support corpus."
-    },
-    {
-      "topic_id": "case-toggle",
       "question": "How do I uppercase a whole word?",
       "verdicts": {
-        "vim_accuracy": "warning",
+        "vim_accuracy": "fail",
         "kindavim_accuracy": "fail",
         "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "warning",
+        "unsupported_consistency": "fail",
+        "token_conventions": "fail",
+        "verb_choice": "pass",
         "related_quality": "fail",
         "xref_validity": "fail",
         "conciseness": "pass"
       },
       "issues": [
-        "`gUiw` is accurate for Vim, but `viwU` is not established by the support corpus for kindaVim",
-        "Says `gU`/`gu` can behave differently on native text fields instead of stating kindaVim support clearly",
-        "Related summary for `~` is accurate, but `gu` is not a supported corpus token by itself",
-        "Related includes unsupported/non-corpus token `gu`"
+        "Marks `gU` as unsupported even though stock Vim supports `gU{motion}` and `gUiw`.",
+        "Marks the entry supported while the answer says kindaVim doesn't implement the feature.",
+        "Uses `{{normal}}`/`{{visual}}` instead of required `{normal}`/`{visual}` format.",
+        "Related includes `viwU`, which is not a corpus command token.",
+        "Related summary `u — in visual, lowercase` is inaccurate for kindaVim support corpus, which does not list visual `u` support separately."
       ],
-      "notes": "Stock Vim part is mostly right, but kindaVim support is presented ambiguously and related links are invalid."
+      "notes": "This entry mixes an unsupported claim into a supported item and also violates mode-token formatting."
     },
     {
       "topic_id": "case-toggle",
       "question": "How do I lowercase a selection?",
       "verdicts": {
         "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
+        "kindavim_accuracy": "warning",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
-        "token_conventions": "pass",
+        "token_conventions": "fail",
         "verb_choice": "pass",
         "related_quality": "warning",
         "xref_validity": "fail",
         "conciseness": "pass"
       },
       "issues": [
-        "Visual `u` lowercasing is not in the kindaVim support corpus",
-        "Related `U` and `~` in Visual context are not supported corpus entries"
+        "Uses `{{visual}}` and `{{normal}}` instead of required `{visual}` and `{normal}`.",
+        "Related includes `U` and `~`, which are not listed as standalone supported corpus tokens."
       ],
-      "notes": "The Vim behavior is correct, but this should not be presented as supported for kindaVim from the given corpus."
+      "notes": "The Vim behavior described is correct, but the item relies on visual-mode case commands not explicitly present in the support corpus and has formatting issues."
+    },
+    {
+      "topic_id": "case-toggle",
+      "question": "How do I toggle case of a whole word?",
+      "verdicts": {
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "fail",
+        "terminalvim_accuracy": "n/a",
+        "unsupported_consistency": "fail",
+        "token_conventions": "fail",
+        "verb_choice": "pass",
+        "related_quality": "fail",
+        "xref_validity": "fail",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "Marks the entry supported while the answer says kindaVim doesn't implement `g~iw`.",
+        "Uses `{{visual}}` instead of required `{visual}` format.",
+        "Related includes `viw~`, which is not a corpus command token.",
+        "Related includes `U`, which is not a corpus command token."
+      ],
+      "notes": "The workaround is plausible, but the supported/unsupported framing and token usage are inconsistent."
+    },
+    {
+      "topic_id": "case-toggle",
+      "question": "Does `gU` work in kindaVim?",
+      "verdicts": {
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "warning",
+        "terminalvim_accuracy": "pass",
+        "unsupported_consistency": "pass",
+        "token_conventions": "fail",
+        "verb_choice": "pass",
+        "related_quality": "fail",
+        "xref_validity": "fail",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "Uses `{{normal}}` instead of required `{normal}` format.",
+        "Claims visual case commands `U`, `u`, `~` exist in kindaVim, but those tokens are not explicitly in the support corpus.",
+        "Related includes `viwU` and `viw~`, which are not corpus command tokens."
+      ],
+      "notes": "The unsupported framing and stock-Vim explanation are sound, but the answer and related section cite unsupported-by-corpus visual command tokens."
     },
     {
       "topic_id": "case-toggle",
@@ -4424,27 +4439,6 @@
     },
     {
       "topic_id": "dot-repeat",
-      "question": "What's the \"dot formula\" for efficient edits?",
-      "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Mentions `cgn`, which is not in the kindaVim support corpus for supported entries.",
-        "Claims a general 'dot formula' using `cgn`; stock Vim supports it, but the supported answer must stay within kindaVim-supported commands.",
-        "Related includes `cgn`, which is not in the support corpus."
-      ],
-      "notes": "The Vim idea is broadly sound, but this supported entry relies on unsupported corpus content."
-    },
-    {
-      "topic_id": "dot-repeat",
       "question": "Can I combine `.` with a motion?",
       "verdicts": {
         "vim_accuracy": "pass",
@@ -4501,27 +4495,6 @@
         "Related item `Cmd+Q` is not a Vim/kindaVim command and does not appear in the support corpus."
       ],
       "notes": "Main answer and terminal Vim field are accurate, but formatting and Related are off-spec."
-    },
-    {
-      "topic_id": "ex-commands",
-      "question": "Does kindaVim support `:s` (substitute)?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "pass",
-        "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Says to use `cgn`, which is not in the kindaVim support corpus.",
-        "Uses bare `c` in 'Add `c` flag' instead of backtick-wrapped key/token style.",
-        "Related includes `cgn`, which is not in the support corpus."
-      ],
-      "notes": "The Vim substitute description is correct, but the kindaVim workaround cites unsupported corpus content."
     },
     {
       "topic_id": "ex-commands",
@@ -4589,23 +4562,20 @@
       "topic_id": "ex-commands",
       "question": "Can I run `:%s/old/new/g` in kindaVim?",
       "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
+        "vim_accuracy": "warning",
+        "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "pass",
         "unsupported_consistency": "pass",
-        "token_conventions": "warning",
+        "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "fail",
-        "xref_validity": "fail",
+        "related_quality": "pass",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer recommends `cgn`, which is not in the kindaVim support corpus.",
-        "Related includes `cgn`, which is not in the support corpus.",
-        "Related duplicates `/`, which is already mentioned in the answer.",
-        "Uses `Enter` instead of backticked `Enter`/`<CR>` token styling."
+        "Uses `/old<Enter>`; stock Vim accepts `<CR>` to execute search, not `<Enter>` in the provided token convention/examples."
       ],
-      "notes": "The Vim explanation of `:%s/old/new/g` is correct, but the kindaVim-specific workaround cites unsupported `cgn`."
+      "notes": "The main claims are correct, but the key notation should use ``<CR>`` rather than raw `<Enter>` for consistency with Vim notation."
     },
     {
       "topic_id": "ex-commands",
@@ -5229,47 +5199,23 @@
     },
     {
       "topic_id": "macros",
-      "question": "Can I chain commands without a macro?",
-      "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "warning",
-        "terminalvim_accuracy": "pass",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "pass",
-        "related_quality": "fail",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Mentions `cgn`, which is not in the support corpus",
-        "Implies a kindaVim workflow using `cgn`, but kindaVim support for `cgn` is not listed",
-        "Related commands include unsupported/unknown `cgn` with an inaccurate summary by omission"
-      ],
-      "notes": "The macro part is fine, but introducing `cgn` makes the entry factually unsafe for kindaVim and invalidates Related."
-    },
-    {
-      "topic_id": "macros",
       "question": "How do I record and replay a find-and-replace across a file?",
       "verdicts": {
-        "vim_accuracy": "fail",
-        "kindavim_accuracy": "fail",
-        "terminalvim_accuracy": "warning",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "pass",
         "unsupported_consistency": "pass",
-        "token_conventions": "pass",
+        "token_conventions": "warning",
         "verb_choice": "pass",
-        "related_quality": "fail",
-        "xref_validity": "fail",
+        "related_quality": "warning",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Uses `/pattern<Enter>` instead of Vim's documented `/pattern<CR>` notation",
-        "Mentions unsupported/unstated `cgn` as a kindaVim idiom",
-        "Suggests a kindaVim workflow that relies on `cgn`, which is not in the support corpus",
-        "Related includes `cgn`, which is not in the support corpus",
-        "`terminalVim` says `:%s/old/new/gc` does this in one command, but the question mentions both record and replay and the answer mixes substitute and macros"
+        "Uses `Enter` instead of backticked `Enter`/`<Enter>`.",
+        "Related summary for `.` is too vague and not command-specific."
       ],
-      "notes": "This entry should not recommend `cgn` for kindaVim unless it is in the support list, and its notation is slightly off."
+      "notes": "Accurately marks macros and `:s` as unsupported and gives a valid Vim alternative plus a workable kindaVim workaround."
     },
     {
       "topic_id": "marks",
@@ -5473,22 +5419,22 @@
       "topic_id": "search",
       "question": "How do I search for text?",
       "verdicts": {
-        "vim_accuracy": "pass",
+        "vim_accuracy": "warning",
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "warning",
         "verb_choice": "warning",
-        "related_quality": "fail",
+        "related_quality": "pass",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "The key `Enter` should be wrapped in backticks per conventions.",
-        "Use 'Type' for `/` followed by search text rather than 'Press' because this is a multi-character sequence.",
-        "Related duplicates commands already mentioned in the answer (`n`)."
+        "Uses `Enter` without backticks and not as `<Enter>`.",
+        "Says the cursor jumps to the first match forward; in Vim `/` searches for the pattern and lands on the next match, not necessarily meaningfully 'first'.",
+        "Uses 'Press' for multi-key action including typing text and Enter; should use 'Type' for `/...<Enter>`."
       ],
-      "notes": "The command behavior is correct, but it slips on notation, verb choice, and related duplication."
+      "notes": "Mostly correct, but the phrasing around `/` search and the input conventions are a bit off."
     },
     {
       "topic_id": "search",
@@ -5516,19 +5462,38 @@
       "verdicts": {
         "vim_accuracy": "pass",
         "kindavim_accuracy": "pass",
-        "terminalvim_accuracy": "n/a",
+        "terminalvim_accuracy": "pass",
         "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "warning",
-        "related_quality": "warning",
-        "xref_validity": "fail",
+        "token_conventions": "warning",
+        "verb_choice": "pass",
+        "related_quality": "pass",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Uses 'Press' for mentioning two alternative keypresses (`*`, `#`).",
-        "Related includes `g*`, which is not present in the kindaVim support corpus."
+        "Uses `Enter` instead of backticked `Enter`/`<Enter>`."
       ],
-      "notes": "The core explanation is accurate, but the related cross-reference points to an unsupported corpus entry."
+      "notes": "Correctly states that `*` and `#` are unsupported in kindaVim and accurately describes stock Vim behavior in `terminalVim`."
+    },
+    {
+      "topic_id": "search",
+      "question": "Why doesn't `*` work in kindaVim?",
+      "verdicts": {
+        "vim_accuracy": "warning",
+        "kindavim_accuracy": "warning",
+        "terminalvim_accuracy": "pass",
+        "unsupported_consistency": "pass",
+        "token_conventions": "pass",
+        "verb_choice": "pass",
+        "related_quality": "pass",
+        "xref_validity": "pass",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "`*` is unsupported, but calling it 'unbound' may be too specific relative to the corpus, which only says unsupported.",
+        "Stock Vim description omits `g*`/`g#`, making it slightly incomplete for the asked shortcut family."
+      ],
+      "notes": "The unsupported status is right, but 'unbound' is a stronger implementation claim than the support corpus provides."
     },
     {
       "topic_id": "search",
@@ -5551,25 +5516,6 @@
     },
     {
       "topic_id": "search",
-      "question": "How do I repeat my last search?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "pass",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "warning",
-        "related_quality": "pass",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Uses 'Press' for mentioning two alternative keypresses (`n`, `N`)."
-      ],
-      "notes": "The explanation of `n` and `N` matches Vim and kindaVim behavior."
-    },
-    {
-      "topic_id": "search",
       "question": "Is search case-sensitive?",
       "verdicts": {
         "vim_accuracy": "warning",
@@ -5578,16 +5524,15 @@
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
+        "related_quality": "pass",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Claims default search is case-sensitive without support from the provided Vim reference.",
-        "Mentions `:set` non-support inside a supported answer, but `:set` is not listed in the kindaVim support corpus.",
-        "Related includes `:set ignorecase`, which is not present in the kindaVim support corpus."
+        "Claims case-sensitive search 'by default' for stock Vim, but Vim search behavior depends on options like `ignorecase` and `smartcase`; the provided reference does not establish this default here.",
+        "Mentions `:set` behavior for stock Vim accurately enough, but kindaVim support for case sensitivity itself is not established by the corpus."
       ],
-      "notes": "The answer may be broadly true in practice, but it makes unsupported claims relative to the provided references and corpus."
+      "notes": "This overreaches beyond the provided support/reference material by asserting a default search case-sensitivity policy."
     },
     {
       "topic_id": "search",
@@ -5614,23 +5559,22 @@
       "topic_id": "search",
       "question": "How do I search and replace?",
       "verdicts": {
-        "vim_accuracy": "fail",
+        "vim_accuracy": "warning",
         "kindavim_accuracy": "fail",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "fail",
-        "token_conventions": "pass",
+        "token_conventions": "warning",
         "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
+        "related_quality": "pass",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`cgn` is presented as supported behavior, but `gn`/`cgn` are not in the kindaVim support corpus.",
-        "Entry says kindaVim doesn't support `:s` but `isUnsupported` is false.",
-        "Related includes `gn`, which is not present in the kindaVim support corpus.",
-        "Supported-answer shape is wrong for an unsupported feature-focused answer."
+        "Marks the item as supported while explicitly saying kindaVim doesn't support `:s` or `cgn`.",
+        "For an unsupported entry, stock Vim behavior should be in `terminalVim`, but `terminalVim` is null.",
+        "Uses `Enter` instead of backticked `Enter`/`<Enter>`."
       ],
-      "notes": "This should be handled as an unsupported `:s` entry, and it also introduces unsupported `gn`/`cgn` commands."
+      "notes": "This should be an unsupported item, not a supported one, because the answer says the requested feature is not supported."
     },
     {
       "topic_id": "search",
@@ -5652,26 +5596,6 @@
         "Related summaries are thin and reference unsupported/non-corpus command forms."
       ],
       "notes": "The Vim behavior is right, but the notation and related command references do not align cleanly with the corpus and conventions."
-    },
-    {
-      "topic_id": "search",
-      "question": "What's the difference between `*` and `/word<Enter>`?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "pass",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "fail",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Uses unbackticked `*` in related summary text.",
-        "Related includes `g*`, which is not present in the kindaVim support corpus."
-      ],
-      "notes": "The comparison between `*` and `/word<Enter>` is accurate, but the related entry references a non-corpus command and has a formatting slip."
     },
     {
       "topic_id": "search",
@@ -5844,44 +5768,40 @@
       "topic_id": "substitute-shortcuts",
       "question": "How do I repeat a find-and-replace in kindaVim?",
       "verdicts": {
-        "vim_accuracy": "warning",
+        "vim_accuracy": "pass",
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "pass",
-        "unsupported_consistency": "pass",
-        "token_conventions": "pass",
-        "verb_choice": "warning",
-        "related_quality": "fail",
-        "xref_validity": "fail",
+        "unsupported_consistency": "warning",
+        "token_conventions": "warning",
+        "verb_choice": "pass",
+        "related_quality": "pass",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer recommends `cgn`, which is not in the provided support corpus.",
-        "`cgn` is a multi-key sequence but isn't introduced with “Type”.",
-        "Related includes `cgn`, which is not in the support corpus."
+        "Answer never explicitly says kindaVim does not support `&`/`g&`; that only appears in `terminalVim`.",
+        "Uses `Enter` instead of backticked `Enter`/`<Enter>`."
       ],
-      "notes": "The unsupported `&`/`g&` part is correct, but the workaround leans on an unsupported or at least unlisted command."
+      "notes": "The Vim and kindaVim facts are good, but the unsupported answer should explicitly state non-support in the main answer text."
     },
     {
       "topic_id": "substitute-shortcuts",
       "question": "Can I repeat a substitution across multiple lines in kindaVim?",
       "verdicts": {
-        "vim_accuracy": "warning",
+        "vim_accuracy": "pass",
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "pass",
         "unsupported_consistency": "pass",
         "token_conventions": "warning",
-        "verb_choice": "warning",
-        "related_quality": "fail",
-        "xref_validity": "fail",
+        "verb_choice": "pass",
+        "related_quality": "pass",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Answer uses `cgn`, which is not in the provided support corpus.",
-        "`<Enter>` should be backtick-wrapped per token conventions.",
-        "The multi-key sequence `/pattern<Enter>` should be introduced with “Type”, not described generically.",
-        "Related includes `cgn`, which is not in the support corpus."
+        "Uses `<Enter>` instead of the app's preferred `Enter` key token style in backticks."
       ],
-      "notes": "The Vim substitute examples are accurate, but the kindaVim workflow cites an unlisted command and slips on formatting conventions."
+      "notes": "The unsupported status and stock-Vim substitute examples are correct, and the suggested kindaVim workaround is consistent with supported search and repeat-change commands."
     },
     {
       "topic_id": "text-objects",

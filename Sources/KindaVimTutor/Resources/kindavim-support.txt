@@ -108,8 +108,6 @@ V — enter visual line mode
 ? — backward incremental search
 n — repeat last search forward
 N — repeat last search backward
-* — search forward for word under cursor
-# — search backward for word under cursor
 
 # Misc
 . — repeat last change
@@ -190,3 +188,15 @@ Ctrl-O — jump back (jumplist)
 Ctrl-I — jump forward (jumplist)
 gd — go to local definition
 gD — go to global definition
+
+# Word search shortcuts
+# keywords: word search, search word under cursor
+* — search forward for word under cursor
+# — search backward for word under cursor
+g* — loose word search forward
+g# — loose word search backward
+
+# Change-next-match workflow
+# keywords: change next match, cgn workflow
+cgn — change next search match
+cgN — change previous search match

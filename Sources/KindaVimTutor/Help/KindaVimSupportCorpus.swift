@@ -10,7 +10,7 @@ enum KindaVimSupportCorpus {
     /// supports. Unsupported-command badges and the "Not Supported
     /// by kindaVim" banner deep-link here so users can see the full
     /// compatibility matrix.
-    static let docsURL = URL(string: "https://docs.kindavim.app/kindavim-features/supported-vim-commands")!
+    static let docsURL = URL(string: "https://docs.kindavim.app/implementation/accessibility-strategy")!
 
     struct Entry: Equatable, Sendable {
         let command: String
