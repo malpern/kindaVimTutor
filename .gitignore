@@ -4,3 +4,5 @@
 .swiftpm/
 .vscode/
 outputs/
+.venv/
+.cache/
