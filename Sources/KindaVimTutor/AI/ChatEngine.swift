@@ -101,6 +101,14 @@ final class ChatEngine {
             return
         }
 
+        if let topic = KindaVimHelpCorpus.topic(
+            forQuery: text,
+            preferredTopicID: currentHelpTopicID
+        ) {
+            appendTopicReferenceAnswer(topic)
+            return
+        }
+
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *), availability == .ready {
             Task { await streamReply(to: text) }
@@ -169,6 +177,68 @@ final class ChatEngine {
         // those queries surface stock-Vim content irrelevant here.
         let webQuery = qa.isUnsupported ? nil : topic.webSearchQuery
         let videoQuery = qa.isUnsupported ? nil : topic.videoSearchQuery
+        if webQuery != nil || videoQuery != nil {
+            Task { [weak self] in
+                await self?.fetchSupplementaryResultsForCanonical(
+                    webQuery: webQuery,
+                    videoQuery: videoQuery,
+                    messageIndex: index
+                )
+            }
+        }
+    }
+
+    /// Deterministic topic-level fallback when the user clearly
+    /// asked about a documented command/concept but there was no
+    /// exact canonical Q&A match. This keeps common lookups like
+    /// `ci"` or "inside word" off the model path entirely.
+    private func appendTopicReferenceAnswer(_ topic: HelpTopic) {
+        let related = topic.tags
+            .filter { !$0.isEmpty && $0 != topic.id }
+            .prefix(4)
+            .map {
+                VimAnswerDisplay.RelatedCommandDisplay(
+                    command: $0,
+                    summary: topic.title
+                )
+            }
+
+        var display = VimAnswerDisplay(
+            answer: topic.summary + " Open the Manual entry for the full reference.",
+            relatedCommands: Array(related),
+            fasterAlternative: nil,
+            webSearchQuery: nil,
+            videoSearchQuery: nil,
+            isUnsupported: topic.status == .unsupported,
+            terminalVimExplanation: nil,
+            isCanonical: true
+        )
+
+        if topic.status == .unsupported,
+           let unsupportedQA = topic.canonicalQA.first(where: { $0.isUnsupported }) {
+            display.answer = unsupportedQA.answer
+            display.relatedCommands = unsupportedQA.relatedCommands.map {
+                VimAnswerDisplay.RelatedCommandDisplay(
+                    command: $0.command,
+                    summary: $0.summary
+                )
+            }
+            display.terminalVimExplanation = unsupportedQA.terminalVimExplanation
+        }
+
+        var bubble = ChatMessage(
+            role: .assistant,
+            payload: .answer(display)
+        )
+        bubble.canonicalSource = ChatMessage.CanonicalSource(
+            topicID: topic.id,
+            topicTitle: topic.title
+        )
+        messages.append(bubble)
+        let index = messages.count - 1
+
+        let webQuery = display.isUnsupported ? nil : topic.webSearchQuery
+        let videoQuery = display.isUnsupported ? nil : topic.videoSearchQuery
         if webQuery != nil || videoQuery != nil {
             Task { [weak self] in
                 await self?.fetchSupplementaryResultsForCanonical(
@@ -420,108 +490,56 @@ final class ChatEngine {
     }
     #endif
 
+    struct PromptDebugSnapshot {
+        let text: String
+        let estimatedTokenCount: Int
+    }
+
+    func debugPromptSnapshot() -> PromptDebugSnapshot {
+        let text = systemInstructions()
+        return PromptDebugSnapshot(
+            text: text,
+            estimatedTokenCount: Self.estimatedTokenCount(for: text)
+        )
+    }
+
+    static func estimatedTokenCount(for text: String) -> Int {
+        let collapsed = text.replacingOccurrences(
+            of: #"\s+"#,
+            with: " ",
+            options: .regularExpression
+        )
+        // Foundation Models tokenization is proprietary, but in
+        // practice this prompt tracks close to ~3.5 UTF-16 code
+        // units per token. Bias slightly high so the guard test
+        // fails before we hit the 4096-token hard limit at runtime.
+        return Int(ceil(Double(collapsed.utf16.count) / 3.4))
+    }
+
     private func systemInstructions() -> String {
         var prompt = """
-        You are a concise Vim tutor embedded inside the kindaVim Tutor \
-        macOS app. Answer the user's Vim questions clearly and briefly. \
-        Use concrete examples. If the question asks about a feature \
-        the kindaVim notes below say isn't supported, say so plainly \
-        instead of explaining how it works in stock Vim.
+        You are a concise Vim tutor embedded inside the kindaVim Tutor macOS app.
+        Answer briefly, accurately, and with concrete examples.
+        Prefer kindaVim behavior over stock Vim behavior.
 
-        ## Output conventions
-        In the `answer` and `fasterAlternative` fields, use these \
-        inline tokens so the host app can render them with proper \
-        keycap / chip styling:
+        ## Output rules
+        - Wrap keys and command sequences in backticks: `Esc`, `dw`, `ci"`.
+        - Use `{{normal}}`, `{{insert}}`, `{{visual}}` for modes.
+        - Say "Press" for one key and "Type" for multi-key sequences.
+        - For comparison questions, define each command first, then state the difference.
 
-        - `backtick` wrap individual keys and key sequences: \
-          `h`, `Esc`, `dw`, `ci"`.
-        - `{{normal}}`, `{{insert}}`, `{{visual}}` for Vim modes.
-
-        Verb choice:
-        - Use "Press" only when the user pushes a SINGLE key \
-          (e.g. "Press `i` to enter {{insert}}", "Press `Esc`").
-        - Use "Type" when the user enters a multi-character \
-          sequence (e.g. "Type `dw` to delete a word", \
-          "Type `3dd` to delete three lines").
-
-        Example answer:
-          "Type `dw` in {{normal}} to delete the next word. \
-          Combine with a count like `3dw` to delete three."
-
-        ## Comparison questions
-        When the user asks for the difference between two or more \
-        commands/concepts (e.g. "what's the difference between \
-        `dw` and `de`?", "`f` vs `t`?", "`i` vs `a`?"), your \
-        answer MUST:
-        1. Briefly define each term first, one at a time, with a \
-           concrete example.
-        2. Then state the specific difference in the final \
-           sentence.
-
-        Example — "what's the difference between `dw` and `de`?":
-          "`dw` deletes from the cursor through the end of the \
-          word AND the trailing whitespace, so "foo  bar" becomes \
-          "bar". `de` deletes through the end of the word but \
-          stops before the whitespace, leaving "  bar". Use `de` \
-          when you want to preserve spacing; `dw` when you're \
-          removing the whole word unit."
-
-        ## kindaVim command support (authoritative)
-        kindaVim is a macOS menu-bar app that layers Vim-style motions \
-        on top of native text fields. The list below is the source of \
-        truth for what commands work.
-
-        ### Grounding rules (mandatory)
-        1. When the user's query references a specific command in \
-           backticks (e.g. "Explain `u`"), your answer MUST be \
-           about THAT command. Do NOT substitute a different \
-           command just because you know more about it.
-        2. Before setting `isUnsupported`, look up the command in \
-           the two lists below. If it appears under "Supported", \
-           `isUnsupported` MUST be `false`. If it appears under \
-           "Unsupported", `isUnsupported` MUST be `true`. Never \
-           flag a supported command as unsupported, and never \
-           explain an unsupported command as if it worked in \
-           kindaVim.
-        3. If you don't know what a listed supported command does, \
-           say so briefly and suggest the user try it in a lesson — \
-           do not fabricate an explanation.
-
-        ### Unsupported-command protocol
-        When the user's question is about a command (or feature) in \
-        the "Unsupported" list below:
-        1. Set `isUnsupported` to true.
-        2. Keep `answer` SHORT and definitive — e.g. "kindaVim \
-           doesn't support macros." Optionally add the closest \
-           supported kindaVim alternative in the same field, like \
-           "For single-step repeats, use `.` instead." Do NOT \
-           describe stock Vim behavior in the `answer`.
-        3. Put the full stock-Vim explanation (how to record / \
-           replay / etc. in terminal `vim`) in the \
-           `terminalVimExplanation` field, 2–4 sentences, same \
-           `backtick` + `{{{{mode}}}}` token conventions.
-        4. NEVER tell the user to press the unsupported key as if \
-           kindaVim will respond. The explanation is reference \
-           material for users who drop into terminal Vim.
-
-        Example for "how do I record a macro?":
-          answer: "kindaVim doesn't support macros. For single-step \
-          repeats, use `.` instead."
-          isUnsupported: true
-          terminalVimExplanation: "In {{normal}}, type `q` followed \
-          by a register letter (`a`–`z`) to start recording into \
-          that register. Perform your edits, then press `q` again \
-          to stop. Replay with `@<letter>`."
+        ## Grounding rules
+        - If the user asks about a specific command, answer about that command.
+        - Do not invent support. If unsure, say so briefly.
+        - If the command is listed as unsupported below, set `isUnsupported` to true.
+        - For unsupported commands, keep `answer` short and definitive, and put any stock-Vim explanation in `terminalVimExplanation`.
 
         \(KindaVimSupportCorpus.asPromptBlock())
 
-        ## When to request web search
-        Populate `webSearchQuery` when the answer benefits from \
-        supplementary tutorials or videos (e.g. broad concepts, \
-        advanced workflows). Leave it null for self-contained \
-        answers about a single motion. If a video walkthrough \
-        would help, include the word "tutorial" in the query — \
-        YouTube results will surface as thumbnail cards.
+        ## Supplementary search
+        Populate `webSearchQuery` only when external tutorials would help.
+        Leave it null for self-contained single-command answers.
+        Include the word "tutorial" when a video walkthrough would help.
 
         """
         if let lesson = currentLesson, let chapter = currentChapterTitle {
@@ -532,15 +550,10 @@ final class ChatEngine {
 
             """)
         }
-        // In-app manual: give the model the current topic in full
-        // and every other topic as a title+summary+tags line so the
-        // LLM knows what's documented without blowing the context
-        // window. The full Vim manual (~200 KB) is deliberately NOT
-        // included in the system prompt — it was overrunning the
-        // 3B model's window and causing every request to fail.
-        // Canonical Q&A retrieval handles precise grounding for the
-        // common cases; the model handles the rest with its own
-        // Vim knowledge.
+        // Give the model only the currently viewed manual topic.
+        // Canonical retrieval and deterministic topic lookup handle
+        // the rest; trying to inline the whole manual overruns the
+        // 3B model's 4096-token context window.
         prompt.append("\n## kindaVim manual\n\n")
         prompt.append(Self.helpCorpusBlock(currentTopicID: currentHelpTopicID))
         return prompt
@@ -573,21 +586,8 @@ final class ChatEngine {
             lines.append("")
         }
 
-        // Index other topics by title + commands only — dropping the
-        // prose summary saves ~200 tokens on the default prompt,
-        // keeping us comfortably under the 3B model's 4096-token
-        // context window. Canonical retrieval handles precise
-        // grounding for the common questions; the model just needs
-        // to know what topics exist.
-        let otherTopics = topics.filter { $0.id != currentTopicID }
-        if !otherTopics.isEmpty {
-            lines.append("### Other documented topics")
-            for topic in otherTopics {
-                let cmds = topic.tags.isEmpty
-                    ? ""
-                    : " (\(topic.tags.joined(separator: ", ")))"
-                lines.append("- \(topic.title)\(cmds)")
-            }
+        if currentTopicID == nil {
+            lines.append("No specific manual topic is currently open.")
         }
         return lines.joined(separator: "\n")
     }
@@ -599,7 +599,7 @@ final class ChatEngine {
         case .notEnabled:
             return "Apple Intelligence isn't turned on. Open System Settings → Apple Intelligence & Siri to enable it, then reopen this panel."
         case .ready:
-            return "Something went wrong — try again."
+            return "I couldn't answer that one — try rephrasing, or open the Manual for the canonical kindaVim reference."
         }
     }
 }

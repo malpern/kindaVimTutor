@@ -23,18 +23,98 @@ enum KindaVimHelpCorpus {
         /// clickable tag / alias / command chips so the user can
         /// jump between related entries.
         func topic(forCommand command: String) -> HelpTopic? {
-            let needle = command.lowercased()
-            guard !needle.isEmpty else { return nil }
-            // Prefer topics whose tags include the command exactly,
-            // then fall back to alias matches. First match wins;
-            // the corpus is authored small enough that this stays fast.
-            if let exactTag = topics.first(where: {
-                $0.tags.contains(where: { $0.lowercased() == needle })
-            }) { return exactTag }
-            if let aliasMatch = topics.first(where: {
-                $0.aliases.contains(where: { $0.lowercased() == needle })
-            }) { return aliasMatch }
-            return nil
+            topic(forQuery: command)
+        }
+
+        /// Broader deterministic lookup used by chat and manual.
+        /// Handles exact commands, aliases, smart quotes, and
+        /// operator+text-object phrases like "change inside word".
+        func topic(forQuery query: String, preferredTopicID: String? = nil) -> HelpTopic? {
+            let candidates = HelpQueryNormalizer.normalizedLookupCandidates(for: query)
+            guard !candidates.isEmpty else { return nil }
+
+            var bestTopic: HelpTopic?
+            var bestScore = Int.min
+
+            for topic in topics {
+                let score = score(topic: topic, for: candidates, preferredTopicID: preferredTopicID)
+                if score > bestScore {
+                    bestScore = score
+                    bestTopic = topic
+                }
+            }
+
+            guard bestScore >= 60 else { return nil }
+            return bestTopic
+        }
+
+        private func score(
+            topic: HelpTopic,
+            for candidates: [String],
+            preferredTopicID: String?
+        ) -> Int {
+            let normalizedTags = Set(topic.tags.map(HelpQueryNormalizer.normalizedComparable))
+            let normalizedAliases = Set(topic.aliases.map(HelpQueryNormalizer.normalizedComparable))
+            let normalizedTitle = HelpQueryNormalizer.normalizedComparable(topic.title)
+            let normalizedID = HelpQueryNormalizer.normalizedComparable(topic.id)
+            let canonicalQuestionText = topic.canonicalQA
+                .map(\.question)
+                .map(HelpQueryNormalizer.normalizedComparable)
+                .joined(separator: "\n")
+            let canonicalAnswerText = topic.canonicalQA
+                .map(\.answer)
+                .map(HelpQueryNormalizer.normalizedComparable)
+                .joined(separator: "\n")
+            let canonicalRelatedCommands = Set(
+                topic.canonicalQA
+                    .flatMap(\.relatedCommands)
+                    .map(\.command)
+                    .map(HelpQueryNormalizer.normalizedComparable)
+            )
+
+            var score = 0
+            for candidate in candidates {
+                if normalizedTags.contains(candidate) {
+                    score = max(score, 100)
+                }
+                if normalizedAliases.contains(candidate) {
+                    score = max(score, 95)
+                }
+                if normalizedTitle == candidate || normalizedID == candidate {
+                    score = max(score, 90)
+                }
+                if canonicalRelatedCommands.contains(candidate)
+                    || canonicalQuestionText.contains(candidate)
+                    || canonicalAnswerText.contains(candidate)
+                {
+                    score = max(score, 83)
+                }
+
+                if let decomposition = HelpQueryNormalizer.decomposeCommandToken(candidate) {
+                    if normalizedTags.contains(decomposition.core) {
+                        score = max(score, decomposition.operatorPrefix == nil ? 88 : 84)
+                    }
+                    if normalizedAliases.contains(decomposition.core) {
+                        score = max(score, 82)
+                    }
+                    if canonicalRelatedCommands.contains(decomposition.core)
+                        || canonicalQuestionText.contains(decomposition.core)
+                        || canonicalAnswerText.contains(decomposition.core)
+                    {
+                        var canonicalScore = 83
+                        if let op = decomposition.operatorPrefix,
+                           normalizedTags.contains(op) {
+                            canonicalScore += 5
+                        }
+                        score = max(score, canonicalScore)
+                    }
+                }
+            }
+
+            if topic.id == preferredTopicID, score > 0 {
+                score += 2
+            }
+            return score
         }
     }
 
@@ -46,6 +126,10 @@ enum KindaVimHelpCorpus {
 
     static func topic(forLessonID lessonID: String) -> HelpTopic? {
         shared.topic(forLessonID: lessonID)
+    }
+
+    static func topic(forQuery query: String, preferredTopicID: String? = nil) -> HelpTopic? {
+        shared.topic(forQuery: query, preferredTopicID: preferredTopicID)
     }
 
     private static func load() -> Corpus {
@@ -82,11 +166,15 @@ enum KindaVimHelpCorpus {
         }
 
         // SwiftPM resource packaging can flatten files into the bundle
-        // root in app builds. Fall back to those known sample files.
-        for name in ["dedication", "delete-word", "find-character", "macros"] {
-            if let url = Bundle.module.url(forResource: name, withExtension: "txt") {
-                urls.append(url)
-            }
+        // root in app builds. Scan the full bundle root instead of
+        // hard-coding a few sample files so new help topics are
+        // automatically visible in tests and local debug builds.
+        if let moduleRoot = Bundle.module.resourceURL,
+           let rootURLs = try? fm.contentsOfDirectory(
+                at: moduleRoot,
+                includingPropertiesForKeys: nil
+           ) {
+            urls.append(contentsOf: rootURLs.filter { $0.pathExtension == "txt" })
         }
 
         // The packaged app also copies raw Resources/ into

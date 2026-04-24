@@ -5,7 +5,7 @@ status: supported
 tags: iw, aw, ib, ab, iB, aB, i", a", i', a', i[, a[, text-object
 aliases: text object, inside word, around word, inner, outer
 lessons: ch3.l2, ch3.l3
-related: delete-word, change-line
+related: delete-word, change-operator
 questions: What's the difference between `iw` and `aw`? || How do I delete a quoted string? || Why `dib` instead of `di(`?
 web: vim text objects iw ib tutorial
 video: vim text objects iw aw beginner

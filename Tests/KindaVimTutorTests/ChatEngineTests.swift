@@ -112,4 +112,123 @@ struct ChatEngineTests {
         #expect(display.terminalVimExplanation?.contains("`q`") == true)
         #expect(display.relatedCommands.map(\.command) == ["."])
     }
+
+    @Test("topic lookup fallback answers documented commands without using the model")
+    func sendTopicFallbackQuestion() throws {
+        let engine = ChatEngine()
+        engine.activate(
+            lesson: nil,
+            chapterTitle: nil,
+            chapters: Curriculum.chapters,
+            helpTopicID: nil
+        )
+
+        engine.input = "Explain `inside word`"
+        engine.send()
+
+        let assistant = try #require(engine.messages.last)
+        let source = try #require(assistant.canonicalSource)
+        #expect(source.topicID == "text-objects")
+
+        guard case .answer(let display) = assistant.payload else {
+            Issue.record("Expected a structured topic-reference answer payload")
+            return
+        }
+
+        #expect(display.isCanonical)
+        #expect(display.answer.contains("Text objects"))
+    }
+
+    @Test("topic lookup normalizes smart quotes and operator-plus-object phrases")
+    func sendNormalizedTopicQuestion() throws {
+        let engine = ChatEngine()
+        engine.activate(
+            lesson: nil,
+            chapterTitle: nil,
+            chapters: Curriculum.chapters,
+            helpTopicID: nil
+        )
+
+        engine.input = "How do I change inside “quotes”?"
+        engine.send()
+
+        let assistant = try #require(engine.messages.last)
+        let source = try #require(assistant.canonicalSource)
+        #expect(source.topicID == "change-operator")
+    }
+
+    @Test("system prompt stays under the on-device model budget")
+    func systemPromptStaysWithinBudget() {
+        let engine = ChatEngine()
+        engine.activate(
+            lesson: Curriculum.chapters[0].lessons.first,
+            chapterTitle: Curriculum.chapters[0].title,
+            chapters: Curriculum.chapters,
+            helpTopicID: "delete-word"
+        )
+
+        let snapshot = engine.debugPromptSnapshot()
+
+        #expect(snapshot.text.contains("Delete Word"))
+        #expect(snapshot.estimatedTokenCount <= 3400)
+    }
+
+    /// Worst-case prompt size guard. The biggest help topic becomes
+    /// the "currently viewed" topic (so its full body gets embedded
+    /// in the system prompt), with a lesson context attached. If any
+    /// corpus edit pushes the prompt past the budget, this test
+    /// fails before the runtime hits the 3B on-device model's
+    /// 4096-token context-window error.
+    @Test("worst-case system prompt stays under the on-device model budget")
+    func worstCaseSystemPromptStaysWithinBudget() throws {
+        // Budget: 4096 total context window, minus ~700 tokens
+        // reserved for the user's question + prior turn history +
+        // structured VimAnswer output. 3400 is what the current
+        // engine keeps on a typical topic; we hold worst-case to
+        // the same cap so corpus growth is surfaced immediately.
+        let tokenBudget = 3400
+
+        // Pick the topic whose full-serialization is largest. If
+        // someone adds a huge new topic, this selects it
+        // automatically — no need to update the test.
+        let topics = KindaVimHelpCorpus.topics
+        let biggestTopic = try #require(
+            topics.max(by: { lhs, rhs in
+                bodyLength(of: lhs) < bodyLength(of: rhs)
+            })
+        )
+
+        let engine = ChatEngine()
+        engine.activate(
+            lesson: Curriculum.chapters[0].lessons.first,
+            chapterTitle: Curriculum.chapters[0].title,
+            chapters: Curriculum.chapters,
+            helpTopicID: biggestTopic.id
+        )
+
+        let snapshot = engine.debugPromptSnapshot()
+
+        // Diagnostic for the failure path — shows which topic
+        // triggered the overrun and how far over we are.
+        if snapshot.estimatedTokenCount > tokenBudget {
+            Issue.record(
+                """
+                System prompt exceeded budget.
+                Budget: \(tokenBudget) tokens. Estimated: \(snapshot.estimatedTokenCount).
+                Worst-case topic: \(biggestTopic.id) (\(biggestTopic.title)).
+                Check docs/llm-api-efficiency.md and trim kindavim-support.txt /
+                the biggest topic body before shipping.
+                """
+            )
+        }
+        #expect(snapshot.estimatedTokenCount <= tokenBudget)
+    }
+
+    private func bodyLength(of topic: HelpTopic) -> Int {
+        let sections = topic.sections.reduce(0) { acc, s in
+            acc + s.title.count + s.body.count
+        }
+        return topic.title.count + topic.summary.count + sections
+            + topic.tags.joined().count + topic.aliases.joined().count
+    }
 }

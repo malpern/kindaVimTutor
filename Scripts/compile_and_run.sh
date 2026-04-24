@@ -37,6 +37,14 @@ if [[ "${RUN_TESTS}" == "1" ]]; then
   swift test -q
 fi
 
+# Always run the chat system-prompt size guardrail — fast, deterministic,
+# prevents shipping a build whose prompt overruns the on-device model's
+# 4096-token context window. If this fails, trim kindavim-support.txt
+# or the biggest help topic before retrying. See docs/llm-api-efficiency.md.
+log "==> guard: chat prompt size"
+swift test --filter "ChatEngineTests.worstCaseSystemPromptStaysWithinBudget" -q \
+  || fail "Chat system prompt exceeded the token budget — trim before shipping."
+
 HOST_ARCH="$(uname -m)"
 ARCHES_VALUE="${HOST_ARCH}"
 if [[ -n "${RELEASE_ARCHES}" ]]; then

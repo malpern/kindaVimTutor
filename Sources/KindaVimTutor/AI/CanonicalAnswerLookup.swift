@@ -65,26 +65,27 @@ enum CanonicalAnswerLookup {
     ]
 
     private static func tokens(in text: String) -> Set<String> {
+        let normalizedText = HelpQueryNormalizer.standardized(text)
         var tokens: Set<String> = []
 
         // Pull backtick-wrapped commands (`dw`, `ci"`, `Esc`) first
         // and always keep them, regardless of length.
-        var cursor = text.startIndex
-        while cursor < text.endIndex {
-            if text[cursor] == "`" {
-                let after = text.index(after: cursor)
-                if let close = text[after...].firstIndex(of: "`") {
-                    let cmd = String(text[after..<close]).lowercased()
+        var cursor = normalizedText.startIndex
+        while cursor < normalizedText.endIndex {
+            if normalizedText[cursor] == "`" {
+                let after = normalizedText.index(after: cursor)
+                if let close = normalizedText[after...].firstIndex(of: "`") {
+                    let cmd = String(normalizedText[after..<close]).lowercased()
                     if !cmd.isEmpty { tokens.insert(cmd) }
-                    cursor = text.index(after: close)
+                    cursor = normalizedText.index(after: close)
                     continue
                 }
             }
-            cursor = text.index(after: cursor)
+            cursor = normalizedText.index(after: cursor)
         }
 
         // Regular word tokens from surrounding prose.
-        let lowered = text.lowercased()
+        let lowered = HelpQueryNormalizer.normalizedComparable(normalizedText)
         let separators = CharacterSet.alphanumerics.inverted
         let parts = lowered.components(separatedBy: separators)
             .filter { !$0.isEmpty }
@@ -100,6 +101,18 @@ enum CanonicalAnswerLookup {
                 tokens.insert(part)
             } else if part.count >= 3, !stopwords.contains(part) {
                 tokens.insert(part)
+            }
+        }
+
+        for candidate in HelpQueryNormalizer.normalizedLookupCandidates(for: normalizedText) {
+            if let decomposition = HelpQueryNormalizer.decomposeCommandToken(candidate) {
+                tokens.insert(decomposition.core)
+                if let op = decomposition.operatorPrefix {
+                    tokens.insert(op + decomposition.core)
+                }
+            }
+            if candidate.count >= 3, !stopwords.contains(candidate) {
+                tokens.insert(candidate)
             }
         }
         return tokens

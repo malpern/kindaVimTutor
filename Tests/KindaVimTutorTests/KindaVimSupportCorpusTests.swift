@@ -38,13 +38,12 @@ struct KindaVimSupportCorpusTests {
         #expect(corpus.note(for: "q")?.contains("macro") == true)
     }
 
-    @Test("prompt block mentions both supported and unsupported sections")
+    @Test("prompt block stays trimmed to unsupported-only grounding")
     func promptBlockContainsKeyCommands() {
         let block = KindaVimSupportCorpus.asPromptBlock()
 
-        #expect(block.contains("### Supported kindaVim commands"))
         #expect(block.contains("### Unsupported"))
-        #expect(block.contains("`dw`"))
         #expect(block.contains("`q`"))
+        #expect(!block.contains("### Supported kindaVim commands"))
     }
 }

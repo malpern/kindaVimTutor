@@ -168,22 +168,16 @@ enum KindaVimSupportCorpus {
         )
     }
 
-    /// Compact comma-separated command list for inclusion in a
-    /// system prompt. The on-device 3B model has a 4096-token
-    /// context window — the per-entry `- \`cmd\` — note` format
-    /// consumed ~1400 tokens and forced generation failures, so
-    /// prompt-grounding uses just the tokens.
+    /// Compact unsupported-only command list for inclusion in the
+    /// chat system prompt. The on-device 3B model has a 4096-token
+    /// context window, so we only include the "must never claim
+    /// support" set here and let runtime post-processing police
+    /// supported commands.
     static func asPromptBlock() -> String {
-        let supportedList = shared.supported
-            .map { "`\($0.command)`" }
-            .joined(separator: ", ")
         let unsupportedList = shared.unsupported
             .map { "`\($0.command)`" }
             .joined(separator: ", ")
         return """
-        ### Supported kindaVim commands
-        \(supportedList)
-
         ### Unsupported (kindaVim does NOT implement these)
         \(unsupportedList)
         """
