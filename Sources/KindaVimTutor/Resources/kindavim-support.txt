@@ -45,6 +45,12 @@ $ — move to end of line
 gg — go to first line of document
 G — go to last line of document
 
+# Paragraph and sentence motions
+{ — jump to previous paragraph (blank line)
+} — jump to next paragraph (blank line)
+( — jump to previous sentence
+) — jump to next sentence
+
 # Character search
 f — find next occurrence of character on line
 F — find previous occurrence of character on line

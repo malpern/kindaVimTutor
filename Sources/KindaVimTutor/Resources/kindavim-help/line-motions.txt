@@ -57,6 +57,18 @@ Q: How do I jump to column N on a line?
 A: `|` (pipe) followed by a count moves to that column — e.g. `25|` jumps to column 25 on the current line.
 Related: 0 — column zero; $ — last column
 
+Q: How do I jump to the next paragraph?
+A: Press `}` in {{normal}} to jump to the next blank line (next paragraph). Press `{` to jump to the previous one. A paragraph in Vim is a run of non-blank lines separated by a blank line.
+Related: { — jump to previous paragraph; ) — jump to next sentence; ( — jump to previous sentence
+
+Q: How do I jump to the previous paragraph?
+A: Press `{` in {{normal}} to jump back to the previous blank line. Mirror of `}`.
+Related: } — jump to next paragraph; ( — jump to previous sentence
+
+Q: How do I jump by sentence?
+A: Press `)` in {{normal}} to jump to the start of the next sentence; `(` for the previous. Sentences end at `.`, `!`, or `?` followed by whitespace.
+Related: } — jump by paragraph; { — back a paragraph
+
 Q: How do I jump half a screen down?
 A: kindaVim doesn't support `Ctrl-D` / `Ctrl-U` (half-page scroll) — those are tied to Vim's own viewport which kindaVim doesn't own. For jumping around a long document use `gg` (top), `G` (bottom), or prefix `G` with a count to go to that line number.
 Unsupported: yes

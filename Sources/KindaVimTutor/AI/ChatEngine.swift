@@ -97,6 +97,8 @@ final class ChatEngine {
             in: KindaVimHelpCorpus.topics,
             preferredTopicID: currentHelpTopicID
         ) {
+            logQuery(text, tier: "canonical", topicID: canonical.topic.id,
+                     extra: ["score": String(format: "%.2f", canonical.score)])
             appendCanonicalAnswer(canonical.qa, topic: canonical.topic)
             return
         }
@@ -105,21 +107,46 @@ final class ChatEngine {
             forQuery: text,
             preferredTopicID: currentHelpTopicID
         ) {
+            logQuery(text, tier: "topic-reference", topicID: topic.id)
             appendTopicReferenceAnswer(topic)
             return
         }
 
         #if canImport(FoundationModels)
         if #available(macOS 26.0, *), availability == .ready {
+            logQuery(text, tier: "model")
             Task { await streamReply(to: text) }
             return
         }
         #endif
 
+        logQuery(text, tier: "unavailable-fallback")
         messages.append(ChatMessage(
             role: .assistant,
             payload: .text(fallbackReply())
         ))
+    }
+
+    /// Logs each chat query + which retrieval tier served it. Gives us
+    /// a feed of real user questions to triage: queries hitting
+    /// `topic-reference` or `model` repeatedly are good candidates for
+    /// new canonical Q&As. Field names deliberately short to keep log
+    /// lines readable.
+    private func logQuery(
+        _ query: String,
+        tier: String,
+        topicID: String? = nil,
+        extra: [String: String] = [:]
+    ) {
+        var fields: [String: String] = [
+            "tier": tier,
+            "query": query,
+            "viewing": currentHelpTopicID ?? "",
+            "lesson": currentLesson?.id ?? ""
+        ]
+        if let topicID { fields["topic"] = topicID }
+        fields.merge(extra) { _, new in new }
+        AppLogger.shared.info("chat", "query", fields: fields)
     }
 
     /// Renders a pre-authored canonical Q&A directly into the
@@ -193,18 +220,26 @@ final class ChatEngine {
     /// exact canonical Q&A match. This keeps common lookups like
     /// `ci"` or "inside word" off the model path entirely.
     private func appendTopicReferenceAnswer(_ topic: HelpTopic) {
+        // Build per-command summaries from the support corpus so
+        // Related rows read like "0 — move to first column of line"
+        // rather than the repeated topic title ("Line Motions").
+        // Fall back to the topic title only when the corpus has no
+        // note for that command.
+        let corpus = KindaVimSupportCorpus.shared
         let related = topic.tags
             .filter { !$0.isEmpty && $0 != topic.id }
             .prefix(4)
-            .map {
-                VimAnswerDisplay.RelatedCommandDisplay(
-                    command: $0,
-                    summary: topic.title
+            .map { tag in
+                let note = corpus.note(for: tag)?.trimmingCharacters(in: .whitespacesAndNewlines)
+                let summary = (note?.isEmpty == false) ? note! : topic.title
+                return VimAnswerDisplay.RelatedCommandDisplay(
+                    command: tag,
+                    summary: summary
                 )
             }
 
         var display = VimAnswerDisplay(
-            answer: topic.summary + " Open the Manual entry for the full reference.",
+            answer: Self.topicReferenceBody(for: topic),
             relatedCommands: Array(related),
             fasterAlternative: nil,
             webSearchQuery: nil,
@@ -372,11 +407,23 @@ final class ChatEngine {
         from partial: VimAnswer.PartiallyGenerated,
         userQuery: String
     ) -> VimAnswerDisplay {
+        let rawAnswer = partial.answer ?? ""
+        // Flag answers that recommend macOS shortcuts as the
+        // primary answer — the model sometimes defaults to
+        // `PgUp` / `PgDn` / `Home` / `End` / arrow keys when the
+        // question is ambiguous. Those aren't Vim motions and
+        // shouldn't be the headline reply.
+        if Self.answersWithMacOSOnlyKeys(rawAnswer) {
+            AppLogger.shared.warn("chat", "macOSFallbackDetected", fields: [
+                "query": userQuery,
+                "answer": String(rawAnswer.prefix(200))
+            ])
+        }
         let modelSaysUnsupported = partial.isUnsupported ?? false
         let resolvedUnsupported = Self.resolveUnsupported(
             modelFlag: modelSaysUnsupported,
             userQuery: userQuery,
-            answer: partial.answer ?? ""
+            answer: rawAnswer
         )
         return VimAnswerDisplay(
             answer: partial.answer ?? "",
@@ -392,6 +439,52 @@ final class ChatEngine {
                 ? (partial.terminalVimExplanation ?? nil)
                 : nil
         )
+    }
+
+    /// Composes a more substantive topic-reference answer than the
+    /// one-line `topic.summary` we used to emit. Uses the first
+    /// prose section of the topic as the main body (usually a 2–4
+    /// sentence explanation we authored), prepends the summary as a
+    /// brief lede, and appends a pointer to the Manual. Falls back
+    /// to summary alone when the topic has no prose sections.
+    private static func topicReferenceBody(for topic: HelpTopic) -> String {
+        let summary = topic.summary.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let firstSection = topic.sections.first(where: {
+            !$0.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }) else {
+            return summary.isEmpty
+                ? "Open the Manual entry for the full reference."
+                : summary + " Open the Manual entry for the full reference."
+        }
+        let body = firstSection.body.trimmingCharacters(in: .whitespacesAndNewlines)
+        var parts: [String] = []
+        if !summary.isEmpty { parts.append(summary) }
+        parts.append(body)
+        parts.append("Open the Manual entry for the full reference.")
+        return parts.joined(separator: "\n\n")
+    }
+
+    /// Log-only signal that the model recommended a macOS-only
+    /// shortcut (PgUp/Home/End/Cmd+F/arrow keys) as the primary
+    /// answer, where a Vim motion would be correct. The answer
+    /// still renders — we don't have a safe auto-rewrite — but
+    /// the app log captures the regression so prompt-tuning can
+    /// improve over time.
+    private static func answersWithMacOSOnlyKeys(_ answer: String) -> Bool {
+        // Match the key token inside backticks, so prose mentions
+        // of "PgUp" don't trigger. Look for the suspect keys as
+        // the ONLY command-looking thing in a short answer.
+        let macOnly = ["PgUp", "PgDn", "Home", "End",
+                       "Up", "Down", "Left", "Right",
+                       "Cmd+F", "Cmd+G"]
+        guard let range = answer.range(of: "^\\s*(Press|Type)\\s+`([^`]+)`",
+                                       options: .regularExpression),
+              let cmdRange = answer[range].range(of: "`([^`]+)`",
+                                                 options: .regularExpression) else {
+            return false
+        }
+        let cmd = answer[cmdRange].trimmingCharacters(in: CharacterSet(charactersIn: "`"))
+        return macOnly.contains(cmd)
     }
 
     /// Overrides the model's `isUnsupported` flag when it contradicts
@@ -533,6 +626,19 @@ final class ChatEngine {
         - Do not invent support. If unsure, say so briefly.
         - If the command is listed as unsupported below, set `isUnsupported` to true.
         - For unsupported commands, keep `answer` short and definitive, and put any stock-Vim explanation in `terminalVimExplanation`.
+
+        ## Vim-only answers
+        Every answer MUST be a Vim motion, operator, or text object.
+        NEVER recommend macOS keyboard shortcuts as the primary answer —
+        `PgUp`, `PgDn`, `Home`, `End`, arrow keys, `Cmd+F`, etc. are NOT
+        acceptable. The user already knows about those; they want the
+        Vim way. Examples of correct reframing:
+        - "how do I jump to the next paragraph?" → `}` (NOT `PgDn`).
+        - "how do I go to the end of the file?" → `G` (NOT `Cmd+Down`).
+        - "how do I search?" → `/` (NOT `Cmd+F`).
+        macOS shortcuts MAY appear in unsupported-feature answers when
+        kindaVim legitimately doesn't implement a Vim equivalent
+        (e.g. named registers → `Cmd+C`/`Cmd+V`). Never otherwise.
 
         \(KindaVimSupportCorpus.asPromptBlock())
 
