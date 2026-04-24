@@ -1,10 +1,10 @@
 {
   "date": "2026-04-23",
-  "total": 201,
-  "flagged": 125,
+  "total": 200,
+  "flagged": 128,
   "axis_counts": {
     "vim_accuracy": {
-      "pass": 148,
+      "pass": 147,
       "warning": 47,
       "fail": 0,
       "n/a": 6,
@@ -13,7 +13,7 @@
     "kindavim_accuracy": {
       "pass": 173,
       "warning": 27,
-      "fail": 1,
+      "fail": 0,
       "n/a": 0,
       "other": 0
     },
@@ -21,11 +21,11 @@
       "pass": 51,
       "warning": 7,
       "fail": 0,
-      "n/a": 143,
+      "n/a": 142,
       "other": 0
     },
     "unsupported_consistency": {
-      "pass": 194,
+      "pass": 193,
       "warning": 2,
       "fail": 0,
       "n/a": 5,
@@ -33,21 +33,21 @@
     },
     "token_conventions": {
       "pass": 161,
-      "warning": 34,
+      "warning": 33,
       "fail": 6,
       "n/a": 0,
       "other": 0
     },
     "verb_choice": {
       "pass": 169,
-      "warning": 19,
+      "warning": 18,
       "fail": 0,
       "n/a": 13,
       "other": 0
     },
     "related_quality": {
-      "pass": 147,
-      "warning": 47,
+      "pass": 143,
+      "warning": 50,
       "fail": 7,
       "n/a": 0,
       "other": 0
@@ -55,12 +55,12 @@
     "xref_validity": {
       "pass": 176,
       "warning": 6,
-      "fail": 19,
+      "fail": 18,
       "n/a": 0,
       "other": 0
     },
     "conciseness": {
-      "pass": 196,
+      "pass": 195,
       "warning": 5,
       "fail": 0,
       "n/a": 0,
@@ -2568,8 +2568,8 @@
     "text-objects": {
       "title": "Text Objects",
       "status": "supported",
-      "total": 15,
-      "flagged": 9,
+      "total": 14,
+      "flagged": 12,
       "entries": [
         {
           "question": "What's the difference between `iw` and `aw`?",
@@ -2589,17 +2589,20 @@
         {
           "question": "How do I delete the word the cursor is on?",
           "verdicts": {
-            "vim_accuracy": "pass",
+            "vim_accuracy": "warning",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "pass",
+            "related_quality": "warning",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": []
+          "issues": [
+            "`diw` is described as deleting 'just letters', but Vim's word object is not limited to letters; it follows word semantics.",
+            "Related summary for `dw` is imprecise because `dw` deletes to the start of the next word, with Vim's special-case behavior at end of line."
+          ]
         },
         {
           "question": "How do I change the word the cursor is on?",
@@ -2639,7 +2642,7 @@
         {
           "question": "How do I delete everything inside parentheses?",
           "verdicts": {
-            "vim_accuracy": "warning",
+            "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
@@ -2650,30 +2653,11 @@
             "conciseness": "pass"
           },
           "issues": [
-            "Says the cursor can be anywhere on the line; in Vim block text objects require being inside the block or on one of its braces, not merely anywhere on the line.",
-            "Related includes unsupported `c%` in a supported entry, which is acceptable as cross-reference but weak as a 'related' suggestion here."
+            "Related includes `dab`, which is already mentioned in the answer; related commands should avoid duplication."
           ]
         },
         {
-          "question": "Does `i(` work on any type of bracket?",
-          "verdicts": {
-            "vim_accuracy": "pass",
-            "kindavim_accuracy": "warning",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
-            "token_conventions": "warning",
-            "verb_choice": "pass",
-            "related_quality": "warning",
-            "xref_validity": "pass",
-            "conciseness": "pass"
-          },
-          "issues": [
-            "Answer omits `ib` as the Vim shortcut for `i(` / `i)`, though not strictly false.",
-            "Related summary text uses bare tokens `i(` and `i{` without backticks."
-          ]
-        },
-        {
-          "question": "What does the cursor need to be on for `di(` to work?",
+          "question": "Why `dib` instead of `di(`?",
           "verdicts": {
             "vim_accuracy": "pass",
             "kindavim_accuracy": "warning",
@@ -2686,23 +2670,8 @@
             "conciseness": "pass"
           },
           "issues": [
-            "kindaVim support corpus marks `di(` as supported, but the answer hedges with host-app variability instead of stating direct supported behavior"
+            "Saying raw `(` / `{` forms 'aren't independently verified' understates that kindaVim marks forms like `di(` as unsupported."
           ]
-        },
-        {
-          "question": "What's the difference between `i\"` and `a\"`?",
-          "verdicts": {
-            "vim_accuracy": "pass",
-            "kindavim_accuracy": "pass",
-            "terminalvim_accuracy": "n/a",
-            "unsupported_consistency": "pass",
-            "token_conventions": "pass",
-            "verb_choice": "pass",
-            "related_quality": "pass",
-            "xref_validity": "pass",
-            "conciseness": "pass"
-          },
-          "issues": []
         },
         {
           "question": "How do I change the contents of a string without removing the quotes?",
@@ -2711,18 +2680,37 @@
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
-            "token_conventions": "pass",
+            "token_conventions": "fail",
             "verb_choice": "pass",
             "related_quality": "pass",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": []
+          "issues": [
+            "Key token should be written as ``ci\"`` in backticks per the author convention; current escaping breaks the token presentation."
+          ]
+        },
+        {
+          "question": "How do I change everything inside braces?",
+          "verdicts": {
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "pass",
+            "terminalvim_accuracy": "n/a",
+            "unsupported_consistency": "pass",
+            "token_conventions": "pass",
+            "verb_choice": "pass",
+            "related_quality": "warning",
+            "xref_validity": "pass",
+            "conciseness": "pass"
+          },
+          "issues": [
+            "Related includes `ciB`, which is already the main command in the answer; related commands should not duplicate answer commands."
+          ]
         },
         {
           "question": "How do I select text using a text object?",
           "verdicts": {
-            "vim_accuracy": "pass",
+            "vim_accuracy": "warning",
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
@@ -2732,10 +2720,13 @@
             "xref_validity": "pass",
             "conciseness": "pass"
           },
-          "issues": []
+          "issues": [
+            "`viw` does not literally 'enter visual, then selects' as two separate steps the user performs here; it's a single normal-mode command sequence.",
+            "Saying 'In {{visual}} mode, apply a text object' is slightly misleading for examples like `viw`, which start from {{normal}} and enter Visual as part of the sequence."
+          ]
         },
         {
-          "question": "What's the difference between `di(` and `di)`?",
+          "question": "What does the cursor need to be on for `dib` to work?",
           "verdicts": {
             "vim_accuracy": "pass",
             "kindavim_accuracy": "pass",
@@ -2769,19 +2760,19 @@
         {
           "question": "How do I delete to the matching bracket?",
           "verdicts": {
-            "vim_accuracy": "warning",
-            "kindavim_accuracy": "pass",
+            "vim_accuracy": "pass",
+            "kindavim_accuracy": "warning",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "pass",
+            "related_quality": "warning",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "Question asks about deleting to the matching bracket, but the answer mainly explains brace text objects rather than `%`-based matching.",
-            "`di{`/`di}` delete inside the enclosing braces, not 'to the matching bracket' from the cursor position."
+            "Says kindaVim 'doesn't verify `%` specifically' instead of clearly stating whether `d%` itself is supported; support corpus does not list `%` or `d%`.",
+            "Related duplicates commands already mentioned in the answer."
           ]
         },
         {
@@ -2809,15 +2800,14 @@
             "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
-            "token_conventions": "fail",
+            "token_conventions": "pass",
             "verb_choice": "pass",
-            "related_quality": "pass",
+            "related_quality": "warning",
             "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`ci\"` should be written as ``ci\"`` only if the app accepts escaped quotes inside backticks, but the established convention elsewhere is typically ``ci\"`` rendered awkwardly; this is inconsistent and potentially malformed.",
-            "The answer uses plain quoted phrases instead of command-focused backtick styling for the explanations."
+            "Related summary for `yiw` is imprecise; stock Vim treats `iw` as \"inner word\" text object, so \"yank inner word\" is informal rather than the app's usual command-summary style."
           ]
         }
       ]
@@ -3064,19 +3054,17 @@
           "question": "How do I select text inside parens in visual mode?",
           "verdicts": {
             "vim_accuracy": "pass",
-            "kindavim_accuracy": "fail",
+            "kindavim_accuracy": "pass",
             "terminalvim_accuracy": "n/a",
             "unsupported_consistency": "pass",
             "token_conventions": "pass",
-            "verb_choice": "warning",
+            "verb_choice": "pass",
             "related_quality": "warning",
-            "xref_validity": "fail",
+            "xref_validity": "pass",
             "conciseness": "pass"
           },
           "issues": [
-            "`va(` is described as supported but is not in the kindaVim support corpus",
-            "Uses 'Press' for multi-step input (`v` then text object)",
-            "Related command `vi\"` is not a corpus token; supported token is `vi\"` only if represented exactly as `vi\"` in storage, but related parsing is ambiguous and `vi(` duplicates command discussed in answer indirectly"
+            "Related includes `vib`, which is already used in the answer."
           ]
         },
         {
@@ -5398,6 +5386,26 @@
     },
     {
       "topic_id": "text-objects",
+      "question": "How do I delete the word the cursor is on?",
+      "verdicts": {
+        "vim_accuracy": "warning",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "n/a",
+        "unsupported_consistency": "pass",
+        "token_conventions": "pass",
+        "verb_choice": "pass",
+        "related_quality": "warning",
+        "xref_validity": "pass",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "`diw` is described as deleting 'just letters', but Vim's word object is not limited to letters; it follows word semantics.",
+        "Related summary for `dw` is imprecise because `dw` deletes to the start of the next word, with Vim's special-case behavior at end of line."
+      ],
+      "notes": "Mostly good, but the wording about what counts as a word is too simplistic."
+    },
+    {
+      "topic_id": "text-objects",
       "question": "How do I change the word the cursor is on?",
       "verdicts": {
         "vim_accuracy": "pass",
@@ -5439,7 +5447,7 @@
       "topic_id": "text-objects",
       "question": "How do I delete everything inside parentheses?",
       "verdicts": {
-        "vim_accuracy": "warning",
+        "vim_accuracy": "pass",
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
@@ -5450,34 +5458,13 @@
         "conciseness": "pass"
       },
       "issues": [
-        "Says the cursor can be anywhere on the line; in Vim block text objects require being inside the block or on one of its braces, not merely anywhere on the line.",
-        "Related includes unsupported `c%` in a supported entry, which is acceptable as cross-reference but weak as a 'related' suggestion here."
+        "Related includes `dab`, which is already mentioned in the answer; related commands should avoid duplication."
       ],
-      "notes": "The core commands are supported, but the stock Vim cursor-position claim is too broad."
+      "notes": "The command description is accurate, but the related section repeats a command already explained."
     },
     {
       "topic_id": "text-objects",
-      "question": "Does `i(` work on any type of bracket?",
-      "verdicts": {
-        "vim_accuracy": "pass",
-        "kindavim_accuracy": "warning",
-        "terminalvim_accuracy": "n/a",
-        "unsupported_consistency": "pass",
-        "token_conventions": "warning",
-        "verb_choice": "pass",
-        "related_quality": "warning",
-        "xref_validity": "pass",
-        "conciseness": "pass"
-      },
-      "issues": [
-        "Answer omits `ib` as the Vim shortcut for `i(` / `i)`, though not strictly false.",
-        "Related summary text uses bare tokens `i(` and `i{` without backticks."
-      ],
-      "notes": "The bracket-type mapping is accurate, but the related formatting slips."
-    },
-    {
-      "topic_id": "text-objects",
-      "question": "What does the cursor need to be on for `di(` to work?",
+      "question": "Why `dib` instead of `di(`?",
       "verdicts": {
         "vim_accuracy": "pass",
         "kindavim_accuracy": "warning",
@@ -5490,9 +5477,67 @@
         "conciseness": "pass"
       },
       "issues": [
-        "kindaVim support corpus marks `di(` as supported, but the answer hedges with host-app variability instead of stating direct supported behavior"
+        "Saying raw `(` / `{` forms 'aren't independently verified' understates that kindaVim marks forms like `di(` as unsupported."
       ],
-      "notes": "The stock Vim explanation for `di(` is accurate, but the kindaVim-specific sentence is more cautious than the support corpus suggests."
+      "notes": "Stock Vim description is correct, but the kindaVim-specific wording should more clearly state the unsupported raw forms."
+    },
+    {
+      "topic_id": "text-objects",
+      "question": "How do I change the contents of a string without removing the quotes?",
+      "verdicts": {
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "n/a",
+        "unsupported_consistency": "pass",
+        "token_conventions": "fail",
+        "verb_choice": "pass",
+        "related_quality": "pass",
+        "xref_validity": "pass",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "Key token should be written as ``ci\"`` in backticks per the author convention; current escaping breaks the token presentation."
+      ],
+      "notes": "The behavior is correct, but the command token formatting is off."
+    },
+    {
+      "topic_id": "text-objects",
+      "question": "How do I change everything inside braces?",
+      "verdicts": {
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "n/a",
+        "unsupported_consistency": "pass",
+        "token_conventions": "pass",
+        "verb_choice": "pass",
+        "related_quality": "warning",
+        "xref_validity": "pass",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "Related includes `ciB`, which is already the main command in the answer; related commands should not duplicate answer commands."
+      ],
+      "notes": "Accurate explanation, but the related list is redundant."
+    },
+    {
+      "topic_id": "text-objects",
+      "question": "How do I select text using a text object?",
+      "verdicts": {
+        "vim_accuracy": "warning",
+        "kindavim_accuracy": "pass",
+        "terminalvim_accuracy": "n/a",
+        "unsupported_consistency": "pass",
+        "token_conventions": "pass",
+        "verb_choice": "pass",
+        "related_quality": "pass",
+        "xref_validity": "pass",
+        "conciseness": "pass"
+      },
+      "issues": [
+        "`viw` does not literally 'enter visual, then selects' as two separate steps the user performs here; it's a single normal-mode command sequence.",
+        "Saying 'In {{visual}} mode, apply a text object' is slightly misleading for examples like `viw`, which start from {{normal}} and enter Visual as part of the sequence."
+      ],
+      "notes": "The examples are supported, but the mode wording is a bit misleading relative to how `viw` is entered."
     },
     {
       "topic_id": "text-objects",
@@ -5517,21 +5562,21 @@
       "topic_id": "text-objects",
       "question": "How do I delete to the matching bracket?",
       "verdicts": {
-        "vim_accuracy": "warning",
-        "kindavim_accuracy": "pass",
+        "vim_accuracy": "pass",
+        "kindavim_accuracy": "warning",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "pass",
+        "related_quality": "warning",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "Question asks about deleting to the matching bracket, but the answer mainly explains brace text objects rather than `%`-based matching.",
-        "`di{`/`di}` delete inside the enclosing braces, not 'to the matching bracket' from the cursor position."
+        "Says kindaVim 'doesn't verify `%` specifically' instead of clearly stating whether `d%` itself is supported; support corpus does not list `%` or `d%`.",
+        "Related duplicates commands already mentioned in the answer."
       ],
-      "notes": "The commands mentioned are valid, but the stock Vim explanation only partially answers the specific question."
+      "notes": "Stock Vim description of `d%` is correct, but the kindaVim support claim is hedged rather than directly aligned to the corpus."
     },
     {
       "topic_id": "text-objects",
@@ -5561,17 +5606,16 @@
         "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
-        "token_conventions": "fail",
+        "token_conventions": "pass",
         "verb_choice": "pass",
-        "related_quality": "pass",
+        "related_quality": "warning",
         "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`ci\"` should be written as ``ci\"`` only if the app accepts escaped quotes inside backticks, but the established convention elsewhere is typically ``ci\"`` rendered awkwardly; this is inconsistent and potentially malformed.",
-        "The answer uses plain quoted phrases instead of command-focused backtick styling for the explanations."
+        "Related summary for `yiw` is imprecise; stock Vim treats `iw` as \"inner word\" text object, so \"yank inner word\" is informal rather than the app's usual command-summary style."
       ],
-      "notes": "The substance is fine, but the command token formatting is inconsistent with the app's conventions."
+      "notes": "The answer is accurate and concise, but one related summary is slightly loose in terminology."
     },
     {
       "topic_id": "undo-redo",
@@ -5677,21 +5721,19 @@
       "question": "How do I select text inside parens in visual mode?",
       "verdicts": {
         "vim_accuracy": "pass",
-        "kindavim_accuracy": "fail",
+        "kindavim_accuracy": "pass",
         "terminalvim_accuracy": "n/a",
         "unsupported_consistency": "pass",
         "token_conventions": "pass",
-        "verb_choice": "warning",
+        "verb_choice": "pass",
         "related_quality": "warning",
-        "xref_validity": "fail",
+        "xref_validity": "pass",
         "conciseness": "pass"
       },
       "issues": [
-        "`va(` is described as supported but is not in the kindaVim support corpus",
-        "Uses 'Press' for multi-step input (`v` then text object)",
-        "Related command `vi\"` is not a corpus token; supported token is `vi\"` only if represented exactly as `vi\"` in storage, but related parsing is ambiguous and `vi(` duplicates command discussed in answer indirectly"
+        "Related includes `vib`, which is already used in the answer."
       ],
-      "notes": "Stock Vim description is fine, but the answer claims unsupported kindaVim functionality via `va(`."
+      "notes": "The answer accurately describes supported `vib`/`vab` behavior and follows the formatting conventions."
     },
     {
       "topic_id": "visual-mode",

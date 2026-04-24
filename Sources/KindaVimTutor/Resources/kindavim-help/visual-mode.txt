@@ -45,8 +45,8 @@ A: Press `V` (capital) in {{normal}} to enter linewise visual. The current line 
 Related: v — characterwise; yy — yank line without visual
 
 Q: How do I select text inside parens in visual mode?
-A: Press `v` first, then apply a text object: `vi(` selects inside parens, `va(` includes the parens. Same grammar as operators — text objects extend the selection.
-Related: viw — select inner word; vi" — select inside quotes
+A: Type `vib` in {{normal}} — "visual inside block." kindaVim uses the `b` alias for the `()` text object, so `vib` selects inside parens, `vab` selects them too. Same grammar for `viB` / `vaB` on braces.
+Related: viw — select inner word; vi" — select inside quotes; vib — select inside parens
 
 Q: How do I cancel a visual selection?
 A: Press `Esc` — returns to {{normal}} with no edit. The cursor ends up at the last position of the selection.

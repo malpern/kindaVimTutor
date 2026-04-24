@@ -115,6 +115,10 @@ Y — yank line (shortcut for yy)
 ~ — toggle case of character under cursor
 
 # Text objects
+# kindaVim uses the `b`/`B` text-object aliases rather than raw
+# paren/brace forms — `dib` / `dab` operate on `()`, `diB` / `daB`
+# operate on `{}`. The raw `di(` / `di{` forms are NOT verified in
+# the open-source test suite; prefer the `b` / `B` shapes here.
 diw — delete inside word
 daw — delete around word (includes surrounding space)
 diW — delete inside WORD
@@ -127,23 +131,18 @@ yiw — yank inside word
 yaw — yank around word
 yiW — yank inside WORD
 yaW — yank around WORD
-diw — delete inside word
-di( — delete inside parentheses
-da( — delete around parentheses (includes the parens)
-di) — delete inside parentheses (same as di()
-da) — delete around parentheses
-dib — delete inside block (shortcut for di()
-dab — delete around block (shortcut for da()
-ci( — change inside parentheses
-ca( — change around parentheses
-ci) — change inside parentheses (same as ci()
-ca) — change around parentheses
-cib — change inside block (shortcut for ci()
-cab — change around block
-yi( — yank inside parentheses
-ya( — yank around parentheses
-yib — yank inside block
-yab — yank around block
+dib — delete inside block (parens — standard b alias)
+dab — delete around block (parens)
+cib — change inside block (parens)
+cab — change around block (parens)
+yib — yank inside block (parens)
+yab — yank around block (parens)
+diB — delete inside braces (standard B alias)
+daB — delete around braces
+ciB — change inside braces
+caB — change around braces
+yiB — yank inside braces
+yaB — yank around braces
 di" — delete inside double-quoted string
 da" — delete around double-quoted string (includes the quotes)
 ci" — change inside double-quoted string
@@ -154,14 +153,6 @@ di' — delete inside single-quoted string
 da' — delete around single-quoted string
 ci' — change inside single-quoted string
 ca' — change around single-quoted string
-di{ — delete inside braces
-da{ — delete around braces
-diB — delete inside braces (shortcut for di{)
-daB — delete around braces
-ci{ — change inside braces
-ca{ — change around braces
-ciB — change inside braces (shortcut)
-caB — change around braces
 di[ — delete inside brackets
 da[ — delete around brackets
 ci[ — change inside brackets
@@ -185,16 +176,12 @@ vi" — enter visual + inside double quotes
 va" — enter visual + around double quotes
 vi' — enter visual + inside single quotes
 va' — enter visual + around single quotes
-vi( — enter visual + inside parens
-va( — enter visual + around parens
-vi{ — enter visual + inside braces
-va{ — enter visual + around braces
+vib — enter visual + inside parens block (b alias)
+vab — enter visual + around parens block
+viB — enter visual + inside braces block (B alias)
+vaB — enter visual + around braces block
 vi[ — enter visual + inside brackets
 va[ — enter visual + around brackets
-vib — enter visual + inside block (shortcut for vi()
-vab — enter visual + around block (shortcut for va()
-viB — enter visual + inside braces (shortcut)
-vaB — enter visual + around braces (shortcut)
 vip — enter visual + inside paragraph
 vap — enter visual + around paragraph
 viwU — select inner word then uppercase (visual-mode case operator fallback)
@@ -322,6 +309,27 @@ gJ — join next line without inserting the separator space
 # Match-bracket change
 # keywords: c%, change to matching bracket
 c% — change from cursor to matching bracket
+
+# Raw paren / brace text-object forms
+# keywords: di(, ci(, yi(, raw paren text objects
+di( — delete inside parens (raw form — use dib instead)
+da( — delete around parens (raw form — use dab instead)
+ci( — change inside parens (raw form — use cib instead)
+ca( — change around parens (raw form — use cab instead)
+yi( — yank inside parens (raw form — use yib instead)
+ya( — yank around parens (raw form — use yab instead)
+di) — delete inside parens (raw form — use dib instead)
+da) — delete around parens (raw form — use dab instead)
+di{ — delete inside braces (raw form — use diB instead)
+da{ — delete around braces (raw form — use daB instead)
+ci{ — change inside braces (raw form — use ciB instead)
+ca{ — change around braces (raw form — use caB instead)
+yi{ — yank inside braces (raw form — use yiB instead)
+ya{ — yank around braces (raw form — use yaB instead)
+vi( — visual inside parens (raw form — use vib instead)
+va( — visual around parens (raw form — use vab instead)
+vi{ — visual inside braces (raw form — use viB instead)
+va{ — visual around braces (raw form — use vaB instead)
 
 # Sentence / tag text objects
 # keywords: sentence text object, tag text object
