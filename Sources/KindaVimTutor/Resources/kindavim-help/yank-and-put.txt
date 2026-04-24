@@ -31,7 +31,7 @@ A: `p` puts (pastes) the register AFTER the cursor (for character text) or BELOW
 Related: yy — yank line; y — yank operator
 
 Q: How do I copy a whole line?
-A: Press `yy` in {{normal}}. For multiple lines, prefix with a count: `3yy` yanks three lines starting from the current one.
+A: Type `yy` in {{normal}}. For multiple lines, prefix with a count: `3yy` yanks three lines starting from the current one.
 Related: Y — same as yy; p — paste below
 
 Q: Why does `p` sometimes paste on a new line?
@@ -39,7 +39,7 @@ A: Because yanks preserve line-vs-character context. If you yanked with `yy` (li
 Related: P — paste before instead of after; y — characterwise yank
 
 Q: How do I copy a word?
-A: Press `yiw` in {{normal}} — "yank inner word". Works anywhere in the word. `yaw` includes the trailing space (useful when pasting into a list).
+A: Type `yiw` in {{normal}} — "yank inner word". Works anywhere in the word. `yaw` includes the trailing space (useful when pasting into a list).
 Related: yw — yank from cursor to next word; yaw — include surrounding space
 
 Q: How do I copy everything inside quotes?
@@ -47,17 +47,17 @@ A: `yi"` or `yi'` depending on the quote type. Contents only, no quotes. Use `ya
 Related: di" — delete instead; ci" — change instead
 
 Q: Does kindaVim support named registers?
-A: No — kindaVim uses a single default register. Each yank or delete replaces what was there. If you need multiple clipboards at once, use macOS's own Cmd+C / Cmd+V (separate from the kindaVim register).
+A: No — kindaVim uses a single default register. Each yank or delete replaces what was there. If you need multiple clipboards at once, use macOS's own `Cmd+C` / `Cmd+V` (separate from the kindaVim register).
 Unsupported: yes
 TerminalVim: In stock Vim, `"{letter}y{motion}` yanks into a named register (`a`-`z`). `"{letter}p` pastes from it. `"+` is the system clipboard; `"0` always holds the last yank.
 Related: Cmd+C — macOS copy; Cmd+V — macOS paste
 
 Q: How do I paste from the system clipboard?
-A: Use Cmd+V — kindaVim doesn't hook into the `"+` system-clipboard register, but the regular macOS paste shortcut works from {{insert}} mode. For a pure-kindaVim round-trip (yank in app, paste in app), `y` and `p` are all you need.
+A: Use `Cmd+V` — kindaVim doesn't hook into the `"+` system-clipboard register, but the regular macOS paste shortcut works from {{insert}} mode. For a pure-kindaVim round-trip (yank in app, paste in app), `y` and `p` are all you need.
 Related: Cmd+C — macOS copy; "+ — system clipboard register (not supported)
 
 Q: How do I copy from where I am to the end of the line?
-A: Press `y$` in {{normal}}. There's no single-character shortcut like `D`/`C`/`Y` — `y$` is the form. (`Y` is aliased to `yy` in modern Vim.)
+A: Type `y$` in {{normal}}. There's no single-character shortcut like `D`/`C`/`Y` — `y$` is the form. (`Y` is aliased to `yy` in modern Vim.)
 Related: y0 — yank back to column zero; y^ — yank back to first non-blank
 
 Q: How do I yank multiple lines?

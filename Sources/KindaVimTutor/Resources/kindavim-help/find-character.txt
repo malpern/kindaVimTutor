@@ -24,7 +24,7 @@ The mental model is the same as Vim, but the scope is KindaVim's supported text 
 ## Canonical QA
 Q: How do I jump to a specific character on the line?
 A: Press `f` in {{normal}} followed by the character you want. The cursor lands ON that character. For example, `f)` jumps to the next `)` on the line.
-Related: F — jump backward to a character; t — jump to just before a character; ; — repeat the last f/F/t/T forward
+Related: F — jump backward to a character; t — jump to just before a character
 
 Q: What's the difference between `f` and `t`?
 A: `f` lands ON the target character; `t` stops just BEFORE it. So if the line is `foo(bar)` and the cursor is at the start, `f(` puts you on the `(`, while `t(` puts you on the `o` just before it.

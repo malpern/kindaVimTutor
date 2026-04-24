@@ -44,7 +44,7 @@ A: Yes. When there's no next word on the current line, `dw` deletes to the end o
 Related: D — delete from the cursor to end of line; J — join the next line onto the current one
 
 Q: How do I delete just the letters of a word, not the surrounding spaces?
-A: Press `diw` in {{normal}} — "delete inner word." Works from anywhere in the word, leaves both the leading and trailing whitespace intact. Pair it with `caw` or `daw` when you DO want to consume surrounding space.
+A: Type `diw` in {{normal}} — "delete inner word." Works from anywhere in the word, leaves both the leading and trailing whitespace intact. Pair it with `caw` or `daw` when you DO want to consume surrounding space.
 Related: daw — delete around word (includes surrounding space); ciw — change inner word
 
 Q: Why did `dw` leave extra spaces behind?
@@ -52,7 +52,7 @@ A: It probably didn't — `dw` specifically eats the trailing whitespace through
 Related: de — preserves trailing space; diw — preserves surrounding space
 
 Q: How do I delete the word to the left?
-A: Press `db` in {{normal}} to delete back one word — from the cursor to the start of the previous word. Or `dB` for WORD granularity (skip across punctuation).
+A: Type `db` in {{normal}} to delete back one word — from the cursor to the start of the previous word. Or `dB` for WORD granularity (skip across punctuation).
 Related: b — back-a-word motion alone; dge — delete back to end of previous word
 
 Q: What's the fastest way to delete a sentence?

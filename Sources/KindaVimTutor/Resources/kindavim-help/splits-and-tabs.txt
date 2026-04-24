@@ -11,7 +11,7 @@ web:
 video:
 
 ## Why It's Not Supported
-Splits and tabs are ways to view multiple editor buffers inside a single Vim session. kindaVim doesn't have a buffer or viewport — it runs inside whatever native macOS text field is focused. Managing multiple documents is the host app's job (Cmd+N for new window/tab, typically).
+Splits and tabs are ways to view multiple editor buffers inside a single Vim session. kindaVim doesn't have a buffer or viewport — it runs inside whatever native macOS text field is focused. Managing multiple documents is the host app's job (`Cmd+N` for new window/tab, typically).
 
 ## Canonical QA
 Q: How do I split the window in kindaVim?
@@ -21,7 +21,7 @@ TerminalVim: `:split` or `:sp` creates a horizontal split; `:vsplit` or `:vs` a 
 Related: Cmd+N — macOS new window (host app)
 
 Q: How do I open a new tab in kindaVim?
-A: kindaVim doesn't support tab pages. If your host app has its own tab feature (Safari, TextEdit etc.), use Cmd+T.
+A: kindaVim doesn't support tab pages. If your host app has its own tab feature (Safari, TextEdit etc.), use `Cmd+T`.
 Unsupported: yes
 TerminalVim: `:tabnew` opens a new tab. `:tabnext` / `:tabprev` cycle. `gt` / `gT` switch tabs. `:tabclose` closes the current tab.
 Related: Cmd+T — macOS new tab (host app)
@@ -33,10 +33,10 @@ TerminalVim: `Ctrl-W` is the prefix for window commands. `Ctrl-W s` splits horiz
 Related: :split — explicit split command
 
 Q: How do I switch between files in kindaVim?
-A: kindaVim has no buffer concept. Switch between documents using the host app's UI — `Cmd+\`` to cycle windows in the same app, `Cmd+Tab` between apps.
+A: kindaVim has no buffer concept. Switch between documents using the host app's UI — `Cmd+\`` to cycle windows in the same app, ``Cmd+Tab`` between apps.
 Unsupported: yes
 TerminalVim: `:bnext` / `:bprev` cycle buffers. `:ls` lists them. `:b {name}` jumps to a buffer by name.
-Related: `Cmd+\`` — cycle windows in same app
+Related: Cmd+\ — cycle windows in same app
 
 Q: How do I view two files side by side in kindaVim?
 A: Not with kindaVim — it operates on one text field at a time. Open two app windows manually and tile them with macOS window management (Tile Window to Left/Right on the green button).
@@ -45,7 +45,7 @@ TerminalVim: `:vsplit {other-file}` opens the second file in a vertical split. `
 Related: macOS tile windows — native side-by-side
 
 Q: How do I close a split or tab?
-A: There are no splits or tabs in kindaVim to close. For host app windows/tabs, Cmd+W typically closes the current one.
+A: There are no splits or tabs in kindaVim to close. For host app windows/tabs, `Cmd+W` typically closes the current one.
 Unsupported: yes
 TerminalVim: `:q` closes the current split (if last split, quits Vim). `:qa` closes all splits. `:tabclose` for tabs.
 Related: Cmd+W — macOS close window/tab

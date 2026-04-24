@@ -28,7 +28,7 @@ A: `dd` deletes the ENTIRE current line (including the newline). `D` deletes fro
 Related: d$ — same as D; cc — change entire line; S — substitute entire line
 
 Q: How do I delete a whole line?
-A: Press `dd` in {{normal}} to delete the current line. Prefix with a count for multiple: `5dd` deletes five lines starting from the current one.
+A: Type `dd` in {{normal}} to delete the current line. Prefix with a count for multiple: `5dd` deletes five lines starting from the current one.
 Related: D — delete to end of line (doesn't remove line break); dj — delete current line + next
 
 Q: How do I delete from the cursor to the end of the line?
@@ -44,7 +44,7 @@ A: Press `x` in {{normal}} — a shorthand for `dl` (delete one character right)
 Related: X — delete char BEFORE cursor; r — replace one char without deleting
 
 Q: How do I delete back a word?
-A: Press `db` in {{normal}} — delete operator + back-a-word motion. Deletes from the cursor back to the start of the previous word.
+A: Type `db` in {{normal}} — delete operator + back-a-word motion. Deletes from the cursor back to the start of the previous word.
 Related: dw — delete forward a word; dge — delete back to end of previous word
 
 Q: What's the difference between `dw` and `de`?

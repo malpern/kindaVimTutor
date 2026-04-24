@@ -24,7 +24,7 @@ Related: u — undo a change
 
 Q: Does `.` repeat motions like `w` or `$`?
 A: No — motions alone don't change the document. `.` only repeats the last CHANGE. If the change included a motion as part of an operator (`dw`), the whole `dw` gets repeated, not just `w`.
-Related: ; — repeat last f/F/t/T motion; n — repeat last search
+Related: n — repeat last search
 
 Q: How do I undo a `.` repeat?
 A: Same as any other change — press `u` to undo. Each `.` counts as its own undo step, so you can step back through several repeats.
@@ -36,7 +36,7 @@ Related: u — undo; q — macro record (not supported)
 
 Q: Does `.` know how many times I repeated before?
 A: No — it repeats the last change once. Prefix with a count to multiply: `5.` repeats the change five times.
-Related: 5dw — counts work on most commands
+Related: dw — counts work on most commands
 
 Q: What's the "dot formula" for efficient edits?
 A: The idiom is: pair a motion you can repeat (`/pattern`, `f{char}`, or a word motion) with a single-change operator (`cw`, `ciw`, `dw`). Make the change once, then walk through the document with `n.` (or `;.` / `,.`) — each `n` jumps to the next match, each `.` replays the change.

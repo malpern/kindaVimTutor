@@ -25,7 +25,7 @@ A: Both delete the covered text, but `c` then enters {{insert}} so you can retyp
 Related: cc — change line; dc — nothing (operators don't compose); x — delete one char
 
 Q: How do I change a whole line?
-A: Press `cc` in {{normal}} — deletes the line's contents, leaves the line itself in place, and drops you into {{insert}} with the cursor on the (now empty) line. Same visual outcome as `S`.
+A: Type `cc` in {{normal}} — deletes the line's contents, leaves the line itself in place, and drops you into {{insert}} with the cursor on the (now empty) line. Same visual outcome as `S`.
 Related: S — identical to cc; dd — delete line without entering insert
 
 Q: What's the difference between `cc` and `C`?

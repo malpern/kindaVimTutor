@@ -11,7 +11,7 @@ web:
 video:
 
 ## Why It's Not Supported
-Ex commands are Vim's scripting and file-management layer — entered via `:` to open the command line. kindaVim runs inside native macOS text fields, which have no command-line UI and no file concept to save or quit. Saving is the host application's job (Cmd+S); quitting is Cmd+Q on the host app.
+Ex commands are Vim's scripting and file-management layer — entered via `:` to open the command line. kindaVim runs inside native macOS text fields, which have no command-line UI and no file concept to save or quit. Saving is the host application's job (`Cmd+S`); quitting is `Cmd+Q` on the host app.
 
 ## How It Works In Stock Vim
 `:{command}` in {{normal}} opens the command line. Common ones:
@@ -26,13 +26,13 @@ Ex commands are Vim's scripting and file-management layer — entered via `:` to
 
 ## Canonical QA
 Q: How do I save a file in kindaVim?
-A: kindaVim doesn't support Ex commands like `:w`. Use the host application's save shortcut — Cmd+S in most macOS apps.
+A: kindaVim doesn't support Ex commands like `:w`. Use the host application's save shortcut — `Cmd+S` in most macOS apps.
 Unsupported: yes
 TerminalVim: In terminal Vim, type `:w` in {{normal}} and press Enter to write the current buffer to disk. `:w {file}` writes to a different filename.
 Related: Cmd+S — macOS save (native shortcut)
 
 Q: How do I quit in kindaVim?
-A: kindaVim isn't an editor — it's a motion layer over native text fields. There's no file to quit. Use Cmd+Q to quit the host app.
+A: kindaVim isn't an editor — it's a motion layer over native text fields. There's no file to quit. Use `Cmd+Q` to quit the host app.
 Unsupported: yes
 TerminalVim: In terminal Vim, type `:q` to quit (requires saved changes), `:q!` to force-quit discarding changes, or `:wq` / `:x` to save-and-quit in one step.
 Related: Cmd+Q — macOS quit
@@ -50,7 +50,7 @@ TerminalVim: `:!{cmd}` in stock Vim runs `{cmd}` in a shell and shows the output
 Related: Cmd+Space — Spotlight to launch Terminal
 
 Q: How do I open another file in kindaVim?
-A: kindaVim doesn't have a file concept — it works with whatever native text field is focused. Switch between apps / documents using the host app's open-file mechanism (Cmd+O in most apps).
+A: kindaVim doesn't have a file concept — it works with whatever native text field is focused. Switch between apps / documents using the host app's open-file mechanism (`Cmd+O` in most apps).
 Unsupported: yes
 TerminalVim: `:e {filename}` opens a file for editing. `:e!` reloads from disk discarding unsaved changes. `:bnext` / `:bprev` cycle through open buffers.
 Related: Cmd+O — macOS open-file shortcut

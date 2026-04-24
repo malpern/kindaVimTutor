@@ -34,12 +34,12 @@ A: Press `$` in {{normal}} to jump to the last character of the current line. If
 Related: A — append at end of line; 0 — start of line; $ — end of line (motion only)
 
 Q: How do I go to the top of the document?
-A: Press `gg` in {{normal}} — two `g` taps — to jump to the first line.
+A: Type `gg` in {{normal}} — two `g` taps — to jump to the first line.
 Related: G — go to the last line
 
 Q: How do I go to the bottom of the document?
 A: Press `G` (capital) in {{normal}} to jump to the last line.
-Related: gg — go to the first line; 10G — go to line 10
+Related: gg — go to the first line; G — go to line 10
 
 Q: How do I jump to a specific line number?
 A: Type the line number followed by `G`. For example, `25G` jumps to line 25. For line 1, `1G` also works (same as `gg`).
@@ -58,7 +58,7 @@ A: `|` (pipe) followed by a count moves to that column — e.g. `25|` jumps to c
 Related: 0 — column zero; $ — last column
 
 Q: How do I jump half a screen down?
-A: kindaVim doesn't support `Ctrl-D` / `Ctrl-U` (half-page scroll) — those are tied to Vim's own viewport which kindaVim doesn't own. For jumping around a long document use `G`, `gg`, or a line-number jump like `100G`.
+A: kindaVim doesn't support `Ctrl-D` / `Ctrl-U` (half-page scroll) — those are tied to Vim's own viewport which kindaVim doesn't own. For jumping around a long document use `gg` (top), `G` (bottom), or prefix `G` with a count to go to that line number.
 Unsupported: yes
 TerminalVim: In stock Vim, `Ctrl-D` scrolls half a page down and `Ctrl-U` half a page up. `Ctrl-F` / `Ctrl-B` do full-page.
-Related: G — last line; gg — first line; 100G — jump to line 100
+Related: G — last line; gg — first line

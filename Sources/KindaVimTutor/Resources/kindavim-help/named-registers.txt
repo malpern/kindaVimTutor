@@ -16,7 +16,7 @@ Vim has ~35 registers. `"{letter}y` yanks into the named register, `"{letter}p` 
 ## What kindaVim Does
 One default register. Each yank or delete replaces what's there. `y` and `p` are your tools; named-register prefixes do nothing.
 
-For the system clipboard, use macOS-native Cmd+C / Cmd+V from {{insert}}.
+For the system clipboard, use macOS-native `Cmd+C` / `Cmd+V` from {{insert}}.
 
 ## Canonical QA
 Q: How do I yank into a named register like `"a`?
@@ -26,7 +26,7 @@ TerminalVim: `"ay{motion}` yanks into register `a`. `"ap` pastes from it. Names 
 Related: y — default yank; p — default put
 
 Q: How do I copy to the system clipboard?
-A: kindaVim doesn't support the `"+` register. Use macOS Cmd+C from the host app to copy to the system clipboard. Inside kindaVim's text, `y` yanks to kindaVim's internal register, NOT the clipboard.
+A: kindaVim doesn't support the `"+` register. Use macOS `Cmd+C` from the host app to copy to the system clipboard. Inside kindaVim's text, `y` yanks to kindaVim's internal register, NOT the clipboard.
 Unsupported: yes
 TerminalVim: `"+y` yanks to the system clipboard; `"+p` pastes from it. Requires Vim compiled with `+clipboard`.
 Related: Cmd+C — macOS copy; Cmd+V — macOS paste
@@ -44,7 +44,7 @@ TerminalVim: `"0p` pastes the LAST yank (never a delete). `"1p`-`"9p` paste rece
 Related: y — yank (kindaVim); p — put
 
 Q: How do I use the system clipboard from kindaVim?
-A: Use the host app's Cmd+C / Cmd+V shortcuts. From {{insert}}, Cmd+V pastes the clipboard. kindaVim's `p` uses its own internal register separately.
+A: Use the host app's `Cmd+C` / `Cmd+V` shortcuts. From {{insert}}, `Cmd+V` pastes the clipboard. kindaVim's `p` uses its own internal register separately.
 Unsupported: yes
 TerminalVim: `"+y` / `"+p` use the system clipboard directly. `"*y` / `"*p` use the selection primary (X11 style).
 Related: Cmd+C — macOS copy; Cmd+V — macOS paste

@@ -34,11 +34,11 @@ A: `iw` is the word WITHOUT surrounding whitespace — just the letters. `aw` is
 Related: ciw — change inner word; caw — change around word; yiw — yank inner word
 
 Q: How do I delete the word the cursor is on?
-A: Press `diw` in {{normal}} — works no matter where in the word the cursor sits. `diw` deletes inner word (just letters); `daw` deletes around word (letters + one surrounding space).
+A: Type `diw` in {{normal}} — works no matter where in the word the cursor sits. `diw` deletes inner word (just letters); `daw` deletes around word (letters + one surrounding space).
 Related: dw — delete from cursor forward to next word; daw — delete word + surrounding space
 
 Q: How do I change the word the cursor is on?
-A: Press `ciw` to delete the inner word and drop straight into {{insert}}. Doesn't matter where in the word the cursor sits — `ciw` replaces the whole thing.
+A: Type `ciw` to delete the inner word and drop straight into {{insert}}. Doesn't matter where in the word the cursor sits — `ciw` replaces the whole thing.
 Related: caw — change around word; cw — change from cursor to end of word
 
 Q: How do I yank a quoted string?

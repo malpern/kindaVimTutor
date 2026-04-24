@@ -60,7 +60,7 @@ Related: v — enter visual; V — enter linewise visual
 
 Q: Does visual mode support counts?
 A: Yes — in visual mode, a count before a motion multiplies it. `v3w` selects from the cursor forward by three words. The count applies to the motion, not the operator.
-Related: 3w — counts work on motions outside visual too
+Related: w — counts work on motions outside visual too
 
 Q: How do I select from here to the end of the line?
 A: Press `v`, then `$` — character-wise selection to end of line. Or in linewise visual (`V`), the current line is selected and you can extend.
