@@ -573,12 +573,21 @@ final class ChatEngine {
             lines.append("")
         }
 
-        lines.append("### Other documented topics (index only)")
-        for topic in topics where topic.id != currentTopicID {
-            let commands = topic.tags.isEmpty
-                ? ""
-                : " — commands: \(topic.tags.joined(separator: ", "))"
-            lines.append("- \(topic.title)\(commands): \(topic.summary)")
+        // Index other topics by title + commands only — dropping the
+        // prose summary saves ~200 tokens on the default prompt,
+        // keeping us comfortably under the 3B model's 4096-token
+        // context window. Canonical retrieval handles precise
+        // grounding for the common questions; the model just needs
+        // to know what topics exist.
+        let otherTopics = topics.filter { $0.id != currentTopicID }
+        if !otherTopics.isEmpty {
+            lines.append("### Other documented topics")
+            for topic in otherTopics {
+                let cmds = topic.tags.isEmpty
+                    ? ""
+                    : " (\(topic.tags.joined(separator: ", ")))"
+                lines.append("- \(topic.title)\(cmds)")
+            }
         }
         return lines.joined(separator: "\n")
     }

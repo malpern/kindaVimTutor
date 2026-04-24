@@ -31,7 +31,7 @@ struct HelpCorpusTests {
             "Difference From Stock Vim"
         ])
 
-        #expect(topic.canonicalQA.count == 5)
+        #expect(topic.canonicalQA.count == 9)
         let firstQA = try #require(topic.canonicalQA.first)
         #expect(firstQA.question == "How do I delete a word?")
         #expect(firstQA.answer.contains("`dw`"))
@@ -65,7 +65,7 @@ struct HelpCorpusTests {
         #expect(topic.status == .unsupported)
         #expect(topic.tags.contains("q"))
         #expect(topic.aliases == ["recording", "replay"])
-        #expect(topic.canonicalQA.count == 3)
+        #expect(topic.canonicalQA.count == 5)
 
         let firstQA = try #require(topic.canonicalQA.first)
         #expect(firstQA.isUnsupported)
