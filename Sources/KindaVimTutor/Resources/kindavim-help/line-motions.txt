@@ -4,7 +4,7 @@ summary: Jump within a line with `0`, `^`, `$` — start, first non-blank, end. 
 status: supported
 tags: 0, ^, $, gg, G
 aliases: line start, line end, top of file, bottom of file
-lessons: ch1.l7, ch1.l8
+lessons: ch1.l7, ch1.l8, ch4.l5
 related: word-motions
 questions: What's the difference between `0` and `^`? || How do I jump to the top of the document? || Can I jump to a specific line number?
 web: vim line motions 0 caret dollar gg G tutorial

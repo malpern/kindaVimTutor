@@ -15,9 +15,9 @@ struct ExplanationView: View {
     private func contentBlockView(_ block: ContentBlock) -> some View {
         switch block {
         case .text(let text):
-            Text(text)
-                .font(Typography.body)
-                .lineSpacing(4)
+            AnnotatedText(string: text,
+                          font: Typography.body,
+                          capSize: .small)
 
         case .heading(let text):
             Text(text)
@@ -32,11 +32,10 @@ struct ExplanationView: View {
                     .font(.system(size: 13))
                     .frame(width: 18, alignment: .topLeading)
                     .padding(.top, 2)
-                Text(text)
-                    .font(Typography.bodySecondary)
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(3)
-                    .multilineTextAlignment(.leading)
+                AnnotatedText(string: text,
+                              font: Typography.bodySecondary,
+                              capSize: .small,
+                              foregroundStyle: .secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)
@@ -50,11 +49,10 @@ struct ExplanationView: View {
                     .font(.system(size: 13))
                     .frame(width: 18, alignment: .topLeading)
                     .padding(.top, 2)
-                Text(text)
-                    .font(Typography.bodySecondary)
-                    .foregroundStyle(.secondary)
-                    .lineSpacing(3)
-                    .multilineTextAlignment(.leading)
+                AnnotatedText(string: text,
+                              font: Typography.bodySecondary,
+                              capSize: .small,
+                              foregroundStyle: .secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(16)

@@ -8,7 +8,7 @@ extension Curriculum {
         subtitle: "Jump to any character on the line",
         systemImage: "magnifyingglass",
         lessons: [
-            lesson4_1, lesson4_2, lesson4_3, lesson4_4,
+            lesson4_1, lesson4_2, lesson4_3, lesson4_4, lesson4_5,
         ]
     )
 
@@ -166,5 +166,62 @@ extension Curriculum {
             ),
         ],
         motionsIntroduced: ["n", "N"]
+    )
+
+    // MARK: - Lesson 4.5: Paragraph Jump
+
+    private static let lesson4_5 = Lesson(
+        id: "ch4.l5",
+        number: 5,
+        title: "Paragraph Jump",
+        subtitle: "Skip between paragraphs with { and }",
+        explanation: [
+            .heading("Hop by Paragraph"),
+            .text("A paragraph in Vim is a run of non-blank lines separated by a blank line. `}` jumps forward to the next blank line, `{` jumps back to the previous one. Great for moving through prose or code sections fast."),
+            .spacer,
+            .keyCommand(keys: ["}"], description: "Jump to next blank line (next paragraph)"),
+            .keyCommand(keys: ["{"], description: "Jump to previous blank line (previous paragraph)"),
+            .spacer,
+            .tip("Much faster than holding `j` when a blank line is nearby."),
+        ],
+        exercises: [
+            Exercise(
+                id: "ch4.l5.e1",
+                instruction: "Press `}` until you reach the `*`, then `x` to delete it",
+                initialText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nFirst paragraph line.\n\nSecond paragraph here.\n\n*delete me\n\n\n\n\n\n",
+                initialCursorPosition: 0,
+                expectedText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nFirst paragraph line.\n\nSecond paragraph here.\n\ndelete me\n\n\n\n\n\n",
+                expectedCursorPosition: nil,
+                hints: ["Press `}` a few times to skip to the `*` paragraph, then `x`"],
+                difficulty: .learn,
+                drillCount: 6,
+                variations: [
+                    .init(initialText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nAlpha block.\n\nBeta block.\n\nGamma block.\n\n*target\n\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nAlpha block.\n\nBeta block.\n\nGamma block.\n\ntarget\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nOne paragraph.\n\nTwo paragraph.\n\n*three\n\n\n\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nOne paragraph.\n\nTwo paragraph.\n\nthree\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nRed section.\n\nBlue section.\n\nGreen section.\n\n*last\n\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nRed section.\n\nBlue section.\n\nGreen section.\n\nlast\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nTop chunk.\n\nMid chunk.\n\n*bottom\n\n\n\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nTop chunk.\n\nMid chunk.\n\nbottom\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nFirst note.\n\nSecond note.\n\nThird note.\n\n*end\n\n\n\n\n", initialCursorPosition: 0, expectedText: "\n\n// Press } to hop past blank lines, then x to delete the *\n\nFirst note.\n\nSecond note.\n\nThird note.\n\nend\n\n\n\n\n", expectedCursorPosition: nil),
+                ]
+            ),
+            Exercise(
+                id: "ch4.l5.e2",
+                instruction: "Cursor starts at the bottom — press `{` to jump back, then `x` to delete the `*`",
+                initialText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\n*target paragraph.\n\nMiddle paragraph.\n\nLast paragraph here.\n\n\n\n\n",
+                initialCursorPosition: 129,
+                expectedText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\ntarget paragraph.\n\nMiddle paragraph.\n\nLast paragraph here.\n\n\n\n\n",
+                expectedCursorPosition: nil,
+                hints: ["Press `{` a few times to reach the `*` line, then `x`"],
+                difficulty: .practice,
+                drillCount: 6,
+                variations: [
+                    .init(initialText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\n*top target.\n\nMid chunk.\n\nEnd chunk.\n\n\n\n\n\n\n", initialCursorPosition: 108, expectedText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\ntop target.\n\nMid chunk.\n\nEnd chunk.\n\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\n*alpha line.\n\nbeta line.\n\ngamma line.\n\n\n\n\n\n", initialCursorPosition: 110, expectedText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\nalpha line.\n\nbeta line.\n\ngamma line.\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\n*first.\n\nsecond.\n\nthird.\n\nfourth.\n\n\n\n\n", initialCursorPosition: 100, expectedText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\nfirst.\n\nsecond.\n\nthird.\n\nfourth.\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\n*start here.\n\nkeep going.\n\nall the way.\n\n\n\n\n\n", initialCursorPosition: 114, expectedText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\nstart here.\n\nkeep going.\n\nall the way.\n\n\n\n\n\n", expectedCursorPosition: nil),
+                    .init(initialText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\n*top row.\n\nmiddle row.\n\nbottom row.\n\n\n\n\n\n", initialCursorPosition: 108, expectedText: "\n\n// Press { to hop up past blank lines, then x to delete the *\n\ntop row.\n\nmiddle row.\n\nbottom row.\n\n\n\n\n\n", expectedCursorPosition: nil),
+                ]
+            ),
+        ],
+        motionsIntroduced: ["{", "}"]
     )
 }

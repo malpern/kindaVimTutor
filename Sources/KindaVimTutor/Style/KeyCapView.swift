@@ -10,11 +10,14 @@ struct KeyCapView: View {
     enum KeyCapSize {
         case small, regular, large
 
+        // Monospaced design so `0` (digit) and `O` (letter) are
+        // visually distinct on the cap — SF Mono renders zero with a
+        // slash. Rounded design flattened them to the same glyph.
         var font: Font {
             switch self {
-            case .small: .system(size: 11, weight: .medium, design: .rounded)
-            case .regular: .system(size: 14, weight: .medium, design: .rounded)
-            case .large: .system(size: 20, weight: .medium, design: .rounded)
+            case .small: .system(size: 11, weight: .medium, design: .monospaced)
+            case .regular: .system(size: 14, weight: .medium, design: .monospaced)
+            case .large: .system(size: 20, weight: .medium, design: .monospaced)
             }
         }
 

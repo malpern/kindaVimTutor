@@ -80,8 +80,11 @@ enum KindaVimSupportCorpus {
 
         private func normalize(_ token: String) -> String {
             var t = token.trimmingCharacters(in: .whitespacesAndNewlines)
-            // Strip leading count digits (3dw → dw, 10G → G).
-            while let first = t.first, first.isNumber { t.removeFirst() }
+            // Strip leading count digits (3dw → dw, 10G → G) but only
+            // when a non-digit tail remains — `0` is itself a motion.
+            if t.contains(where: { !$0.isNumber }) {
+                while let first = t.first, first.isNumber { t.removeFirst() }
+            }
             // Strip register prefix ("ay → y). Keep the bare `"` on
             // its own since that's the register prefix itself.
             if t.count > 1, t.hasPrefix("\"") {

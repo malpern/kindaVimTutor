@@ -12,6 +12,7 @@ struct VimAnswerBubble: View {
     var onOpenURL: ((URL) -> Void)? = nil
     var onAskAboutMotion: ((String) -> Void)? = nil
     var onOpenHelpTopic: ((String) -> Void)? = nil
+    var onPractice: (() -> Void)? = nil
     var webResults: [WebResult] = []
     var videoShorts: [VideoResult] = []
     var videos: [VideoResult] = []
@@ -28,6 +29,9 @@ struct VimAnswerBubble: View {
                 }
             } else {
                 answerCard
+            }
+            if let onPractice {
+                practiceButton(onPractice)
             }
             if !display.relatedCommands.isEmpty {
                 relatedCommandsSection
@@ -50,6 +54,27 @@ struct VimAnswerBubble: View {
             }
         }
         .frame(maxWidth: 520, alignment: .leading)
+    }
+
+    /// Generates an on-the-fly drill for the concept this bubble
+    /// explains. Only shown when OpenAI is the configured backend —
+    /// gated upstream by `ChatView.shouldOfferPractice(for:)`.
+    private func practiceButton(_ action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: "play.circle")
+                    .font(.system(size: 13, weight: .semibold))
+                Text("Practice this concept")
+                    .font(.system(size: 13, weight: .semibold))
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(Color.accentColor.opacity(0.15),
+                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .foregroundStyle(Color.accentColor)
+        }
+        .buttonStyle(.plain)
+        .help("Generate a short drill for this concept")
     }
 
     /// Small provenance chip that marks answers pulled from the

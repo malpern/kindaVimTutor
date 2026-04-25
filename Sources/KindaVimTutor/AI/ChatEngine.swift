@@ -92,21 +92,69 @@ final class ChatEngine {
         input = ""
         messages.append(ChatMessage(role: .user, payload: .text(text)))
 
-        if let canonical = CanonicalAnswerLookup.match(
+        let canonicalMatch = CanonicalAnswerLookup.match(
             for: text,
             in: KindaVimHelpCorpus.topics,
             preferredTopicID: currentHelpTopicID
-        ) {
+        )
+        let topicMatch = canonicalMatch?.topic
+            ?? KindaVimHelpCorpus.topic(
+                forQuery: text,
+                preferredTopicID: currentHelpTopicID
+            )
+
+        // When OpenAI is the backend, don't short-circuit — instead
+        // inject the matched reference into the system prompt so the
+        // model answers the user's exact phrasing while staying
+        // grounded in our authored content.
+        if AIBackendSettings.backend == .openAI {
+            if let key = AIBackendSettings.openAIKey {
+                // Pull top-3 related topics (including the best match).
+                // Questions often span concepts ("can I undo after dd?"
+                // touches Delete and Undo) — multi-topic grounding
+                // reduces guessing.
+                let referenceTopics = KindaVimHelpCorpus.topics(
+                    forQuery: text,
+                    limit: 3,
+                    preferredTopicID: currentHelpTopicID
+                )
+                logQuery(
+                    text,
+                    tier: "model-openai",
+                    topicID: topicMatch?.id,
+                    extra: canonicalMatch.map { [
+                        "score": String(format: "%.2f", $0.score)
+                    ] } ?? [:]
+                )
+                Task { [referenceTopics, canonicalMatch, topicMatch] in
+                    await streamOpenAIReply(
+                        to: text,
+                        apiKey: key,
+                        referenceTopic: topicMatch,
+                        referenceTopics: referenceTopics,
+                        referenceQA: canonicalMatch?.qa
+                    )
+                }
+                return
+            }
+            logQuery(text, tier: "openai-missing-key")
+            messages.append(ChatMessage(
+                role: .assistant,
+                payload: .text(
+                    "Add an OpenAI API key in Settings → Chat AI (or set OPENAI_API_KEY in the environment), or switch back to Apple Intelligence."
+                )
+            ))
+            return
+        }
+
+        if let canonical = canonicalMatch {
             logQuery(text, tier: "canonical", topicID: canonical.topic.id,
                      extra: ["score": String(format: "%.2f", canonical.score)])
             appendCanonicalAnswer(canonical.qa, topic: canonical.topic)
             return
         }
 
-        if let topic = KindaVimHelpCorpus.topic(
-            forQuery: text,
-            preferredTopicID: currentHelpTopicID
-        ) {
+        if let topic = topicMatch {
             logQuery(text, tier: "topic-reference", topicID: topic.id)
             appendTopicReferenceAnswer(topic)
             return
@@ -149,6 +197,100 @@ final class ChatEngine {
         AppLogger.shared.info("chat", "query", fields: fields)
     }
 
+    /// Build a "Reference for this question" block to append to the
+    /// OpenAI system prompt. Grounds the model in the top-N matched
+    /// topics' authored content so its answer stays aligned with our
+    /// reference while still being tailored to the user's exact
+    /// phrasing. Including multiple topics helps when a question
+    /// spans concepts (e.g. "undo after dd" needs both Delete and
+    /// Undo/Redo).
+    ///
+    /// Returns an empty string when there are no references, so
+    /// concatenating it is always safe.
+    static func referenceBlock(
+        topics: [HelpTopic], qa: CanonicalQA?
+    ) -> String {
+        guard !topics.isEmpty || qa != nil else { return "" }
+        var parts: [String] = [
+            "",
+            "---",
+            "Reference for this question (AUTHORED — answer the user's",
+            "exact phrasing, but ground every fact in these references;",
+            "do not contradict them):",
+        ]
+        for topic in topics {
+            parts.append("")
+            parts.append("### \(topic.title)")
+            if !topic.tags.isEmpty {
+                parts.append("commands: " + topic.tags.joined(separator: ", "))
+            }
+            let summary = topic.summary.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !summary.isEmpty { parts.append("summary: " + summary) }
+            if topic.status == .unsupported {
+                parts.append("status: NOT SUPPORTED in kindaVim")
+            }
+            if let section = topic.sections.first(where: {
+                !$0.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            }) {
+                let body = section.body.trimmingCharacters(in: .whitespacesAndNewlines)
+                parts.append("")
+                parts.append(body)
+            }
+        }
+        if let qa {
+            parts.append("")
+            parts.append("Closest canonical Q&A:")
+            parts.append("Q: \(qa.question)")
+            parts.append("A: \(qa.answer)")
+        }
+        parts.append("---")
+        return parts.joined(separator: "\n")
+    }
+
+    /// Snapshot of prior user/assistant turns for OpenAI. Skips the
+    /// latest user message (it's sent separately as `userQuery`) and
+    /// pulls only recent turns so long sessions don't inflate token
+    /// usage. Caps at 6 prior messages — enough for natural
+    /// follow-ups, small enough to not dominate the context window.
+    private func priorOpenAIHistory() -> [OpenAIBackend.HistoryMessage] {
+        let maxTurns = 6
+        // `messages` already contains the newest user turn (appended
+        // in send()) — drop it so it isn't duplicated in the API call.
+        let prior = messages.dropLast()
+        let recent = prior.suffix(maxTurns)
+        return recent.compactMap { msg in
+            let content = msg.plainText
+            guard !content.isEmpty else { return nil }
+            switch msg.role {
+            case .user:      return .init(role: "user", content: content)
+            case .assistant: return .init(role: "assistant", content: content)
+            case .system:    return nil
+            }
+        }
+    }
+
+    /// Resolve related lessons from a topic's authored `lessons:`
+    /// metadata. This is authoritative — each topic file lists the
+    /// curriculum lessons that teach it. Avoids the false positives
+    /// from keyword-overlap matching on answer prose.
+    private static func resolveRelatedLessons(
+        from topic: HelpTopic, chapters: [Chapter]
+    ) -> [ChatMessage.RelatedLessonRef] {
+        topic.lessonIDs.prefix(3).compactMap { lessonID in
+            guard let chapter = chapters.first(where: {
+                $0.lessons.contains(where: { $0.id == lessonID })
+            }),
+            let lesson = chapter.lessons.first(where: { $0.id == lessonID })
+            else { return nil }
+            return ChatMessage.RelatedLessonRef(
+                id: lessonID,
+                title: lesson.title,
+                chapterNumber: chapter.number,
+                lessonNumber: lesson.number
+            )
+        }
+    }
+
     /// Renders a pre-authored canonical Q&A directly into the
     /// thread. No model call, instant response. The "From reference"
     /// badge on the bubble signals the curated source.
@@ -176,24 +318,13 @@ final class ChatEngine {
             topicID: topic.id,
             topicTitle: topic.title
         )
-        // Surface the topic behind the answer so the user can still
-        // deep-read, mirroring the model path's curriculum lookup.
-        if let lessonId = CurriculumLookup
-            .matches(for: qa.answer, chapters: chapters)
-            .first(where: { _ in true })?.id,
-           let chapter = chapters.first(where: {
-               $0.lessons.contains(where: { $0.id == lessonId })
-           }),
-           let lesson = chapter.lessons.first(where: { $0.id == lessonId }) {
-            bubble.relatedLessons = [
-                ChatMessage.RelatedLessonRef(
-                    id: lessonId,
-                    title: lesson.title,
-                    chapterNumber: chapter.number,
-                    lessonNumber: lesson.number
-                )
-            ]
-        }
+        // Use the topic's own `lessons:` metadata (human-authored)
+        // rather than keyword-overlap on the answer prose, which
+        // produced false positives like "Delete Entire Line" for a
+        // paragraph-jump answer that happened to contain "blank line".
+        bubble.relatedLessons = Self.resolveRelatedLessons(
+            from: topic, chapters: chapters
+        )
         messages.append(bubble)
         let index = messages.count - 1
 
@@ -269,6 +400,9 @@ final class ChatEngine {
             topicID: topic.id,
             topicTitle: topic.title
         )
+        bubble.relatedLessons = Self.resolveRelatedLessons(
+            from: topic, chapters: chapters
+        )
         messages.append(bubble)
         let index = messages.count - 1
 
@@ -310,6 +444,131 @@ final class ChatEngine {
         withResults.videoShorts = video.shorts
         withResults.videos = video.videos
         messages[index] = withResults
+    }
+
+    /// OpenAI path — streams gpt-5.4 through OpenAIBackend. Uses the
+    /// same system prompt the Apple path uses so instruction-tuning
+    /// carries over, plus an optional "Reference for this question"
+    /// block built from the matched canonical topic so the model
+    /// grounds its answer in our authored content. Renders into the
+    /// same VimAnswerDisplay bubble so related-commands /
+    /// related-lessons post-processing still runs.
+    private func streamOpenAIReply(
+        to userText: String,
+        apiKey: String,
+        referenceTopic: HelpTopic? = nil,
+        referenceTopics: [HelpTopic] = [],
+        referenceQA: CanonicalQA? = nil
+    ) async {
+        isResponding = true
+        defer { isResponding = false }
+
+        // Snapshot prior turns BEFORE appending the assistant bubble
+        // so history sent to OpenAI doesn't include the empty bubble
+        // we're about to render into.
+        let history = priorOpenAIHistory()
+
+        var bubble = ChatMessage(
+            role: .assistant,
+            payload: .answer(VimAnswerDisplay()),
+            isStreaming: true
+        )
+        // Surface the topic the answer is grounded in so the "From
+        // reference" badge still shows for OpenAI-served answers.
+        if let topic = referenceTopic {
+            bubble.canonicalSource = ChatMessage.CanonicalSource(
+                topicID: topic.id,
+                topicTitle: topic.title
+            )
+            bubble.relatedLessons = Self.resolveRelatedLessons(
+                from: topic, chapters: chapters
+            )
+        }
+        messages.append(bubble)
+        let index = messages.count - 1
+
+        let prompt = systemInstructions(forBackend: .openAI)
+            + Self.referenceBlock(
+                topics: referenceTopics,
+                qa: referenceQA
+            )
+        do {
+            var finalSnapshot: OpenAIBackend.Snapshot?
+            let stream = OpenAIBackend.stream(
+                userQuery: userText,
+                systemPrompt: prompt,
+                apiKey: apiKey,
+                history: history
+            )
+            for try await snap in stream {
+                finalSnapshot = snap
+                bubble.payload = .answer(
+                    VimAnswerDisplay(
+                        answer: snap.answer,
+                        relatedCommands: snap.relatedCommands,
+                        fasterAlternative: snap.fasterAlternative,
+                        webSearchQuery: snap.webSearchQuery,
+                        videoSearchQuery: snap.videoSearchQuery,
+                        isUnsupported: snap.isUnsupported,
+                        terminalVimExplanation: snap.terminalVimExplanation
+                    )
+                )
+                messages[index] = bubble
+            }
+
+            bubble.isStreaming = false
+            if let final = finalSnapshot {
+                let resolvedUnsupported = Self.resolveUnsupported(
+                    modelFlag: final.isUnsupported,
+                    userQuery: userText,
+                    answer: final.answer
+                )
+                let display = VimAnswerDisplay(
+                    answer: final.answer,
+                    relatedCommands: final.relatedCommands,
+                    fasterAlternative: final.fasterAlternative,
+                    webSearchQuery: final.webSearchQuery,
+                    videoSearchQuery: final.videoSearchQuery,
+                    isUnsupported: resolvedUnsupported,
+                    terminalVimExplanation: resolvedUnsupported
+                        ? final.terminalVimExplanation : nil
+                )
+                bubble.payload = .answer(display)
+                bubble.relatedLessons = CurriculumLookup
+                    .matches(for: final.answer, chapters: chapters)
+                    .compactMap { lesson in
+                        guard let chapter = chapters.first(where: {
+                            $0.lessons.contains(where: { $0.id == lesson.id })
+                        }) else { return nil }
+                        return ChatMessage.RelatedLessonRef(
+                            id: lesson.id,
+                            title: lesson.title,
+                            chapterNumber: chapter.number,
+                            lessonNumber: lesson.number
+                        )
+                    }
+                messages[index] = bubble
+
+                await fetchSupplementaryResultsForCanonical(
+                    webQuery: final.webSearchQuery,
+                    videoQuery: final.videoSearchQuery,
+                    messageIndex: index
+                )
+            } else {
+                messages[index] = bubble
+            }
+        } catch {
+            AppLogger.shared.error("chat", "openAIStreamFailed", fields: [
+                "query": userText,
+                "error": String(describing: error),
+            ])
+            bubble.payload = .text(
+                (error as? LocalizedError)?.errorDescription
+                ?? "OpenAI request failed. Check the console log for details."
+            )
+            bubble.isStreaming = false
+            messages[index] = bubble
+        }
     }
 
     #if canImport(FoundationModels)
@@ -609,7 +868,13 @@ final class ChatEngine {
         return Int(ceil(Double(collapsed.utf16.count) / 3.4))
     }
 
-    private func systemInstructions() -> String {
+    private func systemInstructions(forBackend backend: AIBackend = .apple) -> String {
+        // The Apple on-device 3B model drifts (suggests macOS
+        // shortcuts, mislabels supported commands) so it needs
+        // heavier guardrails + the full unsupported corpus inlined.
+        // OpenAI is tightly grounded by the per-query `referenceBlock`
+        // appended separately and doesn't need either.
+        let heavyGuards = backend == .apple
         var prompt = """
         You are a concise Vim tutor embedded inside the kindaVim Tutor macOS app.
         Answer briefly, accurately, and with concrete examples.
@@ -624,30 +889,37 @@ final class ChatEngine {
         ## Grounding rules
         - If the user asks about a specific command, answer about that command.
         - Do not invent support. If unsure, say so briefly.
-        - If the command is listed as unsupported below, set `isUnsupported` to true.
-        - For unsupported commands, keep `answer` short and definitive, and put any stock-Vim explanation in `terminalVimExplanation`.
+        - For unsupported commands, set `isUnsupported` to true, keep `answer` short and definitive, and put any stock-Vim explanation in `terminalVimExplanation`.
 
-        ## Vim-only answers
-        Every answer MUST be a Vim motion, operator, or text object.
-        NEVER recommend macOS keyboard shortcuts as the primary answer —
-        `PgUp`, `PgDn`, `Home`, `End`, arrow keys, `Cmd+F`, etc. are NOT
-        acceptable. The user already knows about those; they want the
-        Vim way. Examples of correct reframing:
-        - "how do I jump to the next paragraph?" → `}` (NOT `PgDn`).
-        - "how do I go to the end of the file?" → `G` (NOT `Cmd+Down`).
-        - "how do I search?" → `/` (NOT `Cmd+F`).
-        macOS shortcuts MAY appear in unsupported-feature answers when
-        kindaVim legitimately doesn't implement a Vim equivalent
-        (e.g. named registers → `Cmd+C`/`Cmd+V`). Never otherwise.
 
-        \(KindaVimSupportCorpus.asPromptBlock())
+        """
+        if heavyGuards {
+            prompt.append("""
+            ## Vim-only answers
+            Every answer MUST be a Vim motion, operator, or text object.
+            NEVER recommend macOS keyboard shortcuts as the primary answer —
+            `PgUp`, `PgDn`, `Home`, `End`, arrow keys, `Cmd+F`, etc. are NOT
+            acceptable. The user already knows about those; they want the
+            Vim way. Examples of correct reframing:
+            - "how do I jump to the next paragraph?" → `}` (NOT `PgDn`).
+            - "how do I go to the end of the file?" → `G` (NOT `Cmd+Down`).
+            - "how do I search?" → `/` (NOT `Cmd+F`).
+            macOS shortcuts MAY appear in unsupported-feature answers when
+            kindaVim legitimately doesn't implement a Vim equivalent
+            (e.g. named registers → `Cmd+C`/`Cmd+V`). Never otherwise.
 
+            \(KindaVimSupportCorpus.asPromptBlock())
+
+
+            """)
+        }
+        prompt.append("""
         ## Supplementary search
         Populate `webSearchQuery` only when external tutorials would help.
         Leave it null for self-contained single-command answers.
         Include the word "tutorial" when a video walkthrough would help.
 
-        """
+        """)
         if let lesson = currentLesson, let chapter = currentChapterTitle {
             prompt.append("""
 
@@ -656,12 +928,14 @@ final class ChatEngine {
 
             """)
         }
-        // Give the model only the currently viewed manual topic.
-        // Canonical retrieval and deterministic topic lookup handle
-        // the rest; trying to inline the whole manual overruns the
-        // 3B model's 4096-token context window.
-        prompt.append("\n## kindaVim manual\n\n")
-        prompt.append(Self.helpCorpusBlock(currentTopicID: currentHelpTopicID))
+        // Apple path needs the viewed-topic block inlined so it has
+        // something to ground on. OpenAI gets the matched topics via
+        // `referenceBlock` appended by the caller and doesn't need
+        // the viewed-topic duplication.
+        if heavyGuards {
+            prompt.append("\n## kindaVim manual\n\n")
+            prompt.append(Self.helpCorpusBlock(currentTopicID: currentHelpTopicID))
+        }
         return prompt
     }
 

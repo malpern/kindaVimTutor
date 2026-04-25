@@ -224,6 +224,30 @@ struct ChatEngineTests {
         #expect(snapshot.estimatedTokenCount <= tokenBudget)
     }
 
+    @Test("referenceBlock injects matched topic bodies for OpenAI grounding")
+    func referenceBlockGroundsOnMatchedTopics() throws {
+        // Pick a topic we know has a prose section so we can check
+        // its body lands in the block. Delete Word is a safe, stable
+        // pick — it's part of the core curriculum.
+        let topics = KindaVimHelpCorpus.topics
+        let deleteWord = try #require(topics.first(where: { $0.id == "delete-word" }))
+
+        let block = ChatEngine.referenceBlock(topics: [deleteWord], qa: nil)
+
+        #expect(block.contains("Reference for this question"))
+        #expect(block.contains("### \(deleteWord.title)"))
+        #expect(block.contains("commands: " + deleteWord.tags.joined(separator: ", ")))
+        // At least some of the first prose section should appear.
+        let firstBody = deleteWord.sections.first(where: {
+            !$0.body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        })?.body.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        #expect(!firstBody.isEmpty)
+        #expect(block.contains(String(firstBody.prefix(40))))
+
+        // Empty inputs produce empty block — safe to concatenate.
+        #expect(ChatEngine.referenceBlock(topics: [], qa: nil).isEmpty)
+    }
+
     private func bodyLength(of topic: HelpTopic) -> Int {
         let sections = topic.sections.reduce(0) { acc, s in
             acc + s.title.count + s.body.count

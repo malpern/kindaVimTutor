@@ -11,6 +11,7 @@ struct ChatBubble: View {
     var onOpenURL: ((URL) -> Void)? = nil
     var onAskAboutMotion: ((String) -> Void)? = nil
     var onOpenHelpTopic: ((String) -> Void)? = nil
+    var onPractice: (() -> Void)? = nil
 
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
@@ -35,6 +36,7 @@ struct ChatBubble: View {
                 onOpenURL: onOpenURL,
                 onAskAboutMotion: onAskAboutMotion,
                 onOpenHelpTopic: onOpenHelpTopic,
+                onPractice: onPractice,
                 webResults: message.webResults,
                 videoShorts: message.videoShorts,
                 videos: message.videos

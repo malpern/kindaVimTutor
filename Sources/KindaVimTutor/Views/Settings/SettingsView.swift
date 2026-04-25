@@ -10,14 +10,21 @@ struct SettingsView: View {
     @AppStorage("notifications.dailyReminderEnabled") private var dailyReminderEnabled: Bool = true
     @AppStorage("notifications.reminderMinutesFromMidnight") private var reminderMinutes: Int = 19 * 60 + 30
 
+    // Chat backend prefs.
+    @AppStorage(AIBackendSettings.backendKey) private var backendRaw: String = AIBackend.apple.rawValue
+    @State private var openAIKeyField: String = KeychainStore.get(.openAIAPIKey) ?? ""
+    @State private var keySavedFeedback: Bool = false
+
     var body: some View {
         TabView {
             generalTab
                 .tabItem { Label("General", systemImage: "gearshape") }
             remindersTab
                 .tabItem { Label("Reminders", systemImage: "bell") }
+            chatAITab
+                .tabItem { Label("Chat AI", systemImage: "sparkles") }
         }
-        .frame(width: 460, height: 320)
+        .frame(width: 480, height: 380)
     }
 
     // MARK: - General
@@ -108,6 +115,66 @@ struct SettingsView: View {
                     .padding(.top, 4)
             } header: {
                 Text("Practice Reminders")
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    // MARK: - Chat AI
+
+    @ViewBuilder
+    private var chatAITab: some View {
+        Form {
+            Section {
+                Picker("Backend", selection: $backendRaw) {
+                    ForEach(AIBackend.allCases) { backend in
+                        Text(backend.displayName).tag(backend.rawValue)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+
+                Text("Chooses which model answers questions that aren't in the curated reference. Canonical answers from the built-in corpus serve instantly either way.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
+            } header: {
+                Text("Model")
+            }
+
+            if backendRaw == AIBackend.openAI.rawValue {
+                Section {
+                    SecureField("sk-…", text: $openAIKeyField)
+                        .textFieldStyle(.roundedBorder)
+
+                    HStack {
+                        Button("Save Key") {
+                            KeychainStore.set(openAIKeyField, for: .openAIAPIKey)
+                            withAnimation { keySavedFeedback = true }
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                                withAnimation { keySavedFeedback = false }
+                            }
+                        }
+                        .disabled(openAIKeyField.trimmingCharacters(in: .whitespaces).isEmpty
+                                  && KeychainStore.get(.openAIAPIKey) == nil)
+
+                        if keySavedFeedback {
+                            Label("Saved to Keychain", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(.green)
+                                .font(.callout)
+                                .transition(.opacity)
+                        }
+                        Spacer()
+                    }
+
+                    Text("Stored in the macOS Keychain. If left empty, the app reads `OPENAI_API_KEY` from the launch environment (useful during development).")
+                        .font(.callout)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 4)
+                } header: {
+                    Text("OpenAI API Key")
+                }
             }
         }
         .formStyle(.grouped)

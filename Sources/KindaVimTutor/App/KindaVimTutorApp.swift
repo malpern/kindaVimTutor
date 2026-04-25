@@ -1,13 +1,18 @@
+import AppKit
 import SwiftUI
 
 @main
 struct KindaVimTutorApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @State private var appState = AppState()
     @State private var showStats = false
     @State private var isSidebarVisible = true
     @State private var primaryPaneMode: PrimaryPaneMode = .lesson
     @State private var manualNavigation = ManualNavigationState()
     @State private var chatEngine = ChatEngine()
+    /// Binds the ⌘? Help command to a sheet that searches our
+    /// corpus — replaces macOS's system Help-menu search field.
+    @State private var isSearchingHelp = false
     /// Set when the user navigated to a lesson FROM a help surface
     /// (chat or manual) — gives the lesson canvas a back button to
     /// return. Cleared on any subsequent non-help navigation (sidebar
@@ -26,7 +31,41 @@ struct KindaVimTutorApp: App {
             mainUI
             .frame(minWidth: 900, minHeight: 600)
             .environment(appState.modeMonitor)
+            .sheet(isPresented: $isSearchingHelp) {
+                InAppHelpSearchView(
+                    chapters: appState.chapters,
+                    onOpenLesson: { id in
+                        // Defer past the sheet dismissal so state
+                        // mutation doesn't race with SwiftUI's
+                        // teardown (same pattern as ChatView).
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(60))
+                            returnToHelpMode = nil
+                            appState.goToLesson(id)
+                            primaryPaneMode = .lesson
+                        }
+                    },
+                    onOpenTopic: { topicID in
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(60))
+                            manualNavigation.selectedTopicID = topicID
+                            returnToHelpMode = nil
+                            primaryPaneMode = .manual
+                        }
+                    },
+                    onAskChat: { question in
+                        Task { @MainActor in
+                            try? await Task.sleep(for: .milliseconds(60))
+                            primaryPaneMode = .chat
+                            chatEngine.input = question
+                            chatEngine.send()
+                        }
+                    }
+                )
+            }
             .onAppear {
+                // Help-menu stripping lives in `AppDelegate` so it
+                // persists across menu rebuilds.
                 appState.modeMonitor.startMonitoring()
                 if ProcessInfo.processInfo.environment["KINDAVIMTUTOR_ENABLE_CHANNEL"] == "1" {
                     AppCommandChannel.shared.start(appState: appState)
@@ -55,7 +94,8 @@ struct KindaVimTutorApp: App {
             AppMenuCommands(
                 isSidebarVisible: $isSidebarVisible,
                 showStats: $showStats,
-                primaryPaneMode: $primaryPaneMode
+                primaryPaneMode: $primaryPaneMode,
+                isSearchingHelp: $isSearchingHelp
             )
         }
 
@@ -89,6 +129,7 @@ private struct AppMenuCommands: Commands {
     @Binding var isSidebarVisible: Bool
     @Binding var showStats: Bool
     @Binding var primaryPaneMode: PrimaryPaneMode
+    @Binding var isSearchingHelp: Bool
     @Environment(\.openWindow) private var openWindow
 
     var body: some Commands {
@@ -98,16 +139,15 @@ private struct AppMenuCommands: Commands {
             }
         }
 
-        CommandGroup(replacing: .help) {
-            Button("kindaVim Tutor Help") {
-                primaryPaneMode = .chat
-            }
-            // Apple's standard Help shortcut: ⌘⇧/ (aka ⌘?).
-            // Binding the slash with [.command, .shift] registers it
-            // reliably on US layouts and matches the system-drawn
-            // `⌘?` glyph in the menu.
-            .keyboardShortcut("/", modifiers: [.command, .shift])
-        }
+        // The system Help menu is managed by macOS — it ignores our
+        // `⌘?` keyboard shortcut and keeps showing a Spotlight-style
+        // search field indexed on Apple Help Book content we don't
+        // ship. Rather than leave it broken, we empty the Help
+        // CommandGroup here AND strip the menu via `NSApp.helpMenu`
+        // in `AppHelpMenuStripper` (see `mainUI.onAppear`). The
+        // single source of truth for opening Help is the View-menu
+        // entry with ⌘?.
+        CommandGroup(replacing: .help) { EmptyView() }
 
         CommandGroup(before: .sidebar) {
             Button(isSidebarVisible ? "Hide Sidebar" : "Show Sidebar") {
@@ -123,6 +163,15 @@ private struct AppMenuCommands: Commands {
                 showStats.toggle()
             }
             .keyboardShortcut("p", modifiers: [.command, .shift])
+
+            // Parallel Help entry so the ⌘? glyph renders in the
+            // menu — macOS hides shortcuts on items inside the
+            // system-managed Help menu. Invokes the same search
+            // sheet as the Help-menu entry.
+            Button("Search kindaVim Help…") {
+                isSearchingHelp = true
+            }
+            .keyboardShortcut("?", modifiers: [.command])
         }
 
         CommandMenu("Debug") {
@@ -348,6 +397,8 @@ extension KindaVimTutorApp {
                         chapterTitle: appState.selectedChapter?.title,
                         chapters: appState.chapters,
                         helpTopicID: manualNavigation.selectedTopicID,
+                        progressStore: appState.progressStore,
+                        inspectorState: appState.inspectorState,
                         onOpenLesson: { id in
                             // Defer state mutation by one tick so the
                             // Button action can finish before the

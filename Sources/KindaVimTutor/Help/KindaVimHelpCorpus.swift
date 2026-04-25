@@ -48,6 +48,28 @@ enum KindaVimHelpCorpus {
             return bestTopic
         }
 
+        /// Return the top-scoring topics for a query, above the same
+        /// relevance floor used by `topic(forQuery:)`. Useful when the
+        /// caller can afford to ground an LLM in 2-3 nearby references
+        /// rather than just the single best match.
+        func topics(
+            forQuery query: String,
+            limit: Int,
+            preferredTopicID: String? = nil
+        ) -> [HelpTopic] {
+            let candidates = HelpQueryNormalizer.normalizedLookupCandidates(for: query)
+            guard !candidates.isEmpty else { return [] }
+            let scored: [(HelpTopic, Int)] = topics.map { topic in
+                (topic, score(topic: topic, for: candidates,
+                              preferredTopicID: preferredTopicID))
+            }
+            return scored
+                .filter { $0.1 >= 60 }
+                .sorted { $0.1 > $1.1 }
+                .prefix(limit)
+                .map(\.0)
+        }
+
         private func score(
             topic: HelpTopic,
             for candidates: [String],
@@ -126,6 +148,14 @@ enum KindaVimHelpCorpus {
 
     static func topic(forLessonID lessonID: String) -> HelpTopic? {
         shared.topic(forLessonID: lessonID)
+    }
+
+    static func topics(
+        forQuery query: String,
+        limit: Int,
+        preferredTopicID: String? = nil
+    ) -> [HelpTopic] {
+        shared.topics(forQuery: query, limit: limit, preferredTopicID: preferredTopicID)
     }
 
     static func topic(forQuery query: String, preferredTopicID: String? = nil) -> HelpTopic? {
