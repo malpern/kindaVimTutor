@@ -65,6 +65,17 @@ cat > "$APP/Contents/Info.plist" <<PLIST
     <key>CFBundleIconFile</key><string>Icon</string>
     <key>BuildTimestamp</key><string>${BUILD_TIMESTAMP}</string>
     <key>GitCommit</key><string>${GIT_COMMIT}</string>
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key><string>${BUNDLE_ID}.x-callback</string>
+            <key>CFBundleTypeRole</key><string>Editor</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>kindavim-tutor</string>
+            </array>
+        </dict>
+    </array>
 </dict>
 </plist>
 PLIST

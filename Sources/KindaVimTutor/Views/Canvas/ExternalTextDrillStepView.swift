@@ -34,8 +34,14 @@ struct ExternalTextDrillStepView: View {
     /// student picks a Mail drill, so the UI can at least run.
     private static func makeSurface(for app: ExternalTextDrillSpec.App) -> ExternalTextSurface {
         switch app {
-        case .notes: return NotesSurface()
+        case .notes:
+            // Honour the user's "Preferred note app" preference — a
+            // Bear-dwelling student practices every Notes drill in
+            // Bear without us authoring duplicate specs.
+            return DrillAppPreferences.preferredNotesApp == .bear
+                ? BearSurface() : NotesSurface()
         case .mail:  return MailSurface()
+        case .bear:  return BearSurface()
         }
     }
 
@@ -143,17 +149,29 @@ struct ExternalTextDrillStepView: View {
             .shadow(color: .accentColor.opacity(0.25), radius: 30, y: 0)
     }
 
+    /// The effective target app, after applying the user's
+    /// preferred-notes override to `.notes` specs.
+    private var effectiveApp: ExternalTextDrillSpec.App {
+        if spec.preferredApp == .notes,
+           DrillAppPreferences.preferredNotesApp == .bear {
+            return .bear
+        }
+        return spec.preferredApp
+    }
+
     private var surfaceDisplayName: String {
-        switch spec.preferredApp {
+        switch effectiveApp {
         case .notes: "Notes"
         case .mail:  "Mail"
+        case .bear:  "Bear"
         }
     }
 
     private var surfaceAppPath: String {
-        switch spec.preferredApp {
+        switch effectiveApp {
         case .notes: "/System/Applications/Notes.app"
         case .mail:  "/System/Applications/Mail.app"
+        case .bear:  "/Applications/Bear.app"
         }
     }
 
@@ -411,14 +429,23 @@ struct ExternalTextDrillStepView: View {
         engine.onDrillCompleted = {
             ExternalTextDrillPanel.shared.finish(engine: engine)
         }
+        // Show the coaching panel BEFORE engine.start() flips focus
+        // to Bear / Notes / Mail. NSPanel.orderFrontRegardless()
+        // from a backgrounded app silently doesn't render until the
+        // owning app gets an activation event — calling show() while
+        // the tutor is still frontmost guarantees the panel actually
+        // draws. The panel's activation watcher then keeps it
+        // visible across the surface's app-switch dance.
+        ExternalTextDrillPanel.shared.show(
+            engine: engine, modeMonitor: modeMonitor
+        )
         do {
             try await engine.start()
-            ExternalTextDrillPanel.shared.show(
-                engine: engine, modeMonitor: modeMonitor
-            )
         } catch ExternalTextDrillEngine.StartError.usabilityFailed(let reason) {
+            ExternalTextDrillPanel.shared.hide()
             startError = reason
         } catch {
+            ExternalTextDrillPanel.shared.hide()
             startError = "Couldn't start drill. \(error.localizedDescription)"
         }
     }

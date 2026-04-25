@@ -22,6 +22,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         )
     }
 
+    /// macOS dispatches `kindavim-tutor://` URLs here (registered in
+    /// `CFBundleURLTypes` by `package_app.sh`). Route them to the
+    /// callback hub so BearSurface (and future surfaces) can await
+    /// async replies from external apps' `x-callback-url` flows.
+    func application(_ application: NSApplication, open urls: [URL]) {
+        for url in urls {
+            guard url.scheme == "kindavim-tutor" else { continue }
+            Task { @MainActor in
+                URLCallbackHub.shared.handle(url: url)
+            }
+        }
+    }
+
     @objc private func menuDidChange(_ note: Notification) {
         stripHelpMenu()
     }

@@ -174,8 +174,56 @@ final class FinderDrillPanel {
         hide()
         try? await Task.sleep(for: .milliseconds(250))
         engine.stop()
-        try? await Task.sleep(for: .milliseconds(150))
+        // Bumped from 150 → 500ms because Finder sometimes takes a
+        // beat after the folder deletion to auto-navigate its window
+        // up to the parent (per-user `/T/` dir). Closing too soon
+        // missed the parent window in some runs.
+        try? await Task.sleep(for: .milliseconds(500))
         closeDrillFinderWindows(matching: folder, includeParent: true)
+        // Belt-and-suspenders: nuke any Finder window still showing
+        // a path under the per-user tmp dir. The drill is the only
+        // thing that puts windows there, so there's nothing
+        // legitimate to lose.
+        closeFinderWindowsUnderTempDir()
+    }
+
+    /// Walk Finder windows and close any whose displayed path lives
+    /// inside the per-user TMPDIR. Catches the auto-navigated
+    /// grandparent / great-grandparent windows that
+    /// `closeDrillFinderWindows(includeParent:)` misses when Finder's
+    /// path-up traversal passes the immediate parent.
+    private func closeFinderWindowsUnderTempDir() {
+        guard let finder = NSRunningApplication.runningApplications(
+            withBundleIdentifier: "com.apple.finder"
+        ).first else { return }
+        let app = AXUIElementCreateApplication(finder.processIdentifier)
+        var windows: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            app, kAXWindowsAttribute as CFString, &windows
+        ) == .success,
+              let list = windows as? [AXUIElement] else { return }
+        // Match both the public-facing path and the `/private`
+        // realpath since Finder's AXDocument can use either.
+        let tmpPath = NSTemporaryDirectory()
+        let tmpRealPath = "/private" + tmpPath
+        for window in list {
+            var doc: CFTypeRef?
+            AXUIElementCopyAttributeValue(
+                window, kAXDocumentAttribute as CFString, &doc
+            )
+            let docStr = (doc as? String) ?? ""
+            guard docStr.contains(tmpPath) || docStr.contains(tmpRealPath)
+            else { continue }
+            var closeButton: CFTypeRef?
+            if AXUIElementCopyAttributeValue(
+                window, kAXCloseButtonAttribute as CFString, &closeButton
+            ) == .success, let closeButton {
+                AXUIElementPerformAction(
+                    closeButton as! AXUIElement,
+                    kAXPressAction as CFString
+                )
+            }
+        }
     }
 
     /// Closes any Finder windows whose displayed folder sits inside

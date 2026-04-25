@@ -18,6 +18,38 @@ enum AIBackend: String, CaseIterable, Identifiable {
     }
 }
 
+/// User-pickable replacement for any authored `.notes` external
+/// drill. The curriculum's drill specs declare `preferredApp:
+/// .notes`; when this preference is set to `.bear`, the
+/// ExternalTextDrillStepView surface resolver routes those drills
+/// to `BearSurface` instead. Lets someone who lives in Bear practice
+/// every Notes drill in their actual editor.
+enum PreferredNotesApp: String, CaseIterable, Identifiable {
+    case notes
+    case bear
+
+    var id: String { rawValue }
+    var displayName: String {
+        switch self {
+        case .notes: "Apple Notes"
+        case .bear:  "Bear"
+        }
+    }
+}
+
+/// Preference accessor for which app any authored `.notes` drill
+/// should actually run in. Defaults to Notes. Backed by
+/// `UserDefaults` via `@AppStorage` at the settings UI layer.
+enum DrillAppPreferences {
+    static let preferredNotesKey = "drillApps.preferredNotes"
+
+    static var preferredNotesApp: PreferredNotesApp {
+        let raw = UserDefaults.standard.string(forKey: preferredNotesKey)
+            ?? PreferredNotesApp.notes.rawValue
+        return PreferredNotesApp(rawValue: raw) ?? .notes
+    }
+}
+
 /// Centralized accessor for the chat-backend preference + API key.
 /// Reads UserDefaults for backend selection, Keychain for the key,
 /// and falls back to the `OPENAI_API_KEY` environment variable when

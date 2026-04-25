@@ -14,6 +14,10 @@ struct SettingsView: View {
     @AppStorage(AIBackendSettings.backendKey) private var backendRaw: String = AIBackend.apple.rawValue
     @State private var openAIKeyField: String = KeychainStore.get(.openAIAPIKey) ?? ""
     @State private var keySavedFeedback: Bool = false
+    @State private var bearTokenField: String = KeychainStore.get(.bearAPIToken) ?? ""
+    @State private var bearTokenSavedFeedback: Bool = false
+    @AppStorage(DrillAppPreferences.preferredNotesKey)
+    private var preferredNotesRaw: String = PreferredNotesApp.notes.rawValue
 
     var body: some View {
         TabView {
@@ -23,8 +27,10 @@ struct SettingsView: View {
                 .tabItem { Label("Reminders", systemImage: "bell") }
             chatAITab
                 .tabItem { Label("Chat AI", systemImage: "sparkles") }
+            drillAppsTab
+                .tabItem { Label("Drill Apps", systemImage: "app.badge") }
         }
-        .frame(width: 480, height: 380)
+        .frame(width: 480, height: 420)
     }
 
     // MARK: - General
@@ -175,6 +181,73 @@ struct SettingsView: View {
                 } header: {
                     Text("OpenAI API Key")
                 }
+            }
+        }
+        .formStyle(.grouped)
+    }
+
+    // MARK: - Drill Apps
+
+    @ViewBuilder
+    private var drillAppsTab: some View {
+        Form {
+            Section {
+                Text("kindaVim drills can run in real apps so you practice Vim motions the way you'll actually use them. Notes + Mail work out of the box. Bear needs a one-time API token to let the tutor trash drill notes when you finish.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } header: {
+                Text("External Drill Apps")
+            }
+
+            Section {
+                Picker("Preferred note app", selection: $preferredNotesRaw) {
+                    ForEach(PreferredNotesApp.allCases) { app in
+                        Text(app.displayName).tag(app.rawValue)
+                    }
+                }
+                .pickerStyle(.radioGroup)
+
+                Text("Every drill authored for Apple Notes will open in the app you pick here. Mail-based drills are unaffected. Bear opens a fresh note per drill.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
+            } header: {
+                Text("Practice App")
+            }
+
+            Section {
+                SecureField("Bear API token", text: $bearTokenField)
+                    .textFieldStyle(.roundedBorder)
+
+                HStack {
+                    Button("Save Token") {
+                        KeychainStore.set(bearTokenField, for: .bearAPIToken)
+                        withAnimation { bearTokenSavedFeedback = true }
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                            withAnimation { bearTokenSavedFeedback = false }
+                        }
+                    }
+                    .disabled(bearTokenField.trimmingCharacters(in: .whitespaces).isEmpty
+                              && KeychainStore.get(.bearAPIToken) == nil)
+
+                    if bearTokenSavedFeedback {
+                        Label("Saved to Keychain", systemImage: "checkmark.circle.fill")
+                            .foregroundStyle(.green)
+                            .font(.callout)
+                            .transition(.opacity)
+                    }
+                    Spacer()
+                }
+
+                Text("In Bear, open Preferences → Advanced and click “Generate Token.” Without it, drill notes stay in Bear after you finish — you'd need to delete them manually.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 4)
+            } header: {
+                Text("Bear")
             }
         }
         .formStyle(.grouped)

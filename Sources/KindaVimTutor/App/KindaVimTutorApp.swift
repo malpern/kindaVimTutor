@@ -87,6 +87,7 @@ struct KindaVimTutorApp: App {
                 Task.detached(priority: .utility) {
                     await NotesSurface().sweepOrphans()
                     await MailSurface().sweepOrphans()
+                    await BearSurface().sweepOrphans()
                 }
             }
         }

@@ -11,6 +11,10 @@ enum KeychainStore {
     /// same bundle.
     enum Key: String {
         case openAIAPIKey = "openai-api-key"
+        /// Bear's x-callback-url/trash endpoint requires the per-user
+        /// API token from Bear → Preferences → Advanced. We need it
+        /// to clean up drill notes after a practice session.
+        case bearAPIToken = "bear-api-token"
     }
 
     private static let service = "app.kindavim.tutor"

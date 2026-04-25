@@ -25,10 +25,25 @@ final class LessonStepController {
         return false
     }
 
+    /// The lesson this controller currently has steps for. Lets
+    /// `loadLesson` be a no-op when SwiftUI re-runs `.onAppear`
+    /// after a window-activation cycle (e.g. the user switching to
+    /// Bear and back) — without this guard the step index resets to
+    /// 0, throwing the student back to the lesson intro mid-drill.
+    private var loadedLessonID: String?
+
     func loadLesson(_ lesson: Lesson, chapterTitle: String) {
+        if loadedLessonID == lesson.id {
+            AppLogger.shared.info("step", "loadLessonSkipped", fields: [
+                "lesson": lesson.id,
+                "currentIndex": String(currentStepIndex),
+            ])
+            return
+        }
         steps = LessonStep.steps(from: lesson, chapterTitle: chapterTitle)
         currentStepIndex = 0
         navigationDirection = .forward
+        loadedLessonID = lesson.id
         AppLogger.shared.info("step", "loadLesson", fields: [
             "lesson": lesson.id,
             "chapter": chapterTitle,

@@ -14,6 +14,12 @@ final class ExternalTextDrillPanel {
     private var panel: NSPanel?
     private var activationObserver: NSObjectProtocol?
     private var engineRef: ExternalTextDrillEngine?
+    /// Timestamp of the most recent show(). The activation watcher
+    /// ignores hide-on-non-target events during a grace period after
+    /// show so the x-callback-url activation bounce (Bear → tutor →
+    /// Bear) doesn't yank the panel away mid-setup.
+    private var showTimestamp: Date = .distantPast
+    private let activationGracePeriod: TimeInterval = 3.0
 
     func show(engine: ExternalTextDrillEngine, modeMonitor: ModeMonitor) {
         engineRef = engine
@@ -49,8 +55,13 @@ final class ExternalTextDrillPanel {
         positionPanel(panel, bundleIdentifier: engine.surface.bundleIdentifier)
 
         panel.orderFrontRegardless()
+        showTimestamp = Date()
+        AppLogger.shared.info("extDrill", "panelShown", fields: [
+            "target": engine.surface.bundleIdentifier,
+        ])
         self.panel = panel
         installActivationWatcher(targetBundleId: engine.surface.bundleIdentifier)
+
     }
 
     func hide() {
@@ -107,17 +118,33 @@ final class ExternalTextDrillPanel {
             forName: NSWorkspace.didActivateApplicationNotification,
             object: nil, queue: .main
         ) { [weak self] note in
+            guard let self else { return }
             let app = note.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication
             MainActor.assumeIsolated {
                 if app?.bundleIdentifier == targetBundleId {
-                    self?.panel?.orderFrontRegardless()
+                    // Target app is frontmost — panel should show.
+                    // orderFrontRegardless from background doesn't
+                    // render on macOS 26, but the panel was already
+                    // drawn while the tutor was active (show() runs
+                    // before the target app steals focus). As long
+                    // as we don't orderOut during the setup bounce,
+                    // the panel persists on screen.
+                    self.panel?.orderFrontRegardless()
                 } else {
-                    self?.panel?.orderOut(nil)
+                    // Non-target app activated. During the first few
+                    // seconds after show(), ignore this — Bear's
+                    // x-callback-url flow bounces focus through the
+                    // tutor briefly (to deliver x-success), which
+                    // fires this branch and would hide the panel
+                    // right when the student needs it. After the
+                    // grace period, normal hide-on-switch resumes.
+                    let elapsed = Date().timeIntervalSince(self.showTimestamp)
+                    if elapsed > self.activationGracePeriod {
+                        self.panel?.orderOut(nil)
+                    }
                 }
             }
         }
-        let frontmost = NSWorkspace.shared.frontmostApplication?.bundleIdentifier
-        if frontmost != targetBundleId { panel?.orderOut(nil) }
     }
 
     private func removeActivationWatcher() {

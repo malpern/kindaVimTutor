@@ -81,10 +81,21 @@ struct ExternalTextDrillCoachingView: View {
     }
 
     private var surfaceIconName: String {
-        switch engine.spec.preferredApp {
+        switch effectiveApp {
         case .notes: "note.text"
         case .mail:  "envelope.fill"
+        case .bear:  "pawprint.fill"
         }
+    }
+
+    /// Apply the Preferred Notes App preference — `.notes` specs
+    /// route to Bear when the user lives in Bear.
+    private var effectiveApp: ExternalTextDrillSpec.App {
+        if engine.spec.preferredApp == .notes,
+           DrillAppPreferences.preferredNotesApp == .bear {
+            return .bear
+        }
+        return engine.spec.preferredApp
     }
 
     // MARK: - Direction guidance

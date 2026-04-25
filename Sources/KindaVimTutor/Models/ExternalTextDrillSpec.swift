@@ -9,6 +9,7 @@ struct ExternalTextDrillSpec: Hashable, Sendable {
     enum App: Sendable, Hashable {
         case notes
         case mail
+        case bear
     }
 
     struct Rep: Hashable, Sendable {
